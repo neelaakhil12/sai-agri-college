@@ -1,4 +1,3 @@
-import { siteConfig } from "../../data/siteConfig";
 
 export default function AnnouncementBar() {
   return (

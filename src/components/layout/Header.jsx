@@ -122,7 +122,7 @@ export default function Header() {
       <div className="max-w-site mx-auto px-7 flex items-center justify-between h-[70px] gap-5">
 
         {/* Logo */}
-        <a href="#" className="flex items-center gap-2 md:gap-3 no-underline flex-shrink-0 max-w-[70%] sm:max-w-none">
+        <a href="/" className="flex items-center gap-2 md:gap-3 no-underline flex-shrink-0 max-w-[70%] sm:max-w-none">
           <LogoMark size={38} className="md:w-[44px] md:h-[44px]" />
           <div className="min-w-0">
             <div className="font-lora text-[0.85rem] md:text-[0.95rem] font-bold text-ink leading-[1.2] truncate sm:whitespace-normal">

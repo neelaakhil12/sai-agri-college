@@ -24,7 +24,7 @@ export default function Footer() {
         grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-8 md:gap-9">
 
         <div>
-          <a href="#" className="flex items-center gap-3 no-underline mb-1">
+          <a href="/" className="flex items-center gap-3 no-underline mb-1">
             <LogoMark size={36} />
             <div>
               <div className="font-lora text-[0.88rem] md:text-[0.9rem] font-bold text-white">SRI Aakash IIT-Medical Academy</div>
