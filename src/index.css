@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Sora', sans-serif;
+    background-color: #fafaf7;
+    color: #374151;
+    overflow-x: hidden;
+  }
+  * { box-sizing: border-box; }
+}
+
+@layer components {
+  /* ── Scroll Reveal ── */
+  .rv {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .rv.vis {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Hero slide bg patterns ── */
+  .hero-bg-pattern::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 75% 50%, rgba(255,255,255,.05) 0%, transparent 60%),
+      repeating-linear-gradient(60deg, transparent, transparent 70px, rgba(255,255,255,.02) 70px, rgba(255,255,255,.02) 71px);
+  }
+
+  /* ── Announcement stripe ── */
+  .ann-stripe::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 120px,
+      rgba(255,255,255,.03) 120px,
+      rgba(255,255,255,.03) 121px
+    );
+  }
+
+  /* ── Live dot ── */
+  .live-dot::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #f87171;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+    animation: blink 1.5s infinite;
+  }
+
+  /* ── Principal quote mark ── */
+  .quote-mark::before {
+    content: '\201C';
+    position: absolute;
+    top: -14px;
+    right: 14px;
+    font-family: 'Lora', serif;
+    font-size: 7rem;
+    color: rgba(255,255,255,.07);
+    line-height: 1;
+  }
+
+  /* ── Feat section bg ── */
+  .feat-section-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 20% 80%, rgba(19,71,160,.18) 0%, transparent 60%);
+  }
+
+  /* ── Achievers section bg ── */
+  .ach-section-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 65% 50% at 85% 50%, rgba(19,71,160,.22) 0%, transparent 60%);
+  }
+}
+
+@layer utilities {
+  .font-lora  { font-family: 'Lora', serif; }
+  .font-sora  { font-family: 'Sora', sans-serif; }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ── Keyframes ── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.25; }
+}
+@keyframes fpulse {
+  0%, 100% { box-shadow: 0 6px 22px rgba(224,92,26,.42); }
+  50%       { box-shadow: 0 6px 30px rgba(224,92,26,.60); }
+}
+
+/* ── Slider dot active ── */
+.dot-active { width: 26px !important; background: #fff !important; }
+
+/* ── Marquee ── */
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+.marquee-left  { animation: marquee-left  28s linear infinite; }
+.marquee-right { animation: marquee-right 28s linear infinite; }
+.marquee-track:hover .marquee-left,
+.marquee-track:hover .marquee-right { animation-play-state: paused; }
+
+/* ── Dropdown hover ── */
+.nav-dropdown {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: all 0.22s ease;
+}
+.nav-dropdown-parent:hover .nav-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.nav-dropdown-parent:hover > a svg {
+  transform: rotate(180deg);
+}
