@@ -9,10 +9,14 @@ export default function About() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-[68px] items-start">
 
           <Reveal className="relative pb-6">
-            <div className="w-full rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-3"
-              style={{ aspectRatio: "4/3", background: "linear-gradient(135deg,#1347a0,#0b1220)" }}>
-              <Building2 size={56} className="text-white/30" />
-              <span className="font-lora italic text-[0.95rem] text-white/35">Champapet Campus, Hyderabad</span>
+            <div className="w-full rounded-2xl overflow-hidden relative"
+              style={{ aspectRatio: "4/3" }}>
+              <img 
+                src="/58471.JPG.jpeg" 
+                alt="Champapet Campus, Hyderabad" 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/10" />
             </div>
             <div className="absolute -bottom-2 -right-1 md:-right-2 bg-white border-2 border-[#e2e8f0]
               rounded-2xl px-3 md:px-[22px] py-3 md:py-[18px]

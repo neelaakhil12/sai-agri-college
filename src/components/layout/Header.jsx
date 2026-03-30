@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { siteConfig } from "../../data/siteConfig";
-import LogoMark from "../ui/LogoMark";
 
 function PhoneIcon() {
   return (
@@ -23,13 +23,23 @@ function ChevronDown({ open }) {
 }
 
 function NavLink({ href, children, onClick }) {
+  if (href.startsWith("#")) {
+    return (
+      <a href={`/${href}`} onClick={onClick}
+        className="flex items-center gap-1 text-[0.83rem] font-medium text-[#374151] no-underline
+          px-[13px] py-2 rounded-lg transition-all duration-[180ms]
+          hover:bg-sky hover:text-blue whitespace-nowrap">
+        {children}
+      </a>
+    );
+  }
   return (
-    <a href={href} onClick={onClick}
+    <Link to={href} onClick={onClick}
       className="flex items-center gap-1 text-[0.83rem] font-medium text-[#374151] no-underline
         px-[13px] py-2 rounded-lg transition-all duration-[180ms]
         hover:bg-sky hover:text-blue whitespace-nowrap">
       {children}
-    </a>
+    </Link>
   );
 }
 
@@ -71,13 +81,22 @@ function NavDropdown({ label, href, items, onClose }) {
             <div key={i}>
               {item.divider
                 ? <div className="h-px bg-[#e2e8f0] my-1" />
-                : <a href={item.href || href}
+                : (item.href && item.href.startsWith("#")) ? 
+                  <a href={`/${item.href}`}
                     onClick={() => { setOpen(false); onClose?.(); }}
                     className="block px-[13px] py-[9px] rounded-lg text-[0.81rem] font-medium
                       text-[#374151] no-underline transition-all duration-150
                       hover:bg-sky hover:text-blue focus:outline-none focus:bg-sky focus:text-blue">
                     {item.label}
                   </a>
+                  :
+                  <Link to={item.href || href}
+                    onClick={() => { setOpen(false); onClose?.(); }}
+                    className="block px-[13px] py-[9px] rounded-lg text-[0.81rem] font-medium
+                      text-[#374151] no-underline transition-all duration-150
+                      hover:bg-sky hover:text-blue focus:outline-none focus:bg-sky focus:text-blue">
+                    {item.label}
+                  </Link>
               }
             </div>
           ))}
@@ -92,51 +111,46 @@ export default function Header() {
 
   const navItems = [
     {
-      type: "dropdown", label: "Engineering Stream", href: "#programs",
+      type: "dropdown", label: "Engineering Stream", href: "/engineering",
       items: [
-        { label: "MPC – Overview" },
+        { label: "Engineering Page Overview", href: "/engineering" },
         { divider: true },
-        { label: "JEE Mains – Super 40 Batch" },
-        { label: "JEE Advanced Track" },
-        { label: "EAPCET Preparation" },
+        { label: "JEE Mains – Super 40 Batch", href: "/engineering" },
+        { label: "JEE Advanced Track", href: "/engineering" },
+        { label: "EAPCET Preparation", href: "/engineering" },
       ],
     },
     {
-      type: "dropdown", label: "Medical Stream", href: "#programs",
+      type: "dropdown", label: "Medical Stream", href: "/medical",
       items: [
-        { label: "BIPC – Overview" },
+        { label: "Medical Page Overview", href: "/medical" },
         { divider: true },
-        { label: "NEET Target Batch – 40" },
-        { label: "Full Medical Programme" },
-        { label: "EAPCET Preparation" },
+        { label: "NEET Target Batch – 40", href: "/medical" },
+        { label: "Full Medical Programme", href: "/medical" },
+        { label: "EAPCET Preparation", href: "/medical" },
       ],
     },
-    { type: "link", label: "Commerce Stream", href: "#programs" },
-    { type: "link", label: "Faculty", href: "#faculty" },
-    { type: "link", label: "Results", href: "#achievers" },
+    { type: "link", label: "Commerce Stream", href: "/commerce" },
+    { type: "link", label: "Faculty", href: "/faculty" },
+    { type: "link", label: "Results", href: "/results" },
   ];
 
   return (
     <header className="bg-white border-b border-[#e2e8f0] sticky top-0 z-[200]
       shadow-[0_2px_12px_rgba(0,0,0,.07)]">
-      <div className="max-w-site mx-auto px-7 flex items-center justify-between h-[70px] gap-5">
+      <div className="max-w-site mx-auto px-7 flex items-center justify-between h-[80px] md:h-[90px] gap-5">
 
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2 md:gap-3 no-underline flex-shrink-0 max-w-[70%] sm:max-w-none">
-          <LogoMark size={38} className="md:w-[44px] md:h-[44px]" />
-          <div className="min-w-0">
-            <div className="font-lora text-[0.85rem] md:text-[0.95rem] font-bold text-ink leading-[1.2] truncate sm:whitespace-normal">
-              SRI Aakash IIT-Medical Academy
-              <span className="hidden xs:inline-block bg-sky2 text-blue border border-[#bfdbfe] px-[6px] md:px-[9px] py-[1px] md:py-[2px]
-                rounded text-[0.6rem] md:text-[0.65rem] font-bold tracking-[.05em] ml-[6px] whitespace-nowrap">
-                Code: {siteConfig.collegeCode}
-              </span>
-            </div>
-            <span className="text-[0.58rem] md:text-[0.63rem] font-semibold text-blue tracking-[.07em] uppercase block mt-[1px] truncate">
-              {siteConfig.tagline}
-            </span>
+        <Link to="/" className="flex items-center gap-2 md:gap-3 no-underline flex-shrink-0 max-w-[70%] sm:max-w-none">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <img src="/logo.png" alt="SRI Aakash Academy" className="h-[48px] md:h-[56px] lg:h-[60px] w-auto" />
+            <img src="/logo2.png" alt="Aakash Junior College" className="h-[44px] md:h-[50px] lg:h-[54px] w-auto" />
           </div>
-        </a>
+          <span className="bg-sky2 text-blue border border-[#bfdbfe] px-[8px] md:px-[10px] py-[2px] md:py-[3px]
+            rounded text-[0.65rem] md:text-[0.72rem] font-bold tracking-[.05em] whitespace-nowrap">
+            Code: {siteConfig.collegeCode}
+          </span>
+        </Link>
 
         {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center gap-[2px]">
@@ -197,11 +211,11 @@ export default function Header() {
                   onClose={() => setMenuOpen(false)} />
               )
               : (
-                <a key={i} href={item.href} onClick={() => setMenuOpen(false)}
+                <Link key={i} to={item.href} onClick={() => setMenuOpen(false)}
                   className="px-3 py-[10px] text-[0.88rem] font-medium text-ink no-underline
                     rounded-lg hover:bg-sky hover:text-blue transition-colors">
                   {item.label}
-                </a>
+                </Link>
               )
           )}
           <div className="border-t border-[#e2e8f0] mt-2 pt-3 flex flex-col gap-2">
@@ -211,7 +225,7 @@ export default function Header() {
                 hover:text-blue hover:bg-sky transition-colors">
               <PhoneIcon /> {siteConfig.phones[0]}
             </a>
-            <a href="#contact" onClick={() => setMenuOpen(false)}
+            <a href="/#contact" onClick={() => setMenuOpen(false)}
               className="bg-orange text-white px-4 py-[11px] rounded-lg font-bold text-[0.88rem]
                 no-underline text-center">
               Admission Enquiry
@@ -237,11 +251,11 @@ function MobileDropdown({ label, href, items, onClose }) {
       {open && (
         <div className="ml-3 flex flex-col gap-[2px] mb-1">
           {items.filter((it) => !it.divider).map((item, i) => (
-            <a key={i} href={item.href || href} onClick={onClose}
+            <Link key={i} to={item.href || href} onClick={onClose}
               className="px-3 py-[8px] text-[0.83rem] text-muted no-underline rounded-lg
                 hover:bg-sky hover:text-blue transition-colors">
               {item.label}
-            </a>
+            </Link>
           ))}
         </div>
       )}

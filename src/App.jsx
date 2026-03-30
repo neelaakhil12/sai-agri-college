@@ -1,3 +1,4 @@
+import { Routes, Route } from "react-router-dom";
 import { useScrollReveal } from "./hooks/useScrollReveal";
 
 // Layout
@@ -7,21 +8,13 @@ import Header           from "./components/layout/Header";
 import Footer           from "./components/layout/Footer";
 import FloatingButtons  from "./components/layout/FloatingButtons";
 
-// Sections
-import HeroSlider   from "./components/sections/HeroSlider";
-
-import StatsBand    from "./components/sections/StatsBand";
-import About        from "./components/sections/About";
-import Programs     from "./components/sections/Programs";
-import Features     from "./components/sections/Features";
-import Faculty      from "./components/sections/Faculty";
-import Achievers    from "./components/sections/Achievers";
-import WhyChooseUs  from "./components/sections/WhyChooseUs";
-import Testimonials from "./components/sections/Testimonials";
-import Gallery      from "./components/sections/Gallery";
-import FAQ          from "./components/sections/FAQ";
-import CTABand      from "./components/sections/CTABand";
-import Contact      from "./components/sections/Contact";
+// Pages
+import Home             from "./pages/Home";
+import Engineering      from "./pages/Engineering";
+import Medical          from "./pages/Medical";
+import Commerce         from "./pages/Commerce";
+import FacultyPage      from "./pages/FacultyPage";
+import Results          from "./pages/Results";
 
 export default function App() {
   useScrollReveal();
@@ -33,22 +26,16 @@ export default function App() {
       <TopBar />
       <Header />
 
-      {/* ── Main content ── */}
+      {/* ── Main content with Routing ── */}
       <main>
-        <HeroSlider />
-
-        <StatsBand />
-        <About />
-        <Programs />
-        <Features />
-        <Faculty />
-        <Achievers />
-        <WhyChooseUs />
-        <Testimonials />
-        <Gallery />
-        <FAQ />
-        <CTABand />
-        <Contact />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/engineering" element={<Engineering />} />
+          <Route path="/medical" element={<Medical />} />
+          <Route path="/commerce" element={<Commerce />} />
+          <Route path="/faculty" element={<FacultyPage />} />
+          <Route path="/results" element={<Results />} />
+        </Routes>
       </main>
 
       {/* ── Footer ── */}

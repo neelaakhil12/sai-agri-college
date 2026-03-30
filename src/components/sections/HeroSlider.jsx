@@ -3,6 +3,7 @@ import { useSlider } from "../../hooks/useSlider";
 const slides = [
   {
     bg: "linear-gradient(115deg,#071428 0%,#0f2d6e 45%,#1347a0 100%)",
+    img: "/58471.JPG.jpeg",
     tag: "JEE Mains · JEE Advanced · EAPCET",
     h1: ['Step into <em class="italic text-[#fde68a]">Aakash...</em>', "Reach the Desired", "Destination."],
     motto: '"A victory Path for JEE (Main) & NEET & CPT-CMA"',
@@ -17,7 +18,24 @@ const slides = [
     ],
   },
   {
+    bg: "linear-gradient(115deg,#1347a0 0%,#0f2d6e 45%,#071428 100%)",
+    img: "/hero_engineering.png",
+    tag: "Engineering Excellence · Super-40 Batch",
+    h1: ["Master the JEE", 'with <em class="italic text-[#fde68a]">Aakash\'s</em>', "Advanced Coaching."],
+    motto: '"Focused Coaching for India\'s Toughest Entrance Exams."',
+    desc: "Intensive 2-year integrated program covering the complete syllabus of JEE Mains & Advanced with daily practice sessions and doubt-clearing batches.",
+    btn1: { label: "Enquire for JEE 2025 →", href: "#contact" },
+    btn2: { label: "View Advanced Program", href: "#programs" },
+    stats: [
+      { num: "20+", lbl: "Faculty Experts" },
+      { num: "10k+", lbl: "Mock Tests" },
+      { num: "IIT", lbl: "Preparation", yellow: true },
+      { num: "BITS", lbl: "Success Rate", yellow: true },
+    ],
+  },
+  {
     bg: "linear-gradient(115deg,#041a0e 0%,#064e2e 45%,#0e7c4b 100%)",
+    img: "/hero_medical.png",
     tag: "NEET Target Batch-40 · Medical Programme · EAPCET",
     h1: ["Your MBBS Journey", 'Starts with <em class="italic text-[#fde68a]">Aakash\'s</em>', "NEET Target Batch."],
     motto: '"Step in Aakash... Reach the desired Destination."',
@@ -33,6 +51,7 @@ const slides = [
   },
   {
     bg: "linear-gradient(115deg,#1a0e04 0%,#4a2d0a 45%,#c8900a 100%)",
+    img: "/hero_commerce.png",
     tag: "CPT · CMA · Commerce Track",
     h1: ["Build Your Career", 'in <em class="italic text-[#fde68a]">Commerce,</em>', "CA & CMA."],
     motto: '"Step in Aakash... Reach the desired Destination."',
@@ -63,7 +82,11 @@ export default function HeroSlider() {
           }}>
 
           {/* BG */}
-          <div className="absolute inset-0 w-full h-full hero-bg-pattern" style={{ background: s.bg }} />
+          <div className="absolute inset-0 w-full h-full overflow-hidden">
+            <img src={s.img} className="w-full h-full object-cover" alt="" />
+            <div className="absolute inset-0 hero-bg-pattern opacity-60" style={{ background: s.bg }} />
+            <div className="absolute inset-0 bg-black/40" />
+          </div>
 
           {/* Content */}
           <div className="relative z-[2] w-full max-w-site mx-auto px-5 md:px-7
