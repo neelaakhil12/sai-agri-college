@@ -1,4 +1,3 @@
-import { Building2, BookOpen, FlaskConical, Trophy, GraduationCap } from "lucide-react";
 import Reveal from "../ui/Reveal";
 import SectionHeader from "../ui/SectionHeader";
 

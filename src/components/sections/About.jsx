@@ -1,4 +1,3 @@
-import { Building2 } from "lucide-react";
 import Reveal from "../ui/Reveal";
 import SectionHeader from "../ui/SectionHeader";
 
