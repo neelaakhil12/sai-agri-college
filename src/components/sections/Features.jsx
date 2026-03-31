@@ -28,8 +28,8 @@ export default function Features() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[18px] mt-10 md:mt-11">
           {features.map((f, i) => (
-            <Reveal key={i} delay={i * 0.07}>
-              <div className="p-[22px] md:p-[26px] rounded-2xl transition-all duration-[250ms]
+            <Reveal key={i} delay={i * 0.07} className="h-full">
+              <div className="p-[22px] md:p-[26px] rounded-2xl transition-all duration-[250ms] h-full flex flex-col
                 hover:border-[rgba(147,197,253,.3)] hover:-translate-y-[3px]"
                 style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)" }}>
                 <div className="w-[48px] h-[48px] md:w-[52px] md:h-[52px] rounded-xl flex items-center justify-center mb-4"
@@ -37,7 +37,7 @@ export default function Features() {
                   <f.Icon size={20} className="text-[#93c5fd]" />
                 </div>
                 <h4 className="text-[0.9rem] md:text-[0.92rem] font-bold text-white mb-2">{f.title}</h4>
-                <p className="text-[0.8rem] md:text-[0.82rem] text-white/50 leading-[1.65]">{f.desc}</p>
+                <p className="text-[0.8rem] md:text-[0.82rem] text-white/50 leading-[1.65] mt-auto">{f.desc}</p>
               </div>
             </Reveal>
           ))}

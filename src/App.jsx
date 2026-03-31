@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { useScrollReveal } from "./hooks/useScrollReveal";
 
 // Layout
@@ -15,9 +15,11 @@ import Medical          from "./pages/Medical";
 import Commerce         from "./pages/Commerce";
 import FacultyPage      from "./pages/FacultyPage";
 import Results          from "./pages/Results";
+import Hostel           from "./pages/Hostel";
 
 export default function App() {
-  useScrollReveal();
+  const location = useLocation();
+  useScrollReveal([location.pathname]);
 
   return (
     <div className="min-h-screen bg-cream font-sora text-[#374151]">
@@ -35,6 +37,7 @@ export default function App() {
           <Route path="/commerce" element={<Commerce />} />
           <Route path="/faculty" element={<FacultyPage />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/hostel" element={<Hostel />} />
         </Routes>
       </main>
 

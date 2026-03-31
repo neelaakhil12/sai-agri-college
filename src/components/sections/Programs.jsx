@@ -29,8 +29,8 @@ function ProgramCard({ p, delay = 0 }) {
   const lc = linkColors[p.color];
   const dc = dotColors[p.color];
   return (
-    <Reveal delay={delay}>
-      <div className="border-[1.5px] border-[#e2e8f0] rounded-2xl overflow-hidden bg-white
+    <Reveal delay={delay} className="h-full">
+      <div className="border-[1.5px] border-[#e2e8f0] rounded-2xl overflow-hidden bg-white h-full flex flex-col
         transition-all duration-[250ms] hover:-translate-y-[5px]
         hover:shadow-[0_18px_48px_rgba(0,0,0,.10)] hover:border-transparent">
         <div className="px-6 pt-7 pb-[22px] relative overflow-hidden" style={{ background: headStyles[p.id] }}>
@@ -48,8 +48,8 @@ function ProgramCard({ p, delay = 0 }) {
             dangerouslySetInnerHTML={{ __html: p.title.replace("&", "&amp;") }} />
           <p className="text-[0.78rem] text-white/50 leading-[1.5] relative">{p.desc}</p>
         </div>
-        <div className="px-6 pt-5 pb-6">
-          <ul className="list-none flex flex-col gap-2 mb-4">
+        <div className="px-6 pt-5 pb-6 flex flex-col flex-1">
+          <ul className="list-none flex flex-col gap-2 mb-4 flex-1">
             {p.exams.map((e, i) => (
               <li key={i} className="flex items-start gap-[10px] text-[0.84rem] font-medium text-[#374151] leading-[1.4]">
                 <span className="w-2 h-2 rounded-[2px] flex-shrink-0 mt-[5px]" style={{ background: dc }} />

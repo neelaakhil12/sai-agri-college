@@ -25,16 +25,16 @@ export default function WhyChooseUs() {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-[14px] md:gap-[18px]">
           {items.map((item, i) => (
-            <Reveal key={i} delay={(i % 5) * 0.06}>
+            <Reveal key={i} delay={(i % 5) * 0.06} className="h-full">
               <div className="px-[14px] md:px-[18px] py-[18px] md:py-[22px] bg-white border-[1.5px] border-[#e2e8f0]
-                rounded-2xl text-center transition-all duration-[250ms]
+                rounded-2xl text-center transition-all duration-[250ms] h-full flex flex-col
                 hover:border-blue hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(19,71,160,.10)]">
                 <div className="w-[46px] h-[46px] md:w-[54px] md:h-[54px] rounded-2xl bg-sky mx-auto mb-[10px] md:mb-[13px]
                   flex items-center justify-center">
                   <item.Icon size={20} className="text-blue" />
                 </div>
                 <h4 className="text-[0.8rem] md:text-[0.86rem] font-bold text-ink leading-[1.35]">{item.title}</h4>
-                <p className="text-[0.7rem] md:text-[0.74rem] text-muted leading-[1.55] mt-[5px]">{item.desc}</p>
+                <p className="text-[0.7rem] md:text-[0.74rem] text-muted leading-[1.55] mt-[5px] mt-auto">{item.desc}</p>
               </div>
             </Reveal>
           ))}

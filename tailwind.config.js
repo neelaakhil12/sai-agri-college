@@ -21,6 +21,7 @@ module.exports = {
         muted:   "#6b7280",
       },
       fontFamily: {
+        outfit: ["'Outfit'", "sans-serif"],
         sora: ["'Sora'", "sans-serif"],
         lora: ["'Lora'", "serif"],
       },

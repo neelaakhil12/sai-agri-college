@@ -111,28 +111,29 @@ export default function Header() {
 
   const navItems = [
     {
-      type: "dropdown", label: "Engineering Stream", href: "/engineering",
+      type: "dropdown", label: "MPC", href: "/engineering",
       items: [
-        { label: "Engineering Page Overview", href: "/engineering" },
+        { label: "Engineering Page Overview", href: "/engineering#engineering-overview" },
         { divider: true },
-        { label: "JEE Mains – Super 40 Batch", href: "/engineering" },
-        { label: "JEE Advanced Track", href: "/engineering" },
-        { label: "EAPCET Preparation", href: "/engineering" },
+        { label: "JEE Mains – Super 40 Batch", href: "/engineering#jee-mains-super-40" },
+        { label: "JEE Advanced Track", href: "/engineering#jee-advanced-track" },
+        { label: "EAPCET Preparation", href: "/engineering#eapcet-preparation" },
       ],
     },
     {
-      type: "dropdown", label: "Medical Stream", href: "/medical",
+      type: "dropdown", label: "BIPC", href: "/medical",
       items: [
-        { label: "Medical Page Overview", href: "/medical" },
+        { label: "Medical Page Overview", href: "/medical#medical-overview" },
         { divider: true },
-        { label: "NEET Target Batch – 40", href: "/medical" },
-        { label: "Full Medical Programme", href: "/medical" },
-        { label: "EAPCET Preparation", href: "/medical" },
+        { label: "NEET Target Batch – 40", href: "/medical#neet-target-batch-40" },
+        { label: "Full Medical Programme", href: "/medical#full-medical-programme" },
+        { label: "EAPCET Preparation", href: "/medical#medical-eapcet-preparation" },
       ],
     },
-    { type: "link", label: "Commerce Stream", href: "/commerce" },
+    { type: "link", label: "MEC", href: "/commerce" },
     { type: "link", label: "Faculty", href: "/faculty" },
     { type: "link", label: "Results", href: "/results" },
+    { type: "link", label: "Hostel", href: "/hostel" },
   ];
 
   return (
