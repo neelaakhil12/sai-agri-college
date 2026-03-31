@@ -6,11 +6,11 @@ import SectionHeader from "../ui/SectionHeader";
 
 function FacultyCard({ f, delay = 0 }) {
   return (
-    <Reveal delay={delay}>
-      <div className="p-4 md:p-5 bg-cream border-[1.5px] border-[#e2e8f0] rounded-2xl
-        transition-all duration-200 hover:border-blue hover:bg-sky">
+    <Reveal delay={delay} className="h-full">
+      <div className="h-full p-4 md:p-5 bg-white border-[1.5px] border-[#e2e8f0] rounded-2xl
+        transition-all duration-200 hover:border-blue hover:bg-sky flex flex-col">
         <div className="w-[46px] h-[46px] md:w-[50px] md:h-[50px] rounded-full flex items-center justify-center
-          text-white font-lora font-bold text-[0.9rem] md:text-[0.95rem] mb-3"
+          text-white font-lora font-bold text-[0.9rem] md:text-[0.95rem] mb-3 shrink-0"
           style={{ background: "linear-gradient(135deg,#1347a0,#0b1220)" }}>
           {f.initials}
         </div>
@@ -18,7 +18,7 @@ function FacultyCard({ f, delay = 0 }) {
         <span className="text-[0.68rem] md:text-[0.7rem] text-blue font-bold uppercase tracking-[.07em] block">
           {f.dept}
         </span>
-        <div className="flex items-center gap-[5px] mt-2 text-[0.72rem] md:text-[0.74rem] text-muted font-medium
+        <div className="flex items-center gap-[5px] mt-auto pt-3 text-[0.72rem] md:text-[0.74rem] text-muted font-medium
           before:content-[''] before:w-[7px] before:h-[7px] before:bg-[#22c55e] before:rounded-full before:flex-shrink-0">
           {f.exp}
         </div>
