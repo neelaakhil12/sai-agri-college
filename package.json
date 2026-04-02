@@ -2,6 +2,6 @@
   "name": "akash-college-root",
   "version": "1.0.0",
   "scripts": {
-    "build": "cd aakash-academy && npm install && npm run build"
+    "build": "cd sri-sai-agriculture && npm install && npm run build"
   }
 }
