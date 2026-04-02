@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     { "src": "backend/index.js", "use": "@vercel/node" },
-    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "aakash-academy/build" } }
+    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "sri-sai-agriculture/build" } }
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/backend/index.js" },
