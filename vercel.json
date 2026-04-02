@@ -4,9 +4,9 @@
     { "src": "backend/index.js", "use": "@vercel/node" },
     { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "aakash-academy/build" } }
   ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "backend/index.js" },
-    { "src": "/uploads/(.*)", "dest": "backend/index.js" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/backend/index.js" },
+    { "source": "/uploads/(.*)", "destination": "/backend/index.js" },
+    { "source": "/((?!api|uploads|static|.*\\.).*)", "destination": "/index.html" }
   ]
 }
