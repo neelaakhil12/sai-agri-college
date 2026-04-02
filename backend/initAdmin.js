@@ -10,20 +10,23 @@ mongoose
   })
   .then(async () => {
     console.log("✅ Connected to MongoDB");
-    const existingAdmin = await Admin.findOne({ username: process.env.ADMIN_USERNAME });
-    if (existingAdmin) {
-      console.log("ℹ️ Admin already exists");
-      process.exit();
+    let admin = await Admin.findOne({ username: process.env.ADMIN_USERNAME });
+    if (admin) {
+      console.log("ℹ️ Admin already exists, updating password...");
+      admin.password = process.env.ADMIN_PASSWORD;
+      await admin.save();
+      console.log("✨ Admin password updated successfully!");
+    } else {
+      admin = new Admin({
+        username: process.env.ADMIN_USERNAME,
+        password: process.env.ADMIN_PASSWORD,
+      });
+      await admin.save();
+      console.log("✨ Admin user created successfully!");
     }
-    const admin = new Admin({
-      username: process.env.ADMIN_USERNAME,
-      password: process.env.ADMIN_PASSWORD,
-    });
-    await admin.save();
-    console.log("✨ Admin user created successfully!");
     process.exit();
   })
   .catch((err) => {
-    console.error("❌ Failed to connect to MongoDB in initAdmin script. Please check if mongod is running.");
+    console.error("❌ Error in initAdmin script:", err.message);
     process.exit(1);
   });
