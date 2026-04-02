@@ -16,7 +16,6 @@ const quickLinks = [
   { label: "Hostel",             href: "/hostel" },
   { label: "Admission Enquiry",  href: "/#contact" },
 ];
-const socialIcons = [];
 
 export default function Footer() {
   return (
