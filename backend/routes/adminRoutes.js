@@ -10,7 +10,7 @@ router.post("/login", async (req, res) => {
   // For testing purposes, check against env first
   if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
     const token = jwt.sign({ id: "admin" }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "Lax", path: "/" });
     return res.json({ message: "Login successful", token });
   }
 
@@ -18,7 +18,7 @@ router.post("/login", async (req, res) => {
   const admin = await Admin.findOne({ username });
   if (admin && (await admin.comparePassword(password))) {
     const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "Lax", path: "/" });
     return res.json({ message: "Login successful", token });
   }
 
