@@ -141,9 +141,9 @@ export default function Header() {
                alt="Sri Sai Agri Institute Logo" 
                className="h-[48px] md:h-[58px] w-auto transition-transform duration-300 group-hover:scale-105"
              />
-            <div className="flex flex-col leading-tight hidden xs:flex">
-              <span className="font-lora text-[1.05rem] md:text-[1.2rem] font-bold text-blue tracking-tight uppercase">Sri Sai Institute</span>
-              <span className="text-[0.6rem] md:text-[0.65rem] font-black text-[#94a3b8] tracking-[0.14em] -mt-0.5 uppercase">Of Agriculture Sciences</span>
+            <div className="flex flex-col leading-tight">
+              <span className="font-lora text-[0.85rem] xs:text-[1rem] md:text-[1.2rem] font-bold text-blue tracking-tight uppercase">Sri Sai Institute</span>
+              <span className="text-[0.5rem] xs:text-[0.6rem] md:text-[0.65rem] font-black text-[#94a3b8] tracking-[0.14em] -mt-0.5 uppercase">Of Agriculture Sciences</span>
             </div>
           </div>
         </Link>
