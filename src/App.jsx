@@ -16,17 +16,26 @@ import Commerce         from "./pages/Commerce";
 import FacultyPage      from "./pages/FacultyPage";
 import Results          from "./pages/Results";
 import Hostel           from "./pages/Hostel";
+import AdminAakash      from "./pages/admin/AdminAakash";
+
+import TestimonialsPage from "./pages/TestimonialsPage";
 
 export default function App() {
   const location = useLocation();
   useScrollReveal([location.pathname]);
 
+  const isAdminPanel = location.pathname.startsWith('/admin');
+
   return (
     <div className="min-h-screen bg-cream font-sora text-[#374151]">
       {/* ── Top fixed layers ── */}
-      <AnnouncementBar />
-      <TopBar />
-      <Header />
+      {!isAdminPanel && (
+        <>
+          <AnnouncementBar />
+          <TopBar />
+          <Header />
+        </>
+      )}
 
       {/* ── Main content with Routing ── */}
       <main>
@@ -37,15 +46,17 @@ export default function App() {
           <Route path="/commerce" element={<Commerce />} />
           <Route path="/faculty" element={<FacultyPage />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/testimonials" element={<TestimonialsPage />} />
           <Route path="/hostel" element={<Hostel />} />
+          <Route path="/admin/aakash" element={<AdminAakash />} />
         </Routes>
       </main>
 
       {/* ── Footer ── */}
-      <Footer />
+      {!isAdminPanel && <Footer />}
 
       {/* ── Floating call buttons ── */}
-      <FloatingButtons />
+      {!isAdminPanel && <FloatingButtons />}
     </div>
   );
 }

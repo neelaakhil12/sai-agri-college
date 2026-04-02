@@ -28,4 +28,11 @@ export const achieverGroups = [
       { name: "T. Ravi Kumar",    place: "NEET Qualifier · MBBS",    initials: "TR" },
     ],
   },
+  {
+    id: "intermediate",
+    title: "Board & Intermediate Toppers",
+    subtitle: "State Board · Intermediate Results",
+    color: { bg: "rgba(212,175,55,.15)", border: "rgba(212,175,55,.25)", tag: "#d4af37", tagBg: "rgba(212,175,55,.1)" },
+    items: [], // Will be filled dynamically or act as empty row initially
+  },
 ];

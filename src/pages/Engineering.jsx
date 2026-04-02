@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import axios from "axios";
 import PageHeader from "../components/ui/PageHeader";
 import Reveal from "../components/ui/Reveal";
 import SectionHeader from "../components/ui/SectionHeader";
@@ -6,7 +7,19 @@ import Contact from "../components/sections/Contact";
 import StatsBand from "../components/sections/StatsBand";
 
 export default function Engineering() {
+  const [dynamicCourses, setDynamicCourses] = React.useState([]);
+
   useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/courses");
+        setDynamicCourses(res.data.filter(c => c.stream?.toLowerCase() === 'engineering'));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchCourses();
+
     function scrollToHash() {
       if (window.location.hash) {
         const id = window.location.hash.replace("#", "");
@@ -77,7 +90,7 @@ export default function Engineering() {
           </div>
         </div>
       </section>
-
+ 
       {/* Program Tracks */}
       <section id="program-tracks" className="py-20 bg-white scroll-mt-[100px]">
         <div className="max-w-site mx-auto px-5 md:px-7">
@@ -88,7 +101,7 @@ export default function Engineering() {
             </Reveal>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* JEE Mains - Super 40 */}
             <Reveal delay={0.1}>
               <div id="jee-mains-super-40" className="h-full bg-cream p-8 rounded-[2rem] border border-blue/10 flex flex-col group hover:bg-blue hover:border-blue transition-all duration-500 scroll-mt-[100px]">
@@ -148,6 +161,36 @@ export default function Engineering() {
                 </div>
               </div>
             </Reveal>
+
+            {/* DYNAMIC COURSES */}
+            {dynamicCourses.map((c, i) => (
+              <Reveal key={c._id} delay={0.4 + i * 0.1}>
+                <div className="h-full bg-cream p-8 rounded-[3rem] border border-blue/10 flex flex-col group hover:bg-blue hover:border-blue transition-all duration-500 shadow-xl shadow-blue/5">
+                  <div className="bg-blue/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-white/20">
+                    <span className="text-3xl">📘</span>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4 group-hover:text-white">{c.title}</h3>
+                  {c.image && (
+                    <img 
+                      src={c.image.startsWith('http') ? c.image : `http://localhost:5000${c.image}`} 
+                      className="w-full h-32 object-cover rounded-2xl mb-4" 
+                      alt="" 
+                    />
+                  )}
+
+                  <p className="text-ink/65 mb-8 group-hover:text-white/80 leading-relaxed">
+                    {c.description}
+                  </p>
+                  <div className="mt-auto space-y-3">
+                    {c.details.map((d, j) => (
+                      <div key={j} className="flex items-center gap-2 group-hover:text-white/90 text-sm">
+                        <span className="text-blue group-hover:text-white">✓</span> {d}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>

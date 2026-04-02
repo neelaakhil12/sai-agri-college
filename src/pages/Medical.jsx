@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import PageHeader from "../components/ui/PageHeader";
 import Reveal from "../components/ui/Reveal";
 import SectionHeader from "../components/ui/SectionHeader";
@@ -6,7 +7,19 @@ import Contact from "../components/sections/Contact";
 import StatsBand from "../components/sections/StatsBand";
 
 export default function Medical() {
+  const [dynamicCourses, setDynamicCourses] = useState([]);
+
   useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/courses");
+        setDynamicCourses(res.data.filter(c => c.stream?.toLowerCase() === 'medical'));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchCourses();
+
     function scrollToHash() {
       if (window.location.hash) {
         const id = window.location.hash.replace("#", "");
@@ -88,7 +101,7 @@ export default function Medical() {
             </Reveal>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* NEET Target Batch - 40 */}
             <Reveal delay={0.1}>
               <div id="neet-target-batch-40" className="h-full bg-[#f0f9f4] p-8 rounded-[2rem] border border-green/10 flex flex-col group hover:bg-green hover:border-green transition-all duration-500 scroll-mt-[100px]">
@@ -148,6 +161,36 @@ export default function Medical() {
                 </div>
               </div>
             </Reveal>
+
+            {/* DYNAMIC COURSES */}
+            {dynamicCourses.map((c, i) => (
+              <Reveal key={c._id} delay={0.4 + i * 0.1}>
+                <div className="h-full bg-[#f0f9f4] p-8 rounded-[2rem] border border-green/10 flex flex-col group hover:bg-green hover:border-green transition-all duration-500 shadow-xl shadow-green/5">
+                  <div className="bg-green/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-white/20">
+                    <span className="text-3xl">🌿</span>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4 group-hover:text-white">{c.title}</h3>
+                  {c.image && (
+                    <img 
+                      src={c.image.startsWith('http') ? c.image : `http://localhost:5000${c.image}`} 
+                      className="w-full h-32 object-cover rounded-2xl mb-4" 
+                      alt="" 
+                    />
+                  )}
+
+                  <p className="text-ink/65 mb-8 group-hover:text-white/80 leading-relaxed">
+                    {c.description}
+                  </p>
+                  <div className="mt-auto space-y-3">
+                    {c.details.map((d, j) => (
+                      <div key={j} className="flex items-center gap-2 group-hover:text-white/90 text-sm">
+                        <span className="text-green group-hover:text-white">●</span> {d}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>

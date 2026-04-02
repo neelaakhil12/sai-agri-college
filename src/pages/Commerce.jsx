@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import PageHeader from "../components/ui/PageHeader";
 import Reveal from "../components/ui/Reveal";
 import SectionHeader from "../components/ui/SectionHeader";
@@ -6,7 +7,19 @@ import Contact from "../components/sections/Contact";
 import StatsBand from "../components/sections/StatsBand";
 
 export default function Commerce() {
+  const [dynamicCourses, setDynamicCourses] = useState([]);
+
   useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/courses");
+        setDynamicCourses(res.data.filter(c => c.stream?.toLowerCase() === 'commerce'));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchCourses();
+
     function scrollToHash() {
       if (window.location.hash) {
         const id = window.location.hash.replace("#", "");
@@ -126,6 +139,36 @@ export default function Commerce() {
                 </div>
               </div>
             </Reveal>
+
+            {/* DYNAMIC COURSES */}
+            {dynamicCourses.map((c, i) => (
+               <Reveal key={c._id} delay={0.3 + i * 0.1}>
+                 <div className="h-full bg-[#fffcf5] p-10 rounded-[2.5rem] border border-gold/10 flex flex-col group hover:bg-gold hover:border-gold transition-all duration-500 shadow-xl shadow-gold/5">
+                   <div className="bg-gold/10 w-20 h-20 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-white/20">
+                     <span className="text-4xl">💼</span>
+                   </div>
+                   <h3 className="text-3xl font-bold mb-6 group-hover:text-white">{c.title}</h3>
+                   {c.image && (
+                    <img 
+                      src={c.image.startsWith('http') ? c.image : `http://localhost:5000${c.image}`} 
+                      className="w-full h-40 object-cover rounded-[2rem] mb-6" 
+                      alt="" 
+                    />
+                   )}
+
+                   <p className="text-ink/65 mb-8 group-hover:text-white/80 text-lg leading-relaxed">
+                     {c.description}
+                   </p>
+                   <div className="mt-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     {c.details.map((d, j) => (
+                       <div key={j} className="flex items-center gap-2 group-hover:text-white/90 text-sm">
+                         <span className="text-gold group-hover:text-white">●</span> {d}
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+               </Reveal>
+            ))}
           </div>
         </div>
       </section>

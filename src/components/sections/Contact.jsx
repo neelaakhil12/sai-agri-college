@@ -1,4 +1,6 @@
 import { useState } from "react";
+import axios from "axios";
+
 import { MapPin, Phone, Mail, Landmark, Target, Clock } from "lucide-react";
 import { siteConfig } from "../../data/siteConfig";
 import Reveal from "../ui/Reveal";
@@ -35,11 +37,19 @@ export default function Contact() {
     if (errors[field]) setErrors((e) => { const n = { ...e }; delete n[field]; return n; });
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
-    setSubmitted(true);
+    
+    try {
+      await axios.post("http://localhost:5000/api/enquiries", form);
+      setSubmitted(true);
+    } catch (err) {
+      alert("Submission failed. Please try again.");
+      console.error(err);
+    }
   }
+
 
   return (
     <section id="contact" className="py-[60px] md:py-[78px] bg-white">

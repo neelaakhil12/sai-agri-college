@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import PageHeader from "../components/ui/PageHeader";
 import Achievers from "../components/sections/Achievers";
+import RecentRanks from "../components/sections/RecentRanks";
 import StatsBand from "../components/sections/StatsBand";
 import Contact from "../components/sections/Contact";
 import Reveal from "../components/ui/Reveal";
@@ -29,6 +30,7 @@ export default function Results() {
         </div>
       </section>
 
+      <RecentRanks />
       <Achievers />
       
       <section className="py-20 lg:py-28 bg-[#0b1220] text-white">
