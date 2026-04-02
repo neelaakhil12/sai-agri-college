@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import SectionHeader from "../ui/SectionHeader";
 
-const API_URL = 'http://localhost:5000';
+const API_URL = '';
 
 const staticRanks = [
   { studentName: "T. Sai Kumar", rank: "AIR 2456", exam: "JEE Advanced", stream: "MPC", hallTicketNumber: "24021001", image: "" },

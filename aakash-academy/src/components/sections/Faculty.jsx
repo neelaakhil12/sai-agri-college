@@ -5,7 +5,7 @@ import { useScrollReveal } from "../../hooks/useScrollReveal";
 import Reveal from "../ui/Reveal";
 import SectionHeader from "../ui/SectionHeader";
 
-const API_URL = 'http://localhost:5000';
+const API_URL = '';
 
 function FacultyCard({ f, delay = 0 }) {
   return (

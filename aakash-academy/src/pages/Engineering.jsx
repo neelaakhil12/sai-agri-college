@@ -12,7 +12,7 @@ export default function Engineering() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/courses");
+        const res = await axios.get("/api/courses");
         setDynamicCourses(res.data.filter(c => c.stream?.toLowerCase() === 'engineering'));
       } catch (err) {
         console.error(err);
@@ -172,7 +172,7 @@ export default function Engineering() {
                   <h3 className="text-2xl font-bold mb-4 group-hover:text-white">{c.title}</h3>
                   {c.image && (
                     <img 
-                      src={c.image.startsWith('http') ? c.image : `http://localhost:5000${c.image}`} 
+                      src={c.image.startsWith('http') ? c.image : `${c.image}`} 
                       className="w-full h-32 object-cover rounded-2xl mb-4" 
                       alt="" 
                     />

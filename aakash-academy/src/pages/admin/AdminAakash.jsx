@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = '/api';
 
 export default function AdminAakash() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -344,7 +344,7 @@ export default function AdminAakash() {
                           <div className="h-12 w-12 rounded-xl bg-gray-100 overflow-hidden mr-4 border border-gray-200">
                             {item.image ? (
                               <img 
-                                src={item.image.startsWith('http') ? item.image : `http://localhost:5000${item.image}`} 
+                                src={item.image.startsWith('http') ? item.image : `${item.image}`} 
                                 className="h-full w-full object-cover" 
                                 alt="" 
                               />

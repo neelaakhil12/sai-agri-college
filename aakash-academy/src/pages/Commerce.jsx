@@ -12,7 +12,7 @@ export default function Commerce() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/courses");
+        const res = await axios.get("/api/courses");
         setDynamicCourses(res.data.filter(c => c.stream?.toLowerCase() === 'commerce'));
       } catch (err) {
         console.error(err);
@@ -150,7 +150,7 @@ export default function Commerce() {
                    <h3 className="text-3xl font-bold mb-6 group-hover:text-white">{c.title}</h3>
                    {c.image && (
                     <img 
-                      src={c.image.startsWith('http') ? c.image : `http://localhost:5000${c.image}`} 
+                      src={c.image.startsWith('http') ? c.image : `${c.image}`} 
                       className="w-full h-40 object-cover rounded-[2rem] mb-6" 
                       alt="" 
                     />

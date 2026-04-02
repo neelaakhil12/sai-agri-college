@@ -42,7 +42,7 @@ export default function Contact() {
     if (Object.keys(e).length) { setErrors(e); return; }
     
     try {
-      await axios.post("http://localhost:5000/api/enquiries", form);
+      await axios.post("/api/enquiries", form);
       setSubmitted(true);
     } catch (err) {
       alert("Submission failed. Please try again.");

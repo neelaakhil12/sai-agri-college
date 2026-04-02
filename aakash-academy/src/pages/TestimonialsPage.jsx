@@ -4,7 +4,7 @@ import PageHeader from "../components/ui/PageHeader";
 import Reveal from "../components/ui/Reveal";
 import SectionHeader from "../components/ui/SectionHeader";
 
-const API_URL = 'http://localhost:5000';
+const API_URL = '';
 
 const staticTestimonials = [
   { initials: "BG", studentName: "B. Geetha",    achievement: "IIT Palakkad · MPC Batch",   quote: "The Super-40 batch made all the difference. My teacher in Physics knew exactly where I was struggling and gave individual attention every single day. I got into IIT Palakkad because of that focus.", stars: 5 },
