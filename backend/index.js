@@ -50,15 +50,21 @@ app.use((err, req, res, next) => {
   next();
 });
 
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, "../sri-sai-agriculture/build")));
+
 app.get("/", (req, res) => {
-  res.send("Sri Sai Agriculture API is running with MySQL & Local Storage...");
+  res.sendFile(path.join(__dirname, "../sri-sai-agriculture/build", "index.html"));
 });
 
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-  });
-}
+// Catch-all handler for any request that doesn't match the ones above
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../sri-sai-agriculture/build", "index.html"));
+});
+
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
 
 module.exports = app;
 
