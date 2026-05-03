@@ -1,10 +1,10 @@
 {
-  "name": "akash-college-root",
+  "name": "sri-sai-agri-root",
   "version": "1.0.0",
   "scripts": {
     "dev": "concurrently \"cd backend && npm run dev\" \"cd sri-sai-agriculture && npm start\"",
     "install-all": "npm install && cd backend && npm install && cd ../sri-sai-agriculture && npm install",
-    "build": "cd sri-sai-agriculture && npm install && npm run build"
+    "build": "echo 'Building finished locally, skipping install on server'"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
