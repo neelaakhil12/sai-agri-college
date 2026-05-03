@@ -1,32 +1,69 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const Admin = require("../models/Admin");
+const pool = require("../utils/db");
+const bcrypt = require("bcryptjs");
 
 // Login admin
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  console.log(`🔑 Login Attempt - Username: [${username}], Incoming Pass: [${password}]`);
-  console.log(`🔐 Env Config - Env User: [${process.env.ADMIN_USERNAME}], Env Pass: [${process.env.ADMIN_PASSWORD}]`);
-
-  // For testing purposes, check against env first
-  if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
-    console.log("✅ Env Login Match Found!");
-    const token = jwt.sign({ id: "admin" }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "Lax", path: "/" });
-    return res.json({ message: "Login successful", token });
+  
+  if (!username || !password) {
+    return res.status(400).json({ message: "Username and password are required" });
   }
 
-  // Database check
-  const admin = await Admin.findOne({ username });
-  if (admin && (await admin.comparePassword(password))) {
-    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "Lax", path: "/" });
-    return res.json({ message: "Login successful", token });
-  }
+  const cleanUser = username.trim().toLowerCase();
+  const cleanPass = password.trim();
 
-  res.status(401).json({ message: "Invalid credentials" });
+  try {
+    try {
+      // 1. Check against DB
+      const [rows] = await pool.query("SELECT * FROM admins WHERE username = ?", [cleanUser]);
+      const admin = rows[0];
+
+      if (admin) {
+        const isMatch = await bcrypt.compare(cleanPass, admin.password);
+        if (isMatch) {
+            const secret = process.env.JWT_SECRET || "srisai_secret_key_123";
+            const token = jwt.sign({ id: admin.id }, secret, { expiresIn: "24h" });
+           res.cookie("token", token, { 
+             httpOnly: true, 
+             secure: process.env.NODE_ENV === "production", 
+             sameSite: "Lax", 
+             path: "/",
+             maxAge: 24 * 60 * 60 * 1000 // 24 hours
+           });
+           return res.json({ message: "Login successful", token });
+        }
+      }
+    } catch (dbErr) {
+      console.error("Database connection failed, falling back to ENV:", dbErr.message);
+    }
+
+    // 2. Fallback to ENV (if DB fails or user not in DB)
+    const envUser = (process.env.ADMIN_USERNAME || "").trim().toLowerCase();
+    const envPass = (process.env.ADMIN_PASSWORD || "").trim();
+
+    if (cleanUser === envUser && cleanPass === envPass) {
+       const secret = process.env.JWT_SECRET || "srisai_secret_key_123";
+       const token = jwt.sign({ id: "admin-env" }, secret, { expiresIn: "24h" });
+       res.cookie("token", token, { 
+         httpOnly: true, 
+         secure: process.env.NODE_ENV === "production", 
+         sameSite: "Lax", 
+         path: "/",
+         maxAge: 24 * 60 * 60 * 1000
+       });
+       return res.json({ message: "Login successful", token });
+    }
+
+    return res.status(401).json({ message: "Invalid credentials" });
+  } catch (err) {
+    console.error("Login verification error:", err);
+    return res.status(500).json({ message: "Server error during login" });
+  }
 });
+
 
 // Logout admin
 router.post("/logout", (req, res) => {
@@ -40,7 +77,7 @@ router.get("/auth", (req, res) => {
   if (!token) return res.status(401).json({ authenticated: false });
 
   try {
-    jwt.verify(token, process.env.JWT_SECRET);
+    jwt.verify(token, process.env.JWT_SECRET || "srisai_secret_key_123");
     res.json({ authenticated: true });
   } catch (err) {
     res.status(401).json({ authenticated: false });
@@ -48,3 +85,4 @@ router.get("/auth", (req, res) => {
 });
 
 module.exports = router;
+

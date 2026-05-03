@@ -4,11 +4,15 @@ import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App";
 
+import { ImageModalProvider } from "./hooks/useImageModal";
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <ImageModalProvider>
+        <App />
+      </ImageModalProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

@@ -1,31 +1,33 @@
-const cloudinary = require("cloudinary").v2;
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Ensure uploads directory exists relative to backend root
+const uploadDir = "uploads";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: "aakash_academy",
-    allowed_formats: ["jpg", "png", "jpeg", "webp"],
-    transformation: [{ width: 1000, height: 1000, crop: "limit" }],
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // Slightly larger 2MB limit for Cloudinary
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("image")) {
-      return cb(new Error("Only images are allowed"), false);
+    if (file.mimetype.startsWith("image") || file.mimetype === "application/pdf") {
+      cb(null, true);
+    } else {
+      cb(new Error("Only images and PDFs are allowed"), false);
     }
-    cb(null, true);
-  }
+  },
 });
 
 module.exports = upload;

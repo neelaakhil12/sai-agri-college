@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Reveal from "../ui/Reveal";
 import SectionHeader from "../ui/SectionHeader";
+import ZoomableImage from "../ui/ZoomableImage";
 
 const courses = [
   "B.Sc Agriculture",
@@ -27,7 +28,7 @@ export default function About() {
           <Reveal className="relative pb-6">
             <div className="w-full rounded-2xl overflow-hidden relative"
               style={{ aspectRatio: "4/3" }}>
-              <img
+              <ZoomableImage
                 src="/about.png"
                 alt="Sri Sai Institute of Agriculture Sciences Campus"
                 className="w-full h-full object-cover"

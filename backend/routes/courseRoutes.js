@@ -1,15 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const Course = require("../models/Course");
+const pool = require("../utils/db");
 const upload = require("../utils/multerConfig");
-
 const authenticate = require("../utils/authMiddleware");
 
 // Get all courses
 router.get("/", async (req, res) => {
   try {
-    const courses = await Course.find();
-    res.json(courses);
+    const [rows] = await pool.query("SELECT * FROM courses ORDER BY id ASC");
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -17,48 +16,49 @@ router.get("/", async (req, res) => {
 
 // Create course (Protected)
 router.post("/", authenticate, upload.single("image"), async (req, res) => {
-  const { title, description, stream, details } = req.body;
+  const { title, stream, description, details } = req.body;
   const image = req.file ? req.file.path : "";
-  
-  let detailList = [];
-  try {
-    if (details) {
-      if (details.startsWith("[")) {
-        detailList = JSON.parse(details);
-      } else {
-        // Fallback: split by comma if not JSON array
-        detailList = details.split(",").map(d => d.trim());
-      }
-    }
-  } catch (err) {
-    // If parsing fails for some reason (e.g. malformed json starts with [), just treat as single item or comma list
-    detailList = details.split(",").map(d => d.trim());
-  }
-
-  const course = new Course({
-    title,
-    description,
-    stream,
-    details: detailList,
-    image,
-  });
 
   try {
-    const newCourse = await course.save();
-    res.status(201).json(newCourse);
+    const [result] = await pool.query(
+      "INSERT INTO courses (title, stream, description, details, image) VALUES (?, ?, ?, ?, ?)",
+      [title, stream, description, details, image]
+    );
+    const [newCourse] = await pool.query("SELECT * FROM courses WHERE id = ?", [result.insertId]);
+    res.status(201).json(newCourse[0]);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// Delete course (Protected)
-router.delete("/:id", authenticate, async (req, res) => {
+// Update course (Protected)
+router.put("/:id", authenticate, upload.single("image"), async (req, res) => {
+      detailsArr = typeof details === "string" ? JSON.parse(details) : details;
+    } catch (e) {
+      detailsArr = [details];
+    }
+  }
+
+  const updateData = { title, description, stream, details: detailsArr };
+  
+  if (req.file) {
+    updateData.image = req.file.path;
+  }
+
   try {
-    await Course.findByIdAndDelete(req.params.id);
-    res.json({ message: "Course deleted" });
+    const { data, error } = await supabase
+      .from("courses")
+      .update(updateData)
+      .eq("id", req.params.id)
+      .select();
+
+    if (error) throw error;
+    res.json(data[0]);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(400).json({ message: err.message });
   }
 });
 
 module.exports = router;
+
+

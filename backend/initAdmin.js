@@ -1,32 +1,53 @@
 require("dotenv").config();
-const mongoose = require("mongoose");
-const Admin = require("./models/Admin");
+const supabase = require("./utils/supabaseClient");
+const bcrypt = require("bcryptjs");
 
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/aakash_academy";
+const username = process.env.ADMIN_USERNAME;
+const password = process.env.ADMIN_PASSWORD;
 
-mongoose
-  .connect(MONGO_URI, {
-    serverSelectionTimeoutMS: 5000,
-  })
-  .then(async () => {
-    console.log("✅ Connected to MongoDB");
-    let admin = await Admin.findOne({ username: process.env.ADMIN_USERNAME });
-    if (admin) {
+async function initAdmin() {
+  if (!username || !password) {
+    console.error("❌ Missing ADMIN_USERNAME or ADMIN_PASSWORD in environment variables!");
+    process.exit(1);
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const { data: existingAdmin, error: fetchError } = await supabase
+      .from("admins")
+      .select("*")
+      .eq("username", username)
+      .single();
+
+    if (fetchError && fetchError.code !== "PGRST116") {
+      throw fetchError;
+    }
+
+    if (existingAdmin) {
       console.log("ℹ️ Admin already exists, updating password...");
-      admin.password = process.env.ADMIN_PASSWORD;
-      await admin.save();
+      const { error: updateError } = await supabase
+        .from("admins")
+        .update({ password: hashedPassword })
+        .eq("id", existingAdmin.id);
+
+      if (updateError) throw updateError;
       console.log("✨ Admin password updated successfully!");
     } else {
-      admin = new Admin({
-        username: process.env.ADMIN_USERNAME,
-        password: process.env.ADMIN_PASSWORD,
-      });
-      await admin.save();
+      console.log("ℹ️ Creating new admin user...");
+      const { error: insertError } = await supabase
+        .from("admins")
+        .insert([{ username, password: hashedPassword }]);
+
+      if (insertError) throw insertError;
       console.log("✨ Admin user created successfully!");
     }
-    process.exit();
-  })
-  .catch((err) => {
+    process.exit(0);
+  } catch (err) {
     console.error("❌ Error in initAdmin script:", err.message);
     process.exit(1);
-  });
+  }
+}
+
+initAdmin();
+

@@ -5,7 +5,7 @@ import { achieverGroups as staticGroups } from "../../data/achievers";
 import Reveal from "../ui/Reveal";
 import SectionHeader from "../ui/SectionHeader";
 
-const API_URL = '';
+const API_URL = 'http://localhost:5000';
 
 const groupIcons = {
   jee:  GraduationCap,

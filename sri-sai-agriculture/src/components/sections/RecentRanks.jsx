@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import SectionHeader from "../ui/SectionHeader";
 
-const API_URL = '';
+const API_URL = 'http://localhost:5000';
 
 const staticRanks = [
   { studentName: "T. Sai Kumar", rank: "Top Researcher", exam: "B.Sc Agri", stream: "Agri Science", hallTicketNumber: "AG2401", image: "" },
@@ -50,8 +50,8 @@ export default function RecentRanks() {
               <div className="aspect-[4/5] bg-gray-100 relative overflow-hidden">
                 {r.image ? (
                   <img 
-                    src={r.image.startsWith('http') ? r.image : `${API_URL}/${r.image}`} 
-                    alt={r.studentName} 
+                    src={r.image.startsWith('http') ? r.image : `http://localhost:5000${r.image.startsWith('/') ? '' : '/'}${r.image}`} 
+                    alt={r.student_name || r.studentName} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                 ) : (
@@ -68,12 +68,12 @@ export default function RecentRanks() {
               {/* Content */}
               <div className="p-4 flex-grow flex flex-col justify-between">
                 <div>
-                  <h4 className="font-bold text-[0.95rem] text-ink leading-tight mb-1">{r.studentName}</h4>
+                  <h4 className="font-bold text-[0.95rem] text-ink leading-tight mb-1">{r.student_name || r.studentName}</h4>
                   <div className="text-[10px] font-bold text-blue tracking-wider uppercase mb-2">{(r.exam || 'PROGRAM')} • {(r.stream || 'AGRI')}</div>
                 </div>
                 <div className="pt-3 border-t border-gray-100 mt-auto">
                   <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">ID / Roll No.</div>
-                  <div className="text-[11px] font-black text-ink mt-1">{r.hallTicketNumber || '-----'}</div>
+                  <div className="text-[11px] font-black text-ink mt-1">{r.hall_ticket_number || r.hallTicketNumber || '-----'}</div>
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useScrollReveal } from "./hooks/useScrollReveal";
 
 // Layout
@@ -16,17 +16,22 @@ import Hostel           from "./pages/Hostel";
 import AdminDashboard  from "./pages/admin/AdminDashboard";
 import AboutPage       from "./pages/AboutPage";
 import TestimonialsPage from "./pages/TestimonialsPage";
+import ActivitiesPage   from "./pages/ActivitiesPage";
+import StudentLogin     from "./pages/portal/StudentLogin";
+import StudentRegister  from "./pages/portal/StudentRegister";
+import StudentDashboard from "./pages/portal/StudentDashboard";
 
 export default function App() {
   const location = useLocation();
   useScrollReveal([location.pathname]);
 
   const isAdminPanel = location.pathname.startsWith('/admin');
+  const isPortal = location.pathname.startsWith('/portal');
 
   return (
     <div className="min-h-screen bg-cream font-sora text-[#374151]">
       {/* ── Top fixed layers ── */}
-      {!isAdminPanel && (
+      {!isAdminPanel && !isPortal && (
         <>
           <AnnouncementBar />
           <TopBar />
@@ -42,16 +47,24 @@ export default function App() {
           <Route path="/faculty" element={<FacultyPage />} />
           <Route path="/results" element={<Results />} />
           <Route path="/testimonials" element={<TestimonialsPage />} />
+          <Route path="/activities" element={<ActivitiesPage />} />
           <Route path="/hostel" element={<Hostel />} />
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          
+          {/* Student Portal Routes */}
+          <Route path="/portal/login" element={<StudentLogin />} />
+          <Route path="/portal/register" element={<StudentRegister />} />
+          <Route path="/portal/dashboard" element={<StudentDashboard />} />
         </Routes>
+
       </main>
 
       {/* ── Footer ── */}
-      {!isAdminPanel && <Footer />}
+      {!isAdminPanel && !isPortal && <Footer />}
 
       {/* ── Floating call buttons ── */}
-      {!isAdminPanel && <FloatingButtons />}
+      {!isAdminPanel && !isPortal && <FloatingButtons />}
     </div>
   );
 }

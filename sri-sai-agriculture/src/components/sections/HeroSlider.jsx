@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { useSlider } from "../../hooks/useSlider";
 
-const slides = [
+const FALLBACK_SLIDES = [
   {
     bg: "linear-gradient(115deg,#071428 0%,#065f46 45%,#15803d 100%)",
     img: "/gallery/1.png",
@@ -37,7 +39,48 @@ const slides = [
 
 
 export default function HeroSlider() {
-  const { current, goTo, prev, next } = useSlider(slides.length);
+  const [slides, setSlides] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSlides = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/hero");
+        if (res.data && res.data.length > 0) {
+          const mapped = res.data.map(s => ({
+            tag: s.tag,
+            h1: Array.isArray(s.h1) ? s.h1 : [s.h1],
+            motto: s.motto,
+            desc: s.description,
+            img: s.image?.startsWith('http') ? s.image : `http://localhost:5000${s.image?.startsWith('/') ? '' : '/'}${s.image}`,
+            bg: s.bg_gradient,
+            btn1: { label: s.btn1_label || "Apply Now", href: s.btn1_href || "#contact" },
+            btn2: { label: s.btn2_label || "Learn More", href: s.btn2_href || "/about" },
+            stats: Array.isArray(s.stats) ? s.stats : []
+          }));
+          setSlides(mapped);
+        } else {
+          setSlides(FALLBACK_SLIDES);
+        }
+      } catch (err) {
+        console.error("Hero fetch error:", err);
+        setSlides(FALLBACK_SLIDES);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSlides();
+  }, []);
+
+  const slider = useSlider(slides.length || 1);
+  const current = slider.current;
+  const goTo = slider.goTo;
+  const prev = slider.prev;
+  const next = slider.next;
+
+  if (loading && slides.length === 0) {
+    return <div className="w-full bg-ink" style={{ height: "88vh" }} />;
+  }
 
   return (
     <div className="relative w-full overflow-hidden" style={{ minHeight: "88vh" }}>
@@ -103,64 +146,73 @@ export default function HeroSlider() {
                 </a>
                 <a href={s.btn2.href}
                   className="inline-flex items-center justify-center gap-2 border-2 border-white/30
-                    text-white px-5 py-3 rounded-[9px] font-semibold text-[0.85rem] no-underline
-                    transition-all duration-200 hover:border-white hover:bg-white/[.08]">
+                  text-white px-5 py-3 rounded-[9px] font-semibold text-[0.85rem] no-underline
+                  transition-all duration-200 hover:border-white hover:bg-white/[.08]">
                   {s.btn2.label}
                 </a>
               </div>
             </div>
 
             {/* Stat card — desktop only */}
-            <div className="hidden lg:grid rounded-[18px] p-7 grid-cols-2 gap-4"
-              style={{
-                background: "rgba(255,255,255,.09)",
-                backdropFilter: "blur(20px)",
-                border: "1px solid rgba(255,255,255,.18)",
-              }}>
-              {s.stats.map((st, si) => (
-                <div key={si} className="text-center px-[10px] py-4 rounded-xl"
-                  style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.08)" }}>
-                  <span className={`font-lora text-[1.8rem] font-bold block leading-none
-                    ${st.yellow ? "text-[#fde68a]" : st.green ? "text-[#6ee7b7]" : "text-white"}`}>
-                    {st.num}
-                  </span>
-                  <span className="text-[0.68rem] text-white/55 uppercase tracking-[.07em] mt-[5px] block">
-                    {st.lbl}
-                  </span>
-                </div>
-              ))}
-            </div>
+            {s.stats && s.stats.length > 0 && (
+              <div className="hidden lg:grid rounded-[18px] p-7 grid-cols-2 gap-4"
+                style={{
+                  background: "rgba(255,255,255,.09)",
+                  backdropFilter: "blur(20px)",
+                  border: "1px solid rgba(255,255,255,.18)",
+                }}>
+                {s.stats.map((st, si) => (
+                  <div key={si} className="text-center px-[10px] py-4 rounded-xl"
+                    style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.08)" }}>
+                    <span className={`font-lora text-[1.8rem] font-bold block leading-none
+                      ${st.yellow ? "text-[#fde68a]" : st.green ? "text-[#6ee7b7]" : "text-white"}`}>
+                      {st.num}
+                    </span>
+                    <span className="text-[0.68rem] text-white/55 uppercase tracking-[.07em] mt-[5px] block">
+                      {st.lbl}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       ))}
 
       {/* Arrows — pushed below content on mobile */}
-      <button onClick={prev}
-        className="absolute left-3 bottom-16 md:bottom-auto md:top-1/2 md:-translate-y-1/2
-          w-[36px] h-[36px] md:w-[42px] md:h-[42px] rounded-full flex items-center justify-center
-          z-10 text-white transition-all duration-200 hover:bg-white/[.22]"
-        style={{ background: "rgba(255,255,255,.13)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,.18)" }}>
-        ←
-      </button>
-      <button onClick={next}
-        className="absolute right-3 bottom-16 md:bottom-auto md:top-1/2 md:-translate-y-1/2
-          w-[36px] h-[36px] md:w-[42px] md:h-[42px] rounded-full flex items-center justify-center
-          z-10 text-white transition-all duration-200 hover:bg-white/[.22]"
-        style={{ background: "rgba(255,255,255,.13)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,.18)" }}>
-        →
-      </button>
+      {slides.length > 1 && (
+        <>
+          <button onClick={prev}
+            className="absolute left-3 bottom-16 md:bottom-auto md:top-1/2 md:-translate-y-1/2
+              w-[36px] h-[36px] md:w-[42px] md:h-[42px] rounded-full flex items-center justify-center
+              z-10 text-white transition-all duration-200 hover:bg-white/[.22]"
+            style={{ background: "rgba(255,255,255,.13)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,.18)" }}>
+            ←
+          </button>
+          <button onClick={next}
+            className="absolute right-3 bottom-16 md:bottom-auto md:top-1/2 md:-translate-y-1/2
+              w-[36px] h-[36px] md:w-[42px] md:h-[42px] rounded-full flex items-center justify-center
+              z-10 text-white transition-all duration-200 hover:bg-white/[.22]"
+            style={{ background: "rgba(255,255,255,.13)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,.18)" }}>
+            →
+          </button>
+        </>
+      )}
 
       {/* Dots */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-        {slides.map((_, i) => (
-          <button key={i} onClick={() => goTo(i)}
-            className="h-2 rounded-[4px] border-none cursor-pointer transition-all duration-300"
-            style={{
-              width: i === current ? 26 : 8,
-              background: i === current ? "#fff" : "rgba(255,255,255,.35)",
-            }} />
-        ))}
-      </div>
+      {slides.length > 1 && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          {slides.map((_, i) => (
+            <button key={i} onClick={() => goTo(i)}
+              className="h-2 rounded-[4px] border-none cursor-pointer transition-all duration-300"
+              style={{
+                width: i === current ? 26 : 8,
+                background: i === current ? "#fff" : "rgba(255,255,255,.35)",
+              }} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
+

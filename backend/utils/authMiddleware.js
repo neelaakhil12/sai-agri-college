@@ -2,14 +2,22 @@ const jwt = require("jsonwebtoken");
 
 const authenticate = (req, res, next) => {
   const token = req.cookies.token;
-  if (!token) return res.status(401).json({ message: "No token, authorization denied" });
+  console.log("🔒 Auth Check - Cookies:", req.cookies);
+  
+  if (!token) {
+    console.log("❌ No token found in cookies");
+    return res.status(401).json({ message: "No token, authorization denied" });
+  }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || "srisai_secret_key_123";
+    const decoded = jwt.verify(token, secret);
     req.admin = decoded;
+    console.log("✅ Token verified for:", decoded.id);
     next();
   } catch (err) {
-    res.status(403).json({ message: "Invalid token" });
+    console.log("❌ Token verification failed:", err.message);
+    res.status(403).json({ message: "Invalid token: " + err.message });
   }
 };
 

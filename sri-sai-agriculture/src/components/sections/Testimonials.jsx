@@ -3,12 +3,12 @@ import axios from "axios";
 import Reveal from "../ui/Reveal";
 import SectionHeader from "../ui/SectionHeader";
 
-const API_URL = '';
+const API_URL = 'http://localhost:5000';
 
 const staticTestimonials = [
-  { initials: "KR", studentName: "K. Rakesh",    achievement: "B.Sc Agriculture Scholar",   quote: "The personalized attention at Sri Sai Institute made all the difference in my research projects. The faculty guided me through complex soil science analysis personally every single day. I'm now pursuing advanced studies with complete confidence.", stars: 5 },
-  { initials: "SA", studentName: "S. Anusha",  achievement: "M.Sc Research Fellow",     quote: "I never felt overwhelmed by the scientific curriculum because of the structured field visits and lab hours. When I struggled with Plant Pathology, the professors provided extra individual sessions. That kind of focus is rare.", stars: 5 },
-  { initials: "MR", studentName: "M. Rahul",  achievement: "Agri-Business Professional",   quote: "The practical field training at Sri Sai Institute showed me exactly how theory translates into real-world farming solutions. By the time I graduated, I already had a deep understanding of sustainable agriculture practices.", stars: 5 },
+  { initials: "KR", student_name: "K. Rakesh",    achievement: "B.Sc Agriculture Scholar",   quote: "The personalized attention at Sri Sai Institute made all the difference in my research projects. The faculty guided me through complex soil science analysis personally every single day. I'm now pursuing advanced studies with complete confidence.", stars: 5 },
+  { initials: "SA", student_name: "S. Anusha",  achievement: "M.Sc Research Fellow",     quote: "I never felt overwhelmed by the scientific curriculum because of the structured field visits and lab hours. When I struggled with Plant Pathology, the professors provided extra individual sessions. That kind of focus is rare.", stars: 5 },
+  { initials: "MR", student_name: "M. Rahul",  achievement: "Agri-Business Professional",   quote: "The practical field training at Sri Sai Institute showed me exactly how theory translates into real-world farming solutions. By the time I graduated, I already had a deep understanding of sustainable agriculture practices.", stars: 5 },
 ];
 
 export default function Testimonials() {
@@ -18,9 +18,9 @@ export default function Testimonials() {
     const fetchData = async () => {
       try {
         const res = await axios.get(`${API_URL}/api/testimonials`);
-        // Filter out old testimonials if necessary
-        const filteredApi = res.data.filter(t => !t.achievement?.includes("IIT") && !t.achievement?.includes("MBBS") && !t.achievement?.includes("NEET"));
-        setData([...filteredApi, ...staticTestimonials]);
+        if (res.data && res.data.length > 0) {
+           setData([...res.data, ...staticTestimonials]);
+        }
       } catch (err) {
         console.error(err);
       }
@@ -59,7 +59,7 @@ export default function Testimonials() {
                     {t.initials}
                   </div>
                   <div className="min-w-0">
-                    <div className="font-bold text-[0.85rem] text-ink truncate">{t.studentName}</div>
+                    <div className="font-bold text-[0.85rem] text-ink truncate">{t.student_name || t.studentName}</div>
                     <div className="text-[0.7rem] text-muted truncate">{t.achievement}</div>
                   </div>
                 </div>

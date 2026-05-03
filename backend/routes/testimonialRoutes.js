@@ -1,49 +1,35 @@
 const express = require("express");
 const router = express.Router();
-const Testimonial = require("../models/Testimonial");
-const upload = require("../utils/multerConfig");
+const pool = require("../utils/db");
 const authenticate = require("../utils/authMiddleware");
 
-// Get all
+// Get all testimonials
 router.get("/", async (req, res) => {
   try {
-    const list = await Testimonial.find();
-    res.json(list);
+    const [rows] = await pool.query("SELECT * FROM testimonials ORDER BY created_at DESC");
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// Create (Protected)
-router.post("/", authenticate, upload.single("image"), async (req, res) => {
-  const { studentName, achievement, quote, initials, stars } = req.body;
-  const image = req.file ? req.file.path : "";
-
-  const entry = new Testimonial({
-    studentName,
-    achievement,
-    quote,
-    initials,
-    stars: parseInt(stars) || 5,
-    image,
-  });
-
+// Create testimonial (Public/Admin)
+router.post("/", async (req, res) => {
+  const { studentName, initials, achievement, quote, stars } = req.body;
   try {
-    const saved = await entry.save();
-    res.status(201).json(saved);
+    const [result] = await pool.query(
+      "INSERT INTO testimonials (student_name, initials, achievement, quote, stars) VALUES (?, ?, ?, ?, ?)",
+      [studentName, initials, achievement, quote, stars || 5]
+    );
+    const [newTestimonial] = await pool.query("SELECT * FROM testimonials WHERE id = ?", [result.insertId]);
+    res.status(201).json(newTestimonial[0]);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// Delete (Protected)
+// Delete testimonial (Protected)
 router.delete("/:id", authenticate, async (req, res) => {
   try {
-    await Testimonial.findByIdAndDelete(req.params.id);
-    res.json({ message: "Deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
 
-module.exports = router;
+
