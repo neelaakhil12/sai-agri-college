@@ -7,6 +7,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error("❌ Missing Supabase URL or Anon Key in environment variables!");
 }
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = createClient(supabaseUrl || "https://placeholder.supabase.co", supabaseAnonKey || "placeholder");
 
 module.exports = supabase;
