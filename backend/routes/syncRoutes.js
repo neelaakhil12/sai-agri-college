@@ -83,17 +83,16 @@ router.post("/sync", authenticate, async (req, res) => {
         // 1. Check if table has data
         const [existing] = await pool.query(`SELECT id FROM ${table} LIMIT 1`);
         
-        if (existing.length === 0 || table === 'stories' || table === 'hero' || table === 'students') {
-          if (table === 'stories' || table === 'hero' || table === 'students') {
+        const tablesToReset = ['stories', 'hero', 'students', 'faculty', 'courses', 'ranks', 'gallery', 'testimonials'];
+        
+        if (existing.length === 0 || tablesToReset.includes(table)) {
+          if (tablesToReset.includes(table)) {
             // For these, we allow refreshing/resetting
-            if (table === 'students') {
-               // We only insert if NO students exist to avoid duplicate emails
-               if (existing.length > 0) {
-                  results[table] = "Skipped (Students already exist)";
-                  continue;
-               }
+            if (table === 'students' && existing.length > 0) {
+              results[table] = "Skipped (Students already exist)";
+              continue;
             } else {
-               await pool.query(`DELETE FROM ${table}`);
+              await pool.query(`DELETE FROM \`${table}\``);
             }
           }
           
