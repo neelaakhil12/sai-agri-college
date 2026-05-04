@@ -40,6 +40,7 @@ try {
   app.use("/api/subjects", require("./routes/subjectRoutes"));
   app.use("/api/qualifications", require("./routes/qualificationRoutes"));
   app.use("/api/admin", require("./routes/adminRoutes"));
+  app.use("/api/admin", require("./routes/syncRoutes"));
   app.use("/api/student-fees", require("./routes/feeRoutes"));
   console.log("✅ Routes initialized");
 

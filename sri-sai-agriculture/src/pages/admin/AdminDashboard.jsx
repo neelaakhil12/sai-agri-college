@@ -96,21 +96,26 @@ export default function AdminDashboard() {
     if (isAdmin) {
       const fetchStudents = async () => {
         try {
-          const res = await axios.get("/api/students/admin/list");
+          const res = await axios.get(`${API_URL}/students/admin/list`);
           setStudents(res.data);
         } catch (err) {
           console.error("Fetch students failed");
         }
       };
-      if (activeTab === "students") fetchStudents();
+
+      if (activeTab === "students") {
+        fetchStudents();
+      } else {
+        fetchData();
+      }
     }
-  }, [isAdmin, fetchData, refresh]);
+  }, [isAdmin, activeTab, fetchData, refresh]);
 
   useEffect(() => {
     const fetchFees = async () => {
       if (selectedStudent) {
         try {
-          const res = await axios.get(`/api/fees/${selectedStudent.id}`);
+          const res = await axios.get(`${API_URL}/student-fees/${selectedStudent.id}`);
           setStudentFees(res.data);
         } catch (err) {
           console.error("Fetch fees failed");
