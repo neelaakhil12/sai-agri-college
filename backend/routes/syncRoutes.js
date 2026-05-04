@@ -67,21 +67,21 @@ router.post("/sync", authenticate, async (req, res) => {
         const [existing] = await connection.query(`SELECT id FROM ${table} LIMIT 1`);
         
         if (existing.length === 0 || table === 'stories' || table === 'hero') {
-          // If stories or hero, we refresh them to ensure the latest fixed content
           if (table === 'stories' || table === 'hero') {
             await connection.query(`DELETE FROM ${table}`);
           }
           
-          for (const item of data) {
-            const keys = Object.keys(item);
-            const values = Object.values(item);
-            const placeholders = keys.map(() => "?").join(", ");
-            await connection.query(
-              `INSERT INTO ${table} (${keys.join(", ")}) VALUES (${placeholders})`,
-              values
-            );
-          }
-          return `Inserted/Refreshed ${data.length} records`;
+          if (data.length === 0) return "No data to insert";
+
+          const keys = Object.keys(data[0]);
+          const values = data.map(item => keys.map(key => item[key]));
+          
+          await connection.query(
+            `INSERT INTO ${table} (${keys.join(", ")}) VALUES ?`,
+            [values]
+          );
+          
+          return `Bulk Inserted/Refreshed ${data.length} records`;
         }
         return "Already has data, skipping";
       } catch (e) {
@@ -98,7 +98,7 @@ router.post("/sync", authenticate, async (req, res) => {
     results.gallery = await syncTable("gallery", DATA.gallery);
     results.hero = await syncTable("hero", DATA.hero);
 
-    res.json({ message: "Sync process completed (MySQL)", details: results });
+    res.json({ message: "Sync process completed (Bulk MySQL)", details: results });
   } catch (err) {
     console.error("CRITICAL SYNC ERROR:", err);
     res.status(500).json({ message: "Sync failed", error: err.message });
