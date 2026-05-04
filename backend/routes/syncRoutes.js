@@ -57,53 +57,43 @@ const DATA = {
 };
 
 router.post("/sync", authenticate, async (req, res) => {
-  const connection = await pool.getConnection();
   try {
     const results = {};
 
-    const syncTable = async (table, data) => {
+    for (const table of Object.keys(DATA)) {
       try {
-        // Check if table has data
-        const [existing] = await connection.query(`SELECT id FROM ${table} LIMIT 1`);
+        const data = DATA[table];
+        // 1. Check if table has data
+        const [existing] = await pool.query(`SELECT id FROM ${table} LIMIT 1`);
         
         if (existing.length === 0 || table === 'stories' || table === 'hero') {
           if (table === 'stories' || table === 'hero') {
-            await connection.query(`DELETE FROM ${table}`);
+            await pool.query(`DELETE FROM ${table}`);
           }
           
-          if (data.length === 0) return "No data to insert";
-
-          const keys = Object.keys(data[0]);
-          const values = data.map(item => keys.map(key => item[key]));
-          
-          await connection.query(
-            `INSERT INTO ${table} (${keys.join(", ")}) VALUES ?`,
-            [values]
-          );
-          
-          return `Bulk Inserted/Refreshed ${data.length} records`;
+          for (const item of data) {
+            const keys = Object.keys(item);
+            const values = Object.values(item);
+            const placeholders = keys.map(() => "?").join(", ");
+            await pool.query(
+              `INSERT INTO ${table} (${keys.join(", ")}) VALUES (${placeholders})`,
+              values
+            );
+          }
+          results[table] = `Synced ${data.length} records`;
+        } else {
+          results[table] = "Skipped (Already has data)";
         }
-        return "Already has data, skipping";
-      } catch (e) {
-        console.error(`Sync Error for ${table}:`, e.message);
-        return `Error: ${e.message}`;
+      } catch (tableErr) {
+        console.error(`Sync Error for ${table}:`, tableErr.message);
+        results[table] = `Error: ${tableErr.message}`;
       }
-    };
+    }
 
-    results.faculty = await syncTable("faculty", DATA.faculty);
-    results.courses = await syncTable("courses", DATA.courses);
-    results.stories = await syncTable("stories", DATA.stories);
-    results.testimonials = await syncTable("testimonials", DATA.testimonials);
-    results.ranks = await syncTable("ranks", DATA.ranks);
-    results.gallery = await syncTable("gallery", DATA.gallery);
-    results.hero = await syncTable("hero", DATA.hero);
-
-    res.json({ message: "Sync process completed (Bulk MySQL)", details: results });
+    res.json({ message: "Sync process completed", details: results });
   } catch (err) {
     console.error("CRITICAL SYNC ERROR:", err);
     res.status(500).json({ message: "Sync failed", error: err.message });
-  } finally {
-    connection.release();
   }
 });
 
