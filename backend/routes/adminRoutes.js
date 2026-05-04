@@ -41,10 +41,11 @@ router.post("/login", async (req, res) => {
     }
 
     // 2. Fallback to ENV (if DB fails or user not in DB)
-    const envUser = (process.env.ADMIN_USERNAME || "").trim().toLowerCase();
-    const envPass = (process.env.ADMIN_PASSWORD || "").trim();
+    const envUser = (process.env.ADMIN_USERNAME || "admin").trim().toLowerCase();
+    const envPass = (process.env.ADMIN_PASSWORD || "admin123").trim();
 
     if (cleanUser === envUser && cleanPass === envPass) {
+       console.log("✅ Admin login successful via ENV fallback");
        const secret = process.env.JWT_SECRET || "srisai_secret_key_123";
        const token = jwt.sign({ id: "admin-env" }, secret, { expiresIn: "24h" });
        res.cookie("token", token, { 
@@ -57,6 +58,7 @@ router.post("/login", async (req, res) => {
        return res.json({ message: "Login successful", token });
     }
 
+    console.log(`❌ Login failed for user: ${cleanUser}. Expected: ${envUser}`);
     return res.status(401).json({ message: "Invalid credentials" });
   } catch (err) {
     console.error("Login verification error:", err);
