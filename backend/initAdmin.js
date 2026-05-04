@@ -1,45 +1,24 @@
 require("dotenv").config();
-const supabase = require("./utils/supabaseClient");
+const pool = require("./utils/db");
 const bcrypt = require("bcryptjs");
 
-const username = process.env.ADMIN_USERNAME;
-const password = process.env.ADMIN_PASSWORD;
+const username = process.env.ADMIN_USERNAME || "admin";
+const password = process.env.ADMIN_PASSWORD || "admin123";
 
 async function initAdmin() {
-  if (!username || !password) {
-    console.error("❌ Missing ADMIN_USERNAME or ADMIN_PASSWORD in environment variables!");
-    process.exit(1);
-  }
-
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const { data: existingAdmin, error: fetchError } = await supabase
-      .from("admins")
-      .select("*")
-      .eq("username", username)
-      .single();
-
-    if (fetchError && fetchError.code !== "PGRST116") {
-      throw fetchError;
-    }
+    const [rows] = await pool.query("SELECT * FROM admins WHERE username = ?", [username]);
+    const existingAdmin = rows[0];
 
     if (existingAdmin) {
       console.log("ℹ️ Admin already exists, updating password...");
-      const { error: updateError } = await supabase
-        .from("admins")
-        .update({ password: hashedPassword })
-        .eq("id", existingAdmin.id);
-
-      if (updateError) throw updateError;
+      await pool.query("UPDATE admins SET password = ? WHERE id = ?", [hashedPassword, existingAdmin.id]);
       console.log("✨ Admin password updated successfully!");
     } else {
       console.log("ℹ️ Creating new admin user...");
-      const { error: insertError } = await supabase
-        .from("admins")
-        .insert([{ username, password: hashedPassword }]);
-
-      if (insertError) throw insertError;
+      await pool.query("INSERT INTO admins (username, password) VALUES (?, ?)", [username, hashedPassword]);
       console.log("✨ Admin user created successfully!");
     }
     process.exit(0);
@@ -50,4 +29,3 @@ async function initAdmin() {
 }
 
 initAdmin();
-
