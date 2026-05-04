@@ -53,6 +53,9 @@ const DATA = {
       bg_gradient: "linear-gradient(115deg,#071428 0%,#065f46 45%,#15803d 100%)", 
       image: "/gallery/1.png" 
     }
+  ],
+  students: [
+    { email: "student@srisai.com", password: "password123", student_name: "Test Student", branch: "Agriculture", course_applied: "Ag. B.Sc.", academic_enrolled_year: "2024-2025" }
   ]
 };
 
@@ -66,14 +69,27 @@ router.post("/sync", authenticate, async (req, res) => {
         // 1. Check if table has data
         const [existing] = await pool.query(`SELECT id FROM ${table} LIMIT 1`);
         
-        if (existing.length === 0 || table === 'stories' || table === 'hero') {
-          if (table === 'stories' || table === 'hero') {
-            await pool.query(`DELETE FROM ${table}`);
+        if (existing.length === 0 || table === 'stories' || table === 'hero' || table === 'students') {
+          if (table === 'stories' || table === 'hero' || table === 'students') {
+            // For these, we allow refreshing/resetting
+            if (table === 'students') {
+               // We only insert if NO students exist to avoid duplicate emails
+               if (existing.length > 0) {
+                  results[table] = "Skipped (Students already exist)";
+                  continue;
+               }
+            } else {
+               await pool.query(`DELETE FROM ${table}`);
+            }
           }
           
           for (const item of data) {
             const keys = Object.keys(item);
             const values = Object.values(item);
+            if (keys.includes('password')) {
+               const bcrypt = require("bcryptjs");
+               values[keys.indexOf('password')] = await bcrypt.hash(item.password, 10);
+            }
             const placeholders = keys.map(() => "?").join(", ");
             await pool.query(
               `INSERT INTO ${table} (${keys.join(", ")}) VALUES (${placeholders})`,

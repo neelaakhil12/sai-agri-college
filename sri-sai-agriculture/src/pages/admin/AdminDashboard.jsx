@@ -1244,11 +1244,14 @@ export default function AdminDashboard() {
                             <td className="px-10 py-6">
                               <div className="flex items-center">
                                 <div className="h-14 w-14 rounded-2xl bg-gray-100 overflow-hidden mr-5 border border-gray-100 shadow-sm group-hover:scale-105 transition-transform duration-500">
-                                  {item.image ? (
+                                  {item.image || item.photo ? (
                                     <img 
-                                      src={item.image?.startsWith('http') ? item.image : (item.image?.startsWith('/gallery') ? item.image : `${item.image?.startsWith('/') ? '' : '/'}${item.image}`)} 
+                                      src={(item.image || item.photo)?.startsWith('http') 
+                                        ? (item.image || item.photo) 
+                                        : `${(item.image || item.photo)?.startsWith('/') ? '' : '/'}${item.image || item.photo}`} 
                                       className="h-full w-full object-cover" 
                                       alt="" 
+                                      onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=No+Image'; }}
                                     />
                                   ) : (
                                     <div className="h-full w-full flex items-center justify-center text-gray-400 font-bold text-base bg-gray-50 uppercase">
