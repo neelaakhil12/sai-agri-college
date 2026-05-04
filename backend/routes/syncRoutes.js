@@ -45,13 +45,27 @@ const DATA = {
   hero: [
     { 
       tag: "🎓 Admissions Open 2026–27", 
-      h1: JSON.stringify(["Welcome to", "Sri Sai Institute"]), 
+      h1: JSON.stringify(["Welcome to Sri Sai Institute", "of Agriculture", "Sciences."]), 
       motto: "\"Empowering the Future of Agriculture through Excellence.\"", 
-      description: "Offering professional B.Sc and M.Sc programs.", 
-      btn1_label: "Apply Now", 
-      btn1_href: "#contact", 
+      description: "Offering professional B.Sc and M.Sc programs in Agriculture and Core Sciences. A premier destination for agricultural research and higher scientific learning.", 
+      btn1_label: "Apply for Admissions →", 
+      btn1_href: "#contact",
+      btn2_label: "Explore Our Programs",
+      btn2_href: "/about",
       bg_gradient: "linear-gradient(115deg,#071428 0%,#065f46 45%,#15803d 100%)", 
       image: "/gallery/1.png" 
+    },
+    { 
+      tag: "Limited Intake – Register Today", 
+      h1: JSON.stringify(["Build Your Career in", "Modern Agriculture", "& Science Research."]), 
+      motto: "\"Practical knowledge and industry-focused professional education for tomorrow's scientists.\"", 
+      description: "Our comprehensive curriculum is designed to shape future agriculture professionals with hands-on field research, modern labs, and expert faculty guidance.", 
+      btn1_label: "Enquire Now →", 
+      btn1_href: "#contact",
+      btn2_label: "About Our Institute",
+      btn2_href: "/about",
+      bg_gradient: "linear-gradient(115deg,#064e3b 0%,#065f46 45%,#047857 100%)", 
+      image: "/gallery/2.png" 
     }
   ],
   students: [
