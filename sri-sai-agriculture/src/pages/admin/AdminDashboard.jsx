@@ -243,11 +243,12 @@ export default function AdminDashboard() {
   };
 
   const handleSync = async () => {
-    if (!window.confirm("This will import missing data from your website to the database. Continue?")) return;
+    if (!window.confirm("This will import/reset your website's core content to the database. Continue?")) return;
     setLoading(true);
     try {
       const res = await axios.post(`${API_URL}/admin/sync`, {}, { withCredentials: true });
-      alert(res.data.message || "Sync successful!");
+      const details = res.data.details ? Object.entries(res.data.details).map(([k, v]) => `• ${k}: ${v}`).join('\n') : "";
+      alert(`${res.data.message || "Sync completed!"}\n\n${details}`);
       setRefresh(prev => prev + 1);
     } catch (err) {
       alert("Sync failed: " + (err.response?.data?.message || err.message));

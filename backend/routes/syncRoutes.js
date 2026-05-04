@@ -104,9 +104,10 @@ router.post("/sync", authenticate, async (req, res) => {
                const bcrypt = require("bcryptjs");
                values[keys.indexOf('password')] = await bcrypt.hash(item.password, 10);
             }
+            const quotedKeys = keys.map(k => `\`${k}\``).join(", ");
             const placeholders = keys.map(() => "?").join(", ");
             await pool.query(
-              `INSERT INTO ${table} (${keys.join(", ")}) VALUES (${placeholders})`,
+              `INSERT INTO \`${table}\` (${quotedKeys}) VALUES (${placeholders})`,
               values
             );
           }
