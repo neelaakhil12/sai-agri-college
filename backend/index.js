@@ -1,70 +1,71 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
-const cookieParser = require("cookie-parser");
-
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Middleware
-app.use(cors({ origin: ["http://localhost:3000", "https://your-domain.com"], credentials: true }));
-app.use(express.json());
-app.use(cookieParser());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// Routes
-const adminRoutes = require("./routes/adminRoutes");
-const facultyRoutes = require("./routes/facultyRoutes");
-const courseRoutes = require("./routes/courseRoutes");
-const rankRoutes = require("./routes/rankRoutes");
-const storyRoutes = require("./routes/storyRoutes");
-const enquiryRoutes = require("./routes/enquiryRoutes");
-const testimonialRoutes = require("./routes/testimonialRoutes");
-const heroRoutes = require("./routes/heroRoutes");
-const galleryRoutes = require("./routes/galleryRoutes");
-
-app.use("/api/admin", adminRoutes);
-app.use("/api/faculty", facultyRoutes);
-app.use("/api/courses", courseRoutes);
-app.use("/api/ranks", rankRoutes);
-app.use("/api/stories", storyRoutes);
-app.use("/api/enquiries", enquiryRoutes);
-app.use("/api/testimonials", testimonialRoutes);
-app.use("/api/hero", heroRoutes);
-app.use("/api/gallery", galleryRoutes);
-app.use("/api/students", require("./routes/studentRoutes"));
-app.use("/api/fees", require("./routes/feeRoutes"));
-app.use("/api/subjects", require("./routes/subjectRoutes"));
-
-// Error Handling Middleware for Multer
-app.use((err, req, res, next) => {
-  if (err instanceof require("multer").MulterError) {
-    if (err.code === "LIMIT_FILE_SIZE") {
-      return res.status(400).json({ message: "File is too large! Maximum limit is 5MB." });
-    }
-    return res.status(400).json({ message: err.message });
-  } else if (err) {
-    return res.status(400).json({ message: err.message });
-  }
-  next();
+// GLOBAL ERROR CATCHER
+process.on('uncaughtException', (err) => {
+  console.error("⛔️ CRITICAL CRASH (Uncaught):", err.message);
+  console.error(err.stack);
 });
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, "../sri-sai-agriculture/build")));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../sri-sai-agriculture/build", "index.html"));
+process.on('unhandledRejection', (reason, promise) => {
+  console.error("⛔️ CRITICAL CRASH (Unhandled Rejection):", reason);
 });
 
-// Catch-all handler for any request that doesn't match the ones above
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../sri-sai-agriculture/build", "index.html"));
-});
+try {
+  console.log("🎬 SCRIPT STARTING...");
+  require("dotenv").config();
+  console.log("✅ Dotenv loaded");
+  
+  const express = require("express");
+  const cors = require("cors");
+  const path = require("path");
+  const cookieParser = require("cookie-parser");
+  console.log("✅ Modules loaded");
 
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+  const app = express();
+  const PORT = process.env.PORT || 5000;
 
-module.exports = app;
+  app.use(cors());
+  app.use(express.json());
+  app.use(cookieParser());
+  app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+  // Import Routes
+  app.use("/api/students", require("./routes/studentRoutes"));
+  app.use("/api/faculty", require("./routes/facultyRoutes"));
+  app.use("/api/courses", require("./routes/courseRoutes"));
+  app.use("/api/stories", require("./routes/storyRoutes"));
+  app.use("/api/testimonials", require("./routes/testimonialRoutes"));
+  app.use("/api/ranks", require("./routes/rankRoutes"));
+  app.use("/api/gallery", require("./routes/galleryRoutes"));
+  app.use("/api/hero", require("./routes/heroRoutes"));
+  app.use("/api/enquiries", require("./routes/enquiryRoutes"));
+  app.use("/api/subjects", require("./routes/subjectRoutes"));
+  app.use("/api/qualifications", require("./routes/qualificationRoutes"));
+  app.use("/api/admin", require("./routes/adminRoutes"));
+  app.use("/api/student-fees", require("./routes/feeRoutes"));
+  console.log("✅ Routes initialized");
+
+  // Serve static files
+  const buildPath = path.join(__dirname, "../sri-sai-agriculture/build");
+  app.use(express.static(buildPath));
+  
+  // Use a general middleware for the SPA fallback to avoid path-to-regexp issues
+  app.use((req, res) => {
+    res.sendFile(path.join(buildPath, "index.html"));
+  });
+
+  console.log("🎬 Starting Express Server...");
+  app.listen(PORT, () => {
+    console.log(`🚀 SERVER IS LIVE ON PORT ${PORT}`);
+  }).on('error', (err) => {
+    console.error("❌ SERVER FAILED TO START:", err.message);
+  });
+
+  // DB Test
+  const pool = require("./utils/db");
+  pool.getConnection()
+    .then(c => { console.log("✅ DB Connected!"); c.release(); })
+    .catch(e => console.error("❌ DB Error:", e.message));
+
+} catch (err) {
+  console.error("⛔️ INITIALIZATION ERROR:", err.message);
+  console.error(err.stack);
+}

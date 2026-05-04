@@ -3,7 +3,7 @@ import axios from "axios";
 import Reveal from "../ui/Reveal";
 import SectionHeader from "../ui/SectionHeader";
 
-const API_URL = 'http://localhost:5000';
+const API_URL = '';
 
 const staticFaculty = [
   { initials: "DV", name: "Divi Vamsi Krishna",  role: "Faculty", department: "Agriculture" },

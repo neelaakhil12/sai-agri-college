@@ -3,7 +3,7 @@ import axios from "axios";
 import Reveal from "../ui/Reveal";
 import SectionHeader from "../ui/SectionHeader";
 
-const API_URL = 'http://localhost:5000';
+const API_URL = '';
 
 const staticTestimonials = [
   { initials: "KR", student_name: "K. Rakesh",    achievement: "B.Sc Agriculture Scholar",   quote: "The personalized attention at Sri Sai Institute made all the difference in my research projects. The faculty guided me through complex soil science analysis personally every single day. I'm now pursuing advanced studies with complete confidence.", stars: 5 },

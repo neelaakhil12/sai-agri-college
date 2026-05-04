@@ -45,14 +45,14 @@ export default function HeroSlider() {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/hero");
+        const res = await axios.get("/api/hero");
         if (res.data && res.data.length > 0) {
           const mapped = res.data.map(s => ({
             tag: s.tag,
             h1: Array.isArray(s.h1) ? s.h1 : [s.h1],
             motto: s.motto,
             desc: s.description,
-            img: s.image?.startsWith('http') ? s.image : `http://localhost:5000${s.image?.startsWith('/') ? '' : '/'}${s.image}`,
+            img: s.image?.startsWith('http') ? s.image : `${s.image?.startsWith('/') ? '' : '/'}${s.image}`,
             bg: s.bg_gradient,
             btn1: { label: s.btn1_label || "Apply Now", href: s.btn1_href || "#contact" },
             btn2: { label: s.btn2_label || "Learn More", href: s.btn2_href || "/about" },

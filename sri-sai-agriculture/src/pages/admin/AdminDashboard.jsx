@@ -1241,7 +1241,7 @@ export default function AdminDashboard() {
                                 <div className="h-14 w-14 rounded-2xl bg-gray-100 overflow-hidden mr-5 border border-gray-100 shadow-sm group-hover:scale-105 transition-transform duration-500">
                                   {item.image ? (
                                     <img 
-                                      src={item.image?.startsWith('http') ? item.image : (item.image?.startsWith('/gallery') ? item.image : `http://localhost:5000${item.image?.startsWith('/') ? '' : '/'}${item.image}`)} 
+                                      src={item.image?.startsWith('http') ? item.image : (item.image?.startsWith('/gallery') ? item.image : `${item.image?.startsWith('/') ? '' : '/'}${item.image}`)} 
                                       className="h-full w-full object-cover" 
                                       alt="" 
                                     />

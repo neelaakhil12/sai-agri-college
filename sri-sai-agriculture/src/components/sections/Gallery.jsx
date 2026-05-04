@@ -5,7 +5,7 @@ import Reveal from "../ui/Reveal";
 import SectionHeader from "../ui/SectionHeader";
 
 // Robust API URL detection for development
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 
 const FALLBACK_ITEMS = [
   { image: "/gallery/1.png",  sub_label: "Main Campus",         label: "Main Academic Block" },
@@ -70,7 +70,7 @@ export default function Gallery() {
                 onClick={() => setSelectedImage(item)}
               >
                 <img 
-                  src={item.image?.startsWith('http') ? item.image : `http://localhost:5000${item.image?.startsWith('/') ? '' : '/'}${item.image}`} 
+                  src={item.image?.startsWith('http') ? item.image : `${item.image?.startsWith('/') ? '' : '/'}${item.image}`} 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                   alt={item.label} 
                 />

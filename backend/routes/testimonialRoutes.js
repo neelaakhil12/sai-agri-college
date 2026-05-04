@@ -31,5 +31,11 @@ router.post("/", async (req, res) => {
 // Delete testimonial (Protected)
 router.delete("/:id", authenticate, async (req, res) => {
   try {
+    await pool.query("DELETE FROM testimonials WHERE id = ?", [req.params.id]);
+    res.json({ message: "Testimonial deleted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
-
+module.exports = router;

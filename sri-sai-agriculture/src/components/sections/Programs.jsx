@@ -5,7 +5,7 @@ import { useScrollReveal } from "../../hooks/useScrollReveal";
 import Reveal from "../ui/Reveal";
 import SectionHeader from "../ui/SectionHeader";
 
-const API_URL = 'http://localhost:5000';
+const API_URL = '';
 
 const headStyles = {
   "bsc-agri": "linear-gradient(130deg,#041a0e,#15803d)",

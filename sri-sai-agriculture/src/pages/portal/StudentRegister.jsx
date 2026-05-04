@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 
 export default function StudentRegister() {
   const [step, setStep] = useState(1);
