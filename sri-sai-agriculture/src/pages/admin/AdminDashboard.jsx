@@ -56,7 +56,15 @@ export default function AdminDashboard() {
   const [editingId, setEditingId] = useState(null);
 
   const tabs = [
+    { id: 'students', label: 'Student Accounts', icon: Users },
     { id: 'hero', label: 'Hero Slider Management', icon: LayoutDashboard },
+    { id: 'faculty', label: 'Faculty Management', icon: Users },
+    { id: 'courses', label: 'Course Management', icon: BookOpen },
+    { id: 'ranks', label: 'Rankings & Results', icon: Award },
+    { id: 'stories', label: 'Success Stories', icon: History },
+    { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
+    { id: 'gallery', label: 'Gallery Management', icon: ImageIcon },
+    { id: 'enquiries', label: 'Student Enquiries', icon: HelpCircle },
   ];
 
   const checkAuth = useCallback(async () => {
