@@ -1284,10 +1284,6 @@ export default function AdminDashboard() {
                     <p className="text-[10px] text-muted uppercase font-black tracking-widest">{data.length} records identified</p>
                  </div>
                  <div className="flex items-center gap-2">
-                    <div className="flex px-8 border-b border-gray-100 overflow-x-auto whitespace-nowrap bg-white/50 backdrop-blur-md sticky top-0 z-[10]">
-                      <button onClick={() => { setActiveTab('students'); setViewMode('list'); }} className={`px-6 py-4 font-black text-[10px] uppercase tracking-[0.2em] transition-all border-b-2 ${activeTab === 'students' ? 'text-blue border-blue' : 'text-gray-400 border-transparent hover:text-ink'}`}>Students</button>
-                      <button onClick={() => { setActiveTab('faculty'); setViewMode('list'); }} className={`px-6 py-4 font-black text-[10px] uppercase tracking-[0.2em] transition-all border-b-2 ${activeTab === 'faculty' ? 'text-blue border-blue' : 'text-gray-400 border-transparent hover:text-ink'}`}>Faculty</button>
-                    </div>
                     <button onClick={() => setRefresh(r => r + 1)} className="p-2 text-gray-400 hover:text-blue transition-colors">
                        <History size={18} />
                     </button>
