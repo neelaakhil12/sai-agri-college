@@ -1219,49 +1219,54 @@ export default function AdminDashboard() {
                     const imgSrc = item.image
                       ? (item.image.startsWith('http') ? item.image : `/${item.image.replace(/^\//, '')}`)
                       : null;
+                    
+                    let displayTitle = "Hero Slide";
+                    try {
+                      if (item.h1) {
+                        const parsed = (typeof item.h1 === 'string' && item.h1.startsWith('[')) ? JSON.parse(item.h1) : item.h1;
+                        displayTitle = Array.isArray(parsed) ? parsed.join(' ') : parsed;
+                      }
+                    } catch (e) {
+                      displayTitle = item.h1 || "Hero Slide";
+                    }
+
                     return (
                       <div key={item.id || idx} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-all group">
                         <div className="relative h-44 bg-gray-100 overflow-hidden">
                           {imgSrc ? (
                             <img src={imgSrc} alt={item.tag} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                              onError={e => { e.target.style.display='none'; }}
+                              onError={e => { e.target.src = 'https://via.placeholder.com/600x400?text=Image+Not+Found'; }}
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <ImageIcon size={40} className="text-gray-300" />
+                            <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                              <LayoutDashboard size={40} className="text-gray-200" />
                             </div>
                           )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                           <div className="absolute bottom-3 left-4">
-                            <span className="text-white text-xs font-bold bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
-                              {item.tag || 'Hero Slide'}
+                            <span className="text-white text-[10px] font-black uppercase tracking-widest bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30">
+                              {item.tag || 'Promotional'}
                             </span>
                           </div>
                           <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => { setFormData({...item}); setEditingId(item.id); setViewMode('form'); }}
-                              className="p-2 bg-white rounded-xl shadow-md text-blue hover:bg-blue hover:text-white transition-all"
-                              title="Edit Slide"
+                              className="p-2.5 bg-white rounded-xl shadow-lg text-blue hover:bg-blue hover:text-white transition-all"
                             ><Edit3 size={14} /></button>
                             <button
                               onClick={() => handleDelete(item.id)}
-                              className="p-2 bg-white rounded-xl shadow-md text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                              title="Delete Slide"
+                              className="p-2.5 bg-white rounded-xl shadow-lg text-red-500 hover:bg-red-500 hover:text-white transition-all"
                             ><Trash2 size={14} /></button>
                           </div>
                         </div>
                         <div className="p-5">
-                          <h4 className="font-bold text-ink text-sm mb-1 truncate">{Array.isArray(item.h1) ? item.h1[0] : (typeof item.h1 === 'string' && item.h1.startsWith('[') ? JSON.parse(item.h1)[0] : item.h1)}</h4>
-                          <p className="text-xs text-muted line-clamp-2 mb-4">{item.description}</p>
+                          <h4 className="font-bold text-ink text-sm mb-1 truncate">{displayTitle}</h4>
+                          <p className="text-[11px] text-muted line-clamp-2 mb-4 leading-relaxed">{item.description}</p>
                           <div className="flex gap-2">
                             <button
                               onClick={() => { setFormData({...item}); setEditingId(item.id); setViewMode('form'); }}
-                              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-blue/10 text-blue rounded-xl font-bold text-xs hover:bg-blue hover:text-white transition-all"
+                              className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue/5 text-blue rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue hover:text-white transition-all"
                             ><Edit3 size={13} /> Edit Slide</button>
-                            <button
-                              onClick={() => handleDelete(item.id)}
-                              className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all"
-                            ><Trash2 size={14} /></button>
                           </div>
                         </div>
                       </div>
