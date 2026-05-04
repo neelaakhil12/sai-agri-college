@@ -53,9 +53,34 @@ try {
     res.sendFile(path.join(buildPath, "index.html"));
   });
 
-  console.log("🎬 Starting Express Server...");
+  // Auto-initialize Admin Account
+  const initAdmin = async () => {
+    try {
+      const bcrypt = require("bcryptjs");
+      const pool = require("./utils/db");
+      const username = process.env.ADMIN_USERNAME || "admin";
+      const password = process.env.ADMIN_PASSWORD || "admin123";
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const [rows] = await pool.query("SELECT * FROM admins WHERE username = ?", [username]);
+      if (rows.length === 0) {
+        console.log("ℹ️ Auto-creating default admin account...");
+        await pool.query("INSERT INTO admins (username, password) VALUES (?, ?)", [username, hashedPassword]);
+        console.log("✨ Admin account created!");
+      } else {
+        // Optional: Update password if needed
+        await pool.query("UPDATE admins SET password = ? WHERE username = ?", [hashedPassword, username]);
+        console.log("✨ Admin account verified.");
+      }
+    } catch (err) {
+      console.error("❌ Admin init failed:", err.message);
+    }
+  };
+
+  const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
-    console.log(`🚀 SERVER IS LIVE ON PORT ${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
+    initAdmin();
   }).on('error', (err) => {
     console.error("❌ SERVER FAILED TO START:", err.message);
   });

@@ -47,17 +47,26 @@ export default function HeroSlider() {
       try {
         const res = await axios.get("/api/hero");
         if (res.data && res.data.length > 0) {
-          const mapped = res.data.map(s => ({
-            tag: s.tag,
-            h1: Array.isArray(s.h1) ? s.h1 : [s.h1],
-            motto: s.motto,
-            desc: s.description,
-            img: s.image?.startsWith('http') ? s.image : `${s.image?.startsWith('/') ? '' : '/'}${s.image}`,
-            bg: s.bg_gradient,
-            btn1: { label: s.btn1_label || "Apply Now", href: s.btn1_href || "#contact" },
-            btn2: { label: s.btn2_label || "Learn More", href: s.btn2_href || "/about" },
-            stats: Array.isArray(s.stats) ? s.stats : []
-          }));
+          const mapped = res.data.map(s => {
+            let h1Array = [];
+            try {
+              h1Array = typeof s.h1 === 'string' && s.h1.startsWith('[') ? JSON.parse(s.h1) : [s.h1];
+            } catch (e) {
+              h1Array = [s.h1];
+            }
+
+            return {
+              tag: s.tag,
+              h1: h1Array,
+              motto: s.motto,
+              desc: s.description,
+              img: s.image?.startsWith('http') ? s.image : `${s.image?.startsWith('/') ? '' : '/'}${s.image}`,
+              bg: s.bg_gradient,
+              btn1: s.btn1_label ? { label: s.btn1_label, href: s.btn1_href || "#" } : null,
+              btn2: s.btn2_label ? { label: s.btn2_label, href: s.btn2_href || "#" } : null,
+              stats: Array.isArray(s.stats) ? s.stats : []
+            };
+          });
           setSlides(mapped);
         } else {
           setSlides(FALLBACK_SLIDES);
@@ -137,19 +146,23 @@ export default function HeroSlider() {
 
               {/* Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
-                <a href={s.btn1.href}
-                  className="inline-flex items-center justify-center gap-2 bg-white text-ink
-                    px-5 py-3 rounded-[9px] font-bold text-[0.85rem] no-underline
-                    transition-all duration-200 shadow-[0_4px_16px_rgba(0,0,0,.14)]
-                    hover:-translate-y-[2px] hover:shadow-[0_8px_24px_rgba(0,0,0,.20)]">
-                  {s.btn1.label}
-                </a>
-                <a href={s.btn2.href}
-                  className="inline-flex items-center justify-center gap-2 border-2 border-white/30
-                  text-white px-5 py-3 rounded-[9px] font-semibold text-[0.85rem] no-underline
-                  transition-all duration-200 hover:border-white hover:bg-white/[.08]">
-                  {s.btn2.label}
-                </a>
+                {s.btn1 && (
+                  <a href={s.btn1.href}
+                    className="inline-flex items-center justify-center gap-2 bg-white text-ink
+                      px-5 py-3 rounded-[9px] font-bold text-[0.85rem] no-underline
+                      transition-all duration-200 shadow-[0_4px_16px_rgba(0,0,0,.14)]
+                      hover:-translate-y-[2px] hover:shadow-[0_8px_24px_rgba(0,0,0,.20)]">
+                    {s.btn1.label}
+                  </a>
+                )}
+                {s.btn2 && (
+                  <a href={s.btn2.href}
+                    className="inline-flex items-center justify-center gap-2 border-2 border-white/30
+                    text-white px-5 py-3 rounded-[9px] font-semibold text-[0.85rem] no-underline
+                    transition-all duration-200 hover:border-white hover:bg-white/[.08]">
+                    {s.btn2.label}
+                  </a>
+                )}
               </div>
             </div>
 
