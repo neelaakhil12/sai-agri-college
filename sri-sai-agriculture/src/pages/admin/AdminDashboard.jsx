@@ -56,15 +56,7 @@ export default function AdminDashboard() {
   const [editingId, setEditingId] = useState(null);
 
   const tabs = [
-    { id: 'students', label: 'Student Accounts', icon: Users },
-    { id: 'faculty', label: 'Faculty', icon: Users },
-    { id: 'courses', label: 'Courses', icon: BookOpen },
-    { id: 'ranks', label: 'Ranks', icon: Award },
-    { id: 'stories', label: 'Stories', icon: History },
-    { id: 'gallery', label: 'Gallery', icon: ImageIcon },
-    { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
-    { id: 'enquiries', label: 'Enquiries', icon: HelpCircle },
-    { id: 'hero', label: 'Hero Section', icon: LayoutDashboard },
+    { id: 'hero', label: 'Hero Slider Management', icon: LayoutDashboard },
   ];
 
   const checkAuth = useCallback(async () => {
@@ -442,11 +434,49 @@ export default function AdminDashboard() {
                   <input required placeholder="Nurturing the future of agriculture" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue/5 focus:border-blue focus:outline-none transition-all" onChange={e => setFormData({...formData, motto: e.target.value})} value={formData.motto || ''} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Button Label</label>
-                  <input placeholder="Join Now" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue/5 focus:border-blue focus:outline-none transition-all" onChange={e => setFormData({...formData, btn1_label: e.target.value})} value={formData.btn1_label || ''} />
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Button 1 Label</label>
+                  <input placeholder="Apply Now" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue/5 focus:border-blue focus:outline-none transition-all" onChange={e => setFormData({...formData, btn1_label: e.target.value})} value={formData.btn1_label || ''} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Button 1 Link</label>
+                  <input placeholder="#contact" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue/5 focus:border-blue focus:outline-none transition-all" onChange={e => setFormData({...formData, btn1_href: e.target.value})} value={formData.btn1_href || ''} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Button 2 Label</label>
+                  <input placeholder="Explore More" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue/5 focus:border-blue focus:outline-none transition-all" onChange={e => setFormData({...formData, btn2_label: e.target.value})} value={formData.btn2_label || ''} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Button 2 Link</label>
+                  <input placeholder="/programs" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue/5 focus:border-blue focus:outline-none transition-all" onChange={e => setFormData({...formData, btn2_href: e.target.value})} value={formData.btn2_href || ''} />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Background Gradient (CSS)</label>
+                  <input placeholder="linear-gradient(...)" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue/5 focus:border-blue focus:outline-none transition-all" onChange={e => setFormData({...formData, bg_gradient: e.target.value})} value={formData.bg_gradient || ''} />
                 </div>
                 <div className="md:col-span-2">
-                  <button type="submit" className="w-full bg-blue text-white py-5 rounded-2xl font-bold text-lg hover:bg-ink transition-all active:scale-[0.98]">Update Hero Section</button>
+                   <div className="p-10 border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50/50 text-center space-y-4 hover:border-blue/50 hover:bg-blue/5 transition-all">
+                      {formData.image && !file && (
+                        <img src={formData.image} className="h-32 mx-auto rounded-xl mb-4 shadow-md" alt="Current hero" />
+                      )}
+                      <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mx-auto text-blue">
+                         <ImageIcon size={32} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-ink">Change Hero Background Image</p>
+                        <p className="text-xs text-muted mt-1">Best size: 1920x1080px. High quality recommended.</p>
+                      </div>
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        className="block w-full text-xs text-gray-400 file:mr-4 file:py-3 file:px-8 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-ink file:text-white hover:file:bg-blue file:transition-all file:cursor-pointer" 
+                        onChange={e => setFile(e.target.files[0])} 
+                      />
+                   </div>
+                </div>
+                <div className="md:col-span-2">
+                  <button type="submit" className="w-full bg-blue text-white py-5 rounded-2xl font-bold text-lg hover:bg-ink transition-all active:scale-[0.98] shadow-xl shadow-blue/20">
+                    {editingId ? 'Update Hero Slide' : 'Create New Slide'}
+                  </button>
                 </div>
               </form>
             </div>
