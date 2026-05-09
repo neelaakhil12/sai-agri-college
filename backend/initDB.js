@@ -58,6 +58,25 @@ async function initDB() {
                 mobile1 VARCHAR(20),
                 branch VARCHAR(255),
                 photo VARCHAR(255),
+                father_name VARCHAR(255),
+                mother_name VARCHAR(255),
+                inter_type VARCHAR(255),
+                dob DATE,
+                gender VARCHAR(50),
+                admission_type VARCHAR(255),
+                medium VARCHAR(255),
+                nationality VARCHAR(255),
+                religion VARCHAR(255),
+                door_no VARCHAR(255),
+                village VARCHAR(255),
+                mandal VARCHAR(255),
+                pin VARCHAR(50),
+                district VARCHAR(255),
+                mobile2 VARCHAR(20),
+                residence_phone VARCHAR(20),
+                email_personal VARCHAR(255),
+                reference VARCHAR(255),
+                current_year VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `,
@@ -147,6 +166,35 @@ async function initDB() {
                 stream VARCHAR(255),
                 batch VARCHAR(255),
                 createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `,
+        student_fees: `
+            CREATE TABLE IF NOT EXISTS student_fees (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                student_id INT,
+                academic_year VARCHAR(255),
+                total_fee DECIMAL(10, 2) DEFAULT 0,
+                fee_paid DECIMAL(10, 2) DEFAULT 0,
+                due_amount DECIMAL(10, 2) DEFAULT 0,
+                hostel_total_fee DECIMAL(10, 2) DEFAULT 0,
+                hostel_fee_paid DECIMAL(10, 2) DEFAULT 0,
+                hostel_due_amount DECIMAL(10, 2) DEFAULT 0,
+                status VARCHAR(50) DEFAULT 'Pending',
+                last_payment_date DATE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+            )
+        `,
+        qualifications: `
+            CREATE TABLE IF NOT EXISTS qualifications (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                student_id INT,
+                examination VARCHAR(255),
+                board_university VARCHAR(255),
+                year_of_passing VARCHAR(50),
+                percentage_cgpa VARCHAR(50),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
             )
         `
     };

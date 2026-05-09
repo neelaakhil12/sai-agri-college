@@ -76,7 +76,7 @@ export default function StudentLogin() {
                 <input type="checkbox" className="w-4 h-4 rounded-lg border-gray-300 text-blue focus:ring-blue" />
                 <span className="text-[12px] font-bold text-muted group-hover:text-ink transition-colors">Remember me</span>
              </label>
-             <button type="button" className="text-[12px] font-bold text-blue hover:underline">Forgot?</button>
+             <button type="button" onClick={() => alert("Please contact the administrator to reset your password.")} className="text-[12px] font-bold text-blue hover:underline">Forgot Password?</button>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

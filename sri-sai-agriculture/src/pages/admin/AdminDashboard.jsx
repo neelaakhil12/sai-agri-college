@@ -732,7 +732,6 @@ export default function AdminDashboard() {
                         { label: 'STUDENT NAME', key: 'student_name', required: true },
                         { label: 'ROLL NUMBER', key: 'roll_no', required: true, placeholder: 'e.g. AG-2026-001' },
                         { label: 'LOGIN EMAIL', key: 'email', required: true, type: 'email' },
-                        { label: 'SET PASSWORD', key: 'password', required: !editingId, placeholder: '••••••••' },
                         { label: 'FATHER NAME', key: 'father_name' },
                         { label: 'MOTHER NAME', key: 'mother_name' },
                         { label: 'DATE OF BIRTH', key: 'dob', type: 'date' },
@@ -942,7 +941,6 @@ export default function AdminDashboard() {
                        { label: 'STUDENT NAME', key: 'student_name' },
                        { label: 'ROLL NUMBER', key: 'roll_no' },
                        { label: 'LOGIN EMAIL', key: 'email' },
-                       { label: 'SET PASSWORD', key: 'password', placeholder: 'Leave blank to keep current' },
                        { label: 'FATHER NAME', key: 'father_name' },
                        { label: 'MOTHER NAME', key: 'mother_name' },
                        { label: 'DATE OF BIRTH', key: 'dob', type: 'date' },
@@ -1053,8 +1051,117 @@ export default function AdminDashboard() {
                           <option value="4th Year">4th Year</option>
                         </select>
                       </div>
-                  </div>
-                  <div className="mt-12 flex gap-4">
+                   </div>
+
+                   <div className="mt-16 p-10 bg-gray-50/50 rounded-[3rem] border border-gray-100">
+                      <div className="flex items-center gap-4 mb-10">
+                        <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500">
+                           <RefreshCw size={24} />
+                        </div>
+                        <div>
+                           <h3 className="text-xl font-black text-ink">FEE ALLOCATION & PAYMENTS</h3>
+                           <p className="text-[10px] text-muted uppercase font-black tracking-widest">Academic & Hostel Yearly Breakdown</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-6">
+                        {['1st year', '2nd year', '3rd year', '4th year'].map((year) => {
+                          const fee = studentFees.find(f => f.academic_year.toLowerCase() === year.toLowerCase()) || {
+                            academic_year: year,
+                            total_fee: 0,
+                            fee_paid: 0,
+                            due_amount: 0,
+                            hostel_total_fee: 0,
+                            hostel_fee_paid: 0,
+                            hostel_due_amount: 0,
+                            status: 'Pending'
+                          };
+
+                          const updateFee = (updates) => {
+                            const newFees = [...studentFees];
+                            const index = newFees.findIndex(f => f.academic_year.toLowerCase() === year.toLowerCase());
+                            if (index >= 0) {
+                              newFees[index] = { ...newFees[index], ...updates };
+                            } else {
+                              newFees.push({ ...fee, ...updates });
+                            }
+                            setStudentFees(newFees);
+                          };
+
+                          return (
+                            <div key={year} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                              <div className="flex items-center justify-between mb-6">
+                                <span className="px-4 py-1.5 bg-ink text-white text-[10px] font-black uppercase tracking-widest rounded-full">{year}</span>
+                                <div className="flex gap-4">
+                                  <div className="text-right">
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Balance</p>
+                                    <p className="text-sm font-black text-blue">₹{(Number(fee.total_fee || 0) + Number(fee.hostel_total_fee || 0)) - (Number(fee.fee_paid || 0) + Number(fee.hostel_fee_paid || 0))}</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                                {/* Academic Fee */}
+                                <div className="space-y-4">
+                                  <h4 className="text-xs font-black text-ink border-l-4 border-blue pl-3 uppercase tracking-wider">Academic Fees</h4>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Total Academic Fee</label>
+                                      <input 
+                                        type="number" 
+                                        placeholder="0.00"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none transition-all font-bold text-ink text-sm"
+                                        value={fee.total_fee || 0}
+                                        onChange={(e) => updateFee({ total_fee: e.target.value, due_amount: e.target.value - (fee.fee_paid || 0) })}
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Academic Fee Paid</label>
+                                      <input 
+                                        type="number" 
+                                        placeholder="0.00"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none transition-all font-bold text-ink text-sm"
+                                        value={fee.fee_paid || 0}
+                                        onChange={(e) => updateFee({ fee_paid: e.target.value, due_amount: (fee.total_fee || 0) - e.target.value })}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Hostel Fee */}
+                                <div className="space-y-4">
+                                  <h4 className="text-xs font-black text-ink border-l-4 border-amber-500 pl-3 uppercase tracking-wider">Hostel Fees</h4>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Total Hostel Fee</label>
+                                      <input 
+                                        type="number" 
+                                        placeholder="0.00"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:border-amber-500 outline-none transition-all font-bold text-ink text-sm"
+                                        value={fee.hostel_total_fee || 0}
+                                        onChange={(e) => updateFee({ hostel_total_fee: e.target.value, hostel_due_amount: e.target.value - (fee.hostel_fee_paid || 0) })}
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Hostel Fee Paid</label>
+                                      <input 
+                                        type="number" 
+                                        placeholder="0.00"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:border-amber-500 outline-none transition-all font-bold text-ink text-sm"
+                                        value={fee.hostel_fee_paid || 0}
+                                        onChange={(e) => updateFee({ hostel_fee_paid: e.target.value, hostel_due_amount: (fee.hostel_total_fee || 0) - e.target.value })}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                   </div>
+
+                   <div className="mt-12 flex gap-4">
                       <button 
                          onClick={async () => {
                             try {
