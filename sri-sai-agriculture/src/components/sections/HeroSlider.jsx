@@ -5,7 +5,7 @@ import { useSlider } from "../../hooks/useSlider";
 const FALLBACK_SLIDES = [
   {
     bg: "linear-gradient(115deg,#071428 0%,#065f46 45%,#15803d 100%)",
-    img: "/gallery/1.png",
+    img: "/internship-photos/intern-1.png",
     tag: "🎓 Admissions Open 2026–27",
     h1: ['Welcome to <em class="italic text-[#fde68a]">Sri Sai Institute</em>', "of Agriculture", "Sciences."],
     motto: '"Empowering the Future of Agriculture through Excellence."',
@@ -21,7 +21,7 @@ const FALLBACK_SLIDES = [
   },
   {
     bg: "linear-gradient(115deg,#064e3b 0%,#065f46 45%,#047857 100%)",
-    img: "/gallery/2.png",
+    img: "/field-visit-media/field-1.png",
     tag: "Limited Intake – Register Today",
     h1: ["Build Your Career in", '<em class="italic text-[#fde68a]">Modern Agriculture</em>', "& Science Research."],
     motto: '"Practical knowledge and industry-focused professional education for tomorrow\'s scientists."',

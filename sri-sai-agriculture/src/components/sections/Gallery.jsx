@@ -8,16 +8,32 @@ import SectionHeader from "../ui/SectionHeader";
 const API_URL = "/api";
 
 const FALLBACK_ITEMS = [
-  { image: "/gallery/1.png",  sub_label: "Main Campus",         label: "Main Academic Block" },
-  { image: "/gallery/2.png",  sub_label: "Research Lab",        label: "Advanced Soil Analysis" },
-  { image: "/gallery/3.png",  sub_label: "Field Work",          label: "Experimental Research Plot" },
-  { image: "/gallery/4.png",  sub_label: "Classrooms",          label: "Digital Learning Hall" },
-  { image: "/gallery/5.png",  sub_label: "Hostels",             label: "Modern Student Housing" },
-  { image: "/gallery/6.png",  sub_label: "Library",             label: "Scientific Resource Center" },
-  { image: "/gallery/7.png",  sub_label: "Agriculture Labs",    label: "Plant Pathology Unit" },
-  { image: "/gallery/8.png",  sub_label: "Practical Field",     label: "Agronomy Research Area" },
-  { image: "/gallery/9.png",  sub_label: "Campus Life",         label: "Green Campus Environment" },
-  { image: "/gallery/10.png", sub_label: "Admissions Hub",      label: "Enquiry & Counseling Center" },
+  // Internship Photos
+  { image: "/internship-photos/intern-1.png", sub_label: "Internship", label: "Prasad Seeds MNC Placement" },
+  { image: "/internship-photos/intern-2.png", sub_label: "Internship", label: "Quality Control Training" },
+  { image: "/internship-photos/intern-3.png", sub_label: "Internship", label: "Seed Processing Visit" },
+  { image: "/internship-photos/intern-4.png", sub_label: "Internship", label: "Industrial Exposure" },
+  // Field Visits
+  { image: "/field-visit-media/field-1.png", sub_label: "Field Visit", label: "Research Plot Analysis" },
+  { image: "/field-visit-media/field-2.png", sub_label: "Field Visit", label: "Crop Health Monitoring" },
+  { image: "/field-visit-media/field-3.png", sub_label: "Field Visit", label: "Modern Irrigation Study" },
+  { image: "/field-visit-media/field-4.png", sub_label: "Field Work", label: "Hands-on Farming Experience" },
+  { image: "/field-visit-media/field-5.png", sub_label: "Field Work", label: "Soil Testing Session" },
+  { image: "/field-visit-media/field-6.png", sub_label: "Field Visit", label: "Expert Interaction" },
+  { image: "/field-visit-media/field-7.png", sub_label: "Field Visit", label: "Livestock Management" },
+  { image: "/field-visit-media/field-8.png", sub_label: "Field Work", label: "Sustainable Agriculture" },
+  // Events
+  { image: "/events-photos/event-1.png", sub_label: "Campus Event", label: "Agri-Fest Celebration" },
+  { image: "/events-photos/event-2.png", sub_label: "Campus Event", label: "Cultural Program" },
+  { image: "/events-photos/event-3.png", sub_label: "Campus Event", label: "Annual Symposium" },
+  { image: "/events-photos/event-4.png", sub_label: "Campus Event", label: "Sports Meet" },
+  { image: "/events-photos/event-5.png", sub_label: "Campus Event", label: "Technical Workshop" },
+  { image: "/events-photos/event-6.png", sub_label: "Campus Event", label: "Student Seminars" },
+  // Trip Photos
+  { image: "/trip-photos/trip-1.png", sub_label: "Educational Trip", label: "Excursion Memories" },
+  { image: "/trip-photos/trip-2.png", sub_label: "Educational Trip", label: "Nature Study Tour" },
+  { image: "/trip-photos/trip-3.png", sub_label: "Educational Trip", label: "Industrial Visit" },
+  { image: "/trip-photos/trip-4.png", sub_label: "Educational Trip", label: "Team Outing" },
 ].map((item, idx) => ({ ...item, id: `fallback-${idx}` }));
 
 export default function Gallery() {

@@ -131,4 +131,63 @@ router.get("/admin/list", authenticate, async (req, res) => {
   }
 });
 
+// Update Student (Admin)
+router.put("/admin/update/:id", authenticate, upload.single("photo"), async (req, res) => {
+  const { id } = req.params;
+  const updates = { ...req.body };
+  
+  try {
+    if (updates.password) {
+      updates.password = await bcrypt.hash(updates.password, 10);
+    }
+    
+    let updateQuery = "UPDATE students SET ";
+    let queryParams = [];
+    
+    // Handle photo upload
+    if (req.file) {
+      updates.photo = req.file.path.replace(/\\/g, "/");
+    }
+
+    // Filter out fields that shouldn't be directly updated this way
+    delete updates.id;
+    delete updates._id;
+    delete updates.created_at;
+
+    const fields = Object.keys(updates);
+    if (fields.length === 0) return res.json({ message: "No changes provided" });
+
+    fields.forEach((field, index) => {
+      updateQuery += `\`${field}\` = ?`;
+      if (index < fields.length - 1) updateQuery += ", ";
+      queryParams.push(updates[field]);
+    });
+
+    updateQuery += " WHERE id = ?";
+    queryParams.push(id);
+
+    await pool.query(updateQuery, queryParams);
+    res.json({ message: "Student updated successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Delete Student (Admin)
+router.delete("/admin/delete/:id", authenticate, async (req, res) => {
+  const { id } = req.params;
+  try {
+    // 1. Delete associated fees
+    await pool.query("DELETE FROM student_fees WHERE student_id = ?", [id]);
+    // 2. Delete associated qualifications
+    await pool.query("DELETE FROM qualifications WHERE student_id = ?", [id]);
+    // 3. Delete student
+    await pool.query("DELETE FROM students WHERE id = ?", [id]);
+    
+    res.json({ message: "Student deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

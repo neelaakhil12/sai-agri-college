@@ -94,7 +94,7 @@ export default function StudentDashboard() {
            <div className="flex items-center gap-4">
               <div className="hidden sm:flex flex-col items-end mr-2">
                  <span className="text-sm font-bold text-ink">{student.student_name}</span>
-                 <span className="text-[10px] text-muted font-bold tracking-tighter">ID: {student.id.split('-')[0].toUpperCase()}</span>
+                 <span className="text-[10px] text-muted font-bold tracking-tighter">ID: {String(student.id).split('-')[0].toUpperCase()}</span>
               </div>
               <div className="h-11 w-11 rounded-2xl bg-sky flex items-center justify-center border-2 border-white shadow-lg overflow-hidden">
                  {student.photo ? <img src={student.photo} className="h-full w-full object-cover" /> : <span className="text-blue font-black text-lg">{student.student_name[0]}</span>}
@@ -117,7 +117,7 @@ export default function StudentDashboard() {
                        </div>
                        <div className="flex flex-col">
                           <h2 className="text-2xl font-black tracking-tight">{student.student_name}</h2>
-                          <p className="text-white/60 text-sm font-medium tracking-wide">ID: {student.id.split('-')[0].toUpperCase()} | Batch: {student.course_applied}</p>
+                          <p className="text-white/60 text-sm font-medium tracking-wide">ID: {String(student.id).split('-')[0].toUpperCase()} | Batch: {student.course_applied}</p>
                        </div>
                     </div>
                     <button onClick={() => setActiveTab('profile')} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all border border-white/10">
@@ -209,7 +209,7 @@ export default function StudentDashboard() {
                   </div>
                   <div className="flex-grow text-center md:text-left">
                      <h2 className="text-4xl font-black text-ink mb-1">{student.student_name}</h2>
-                     <p className="text-blue font-bold tracking-widest uppercase text-xs mb-6">Student ID: {student.id.toUpperCase()}</p>
+                     <p className="text-blue font-bold tracking-widest uppercase text-xs mb-6">Student ID: {String(student.id).toUpperCase()}</p>
                      
                      <div className="flex flex-wrap justify-center md:justify-start gap-4">
                         <ProfileTag label="Course" value={student.course_applied} color="blue" />

@@ -2,7 +2,7 @@ const mysql = require('mysql2/promise');
 require('dotenv').config({ path: './backend/.env' });
 
 async function initDB() {
-    console.log("🚀 Starting Database Initialization for Hostinger...");
+    console.log("🚀 Starting MASTER Database Reset for Hostinger...");
     
     const connectionConfig = {
         host: process.env.DB_HOST,
@@ -18,7 +18,6 @@ async function initDB() {
         console.log("✅ Connected to Hostinger MySQL Database.");
     } catch (err) {
         console.error("❌ Connection Failed:", err.message);
-        console.log("\nTIP: Ensure your current IP is whitelisted in Hostinger -> Remote MySQL.");
         return;
     }
 
@@ -52,6 +51,8 @@ async function initDB() {
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 student_name VARCHAR(255),
                 roll_no VARCHAR(255),
+                email VARCHAR(255),
+                password VARCHAR(255),
                 course_applied VARCHAR(255),
                 academic_enrolled_year VARCHAR(255),
                 mobile1 VARCHAR(20),
@@ -64,6 +65,9 @@ async function initDB() {
             CREATE TABLE IF NOT EXISTS faculty (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(255),
+                initials VARCHAR(10),
+                experience VARCHAR(255),
+                category VARCHAR(255),
                 designation VARCHAR(255),
                 department VARCHAR(255),
                 image VARCHAR(255),
@@ -74,8 +78,10 @@ async function initDB() {
             CREATE TABLE IF NOT EXISTS courses (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 title VARCHAR(255),
+                stream VARCHAR(255),
                 duration VARCHAR(255),
                 description TEXT,
+                details TEXT,
                 image VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -86,6 +92,9 @@ async function initDB() {
                 student_name VARCHAR(255),
                 rank VARCHAR(255),
                 exam VARCHAR(255),
+                stream VARCHAR(255),
+                hall_ticket_number VARCHAR(100),
+                year INT,
                 image VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -94,6 +103,10 @@ async function initDB() {
             CREATE TABLE IF NOT EXISTS stories (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 title VARCHAR(255),
+                name VARCHAR(255),
+                initials VARCHAR(10),
+                place VARCHAR(255),
+                category VARCHAR(255),
                 description TEXT,
                 image VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -103,8 +116,13 @@ async function initDB() {
             CREATE TABLE IF NOT EXISTS testimonials (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(255),
+                student_name VARCHAR(255),
+                initials VARCHAR(10),
+                achievement VARCHAR(255),
                 role VARCHAR(255),
                 content TEXT,
+                quote TEXT,
+                stars INT,
                 image VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -113,6 +131,8 @@ async function initDB() {
             CREATE TABLE IF NOT EXISTS gallery (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 title VARCHAR(255),
+                sub_label VARCHAR(255),
+                label VARCHAR(255),
                 category VARCHAR(255),
                 image VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -133,14 +153,15 @@ async function initDB() {
 
     for (const [name, query] of Object.entries(tables)) {
         try {
+            await pool.query(`DROP TABLE IF EXISTS \`${name}\``);
             await pool.query(query);
-            console.log(`✅ Table '${name}' is ready.`);
+            console.log(`✅ Table '${name}' Reset & Ready.`);
         } catch (err) {
-            console.error(`❌ Error creating table '${name}':`, err.message);
+            console.error(`❌ Error initializing table '${name}':`, err.message);
         }
     }
 
-    console.log("\n🎉 Database schema is fully initialized!");
+    console.log("\n🎉 MASTER RESET COMPLETE! Your database is now 100% compatible.");
     await pool.end();
 }
 

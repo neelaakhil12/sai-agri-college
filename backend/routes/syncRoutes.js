@@ -10,9 +10,26 @@ const DATA = {
     { name: "Patchala Thomas", initials: "PT", department: "Agriculture", experience: "Senior Faculty", category: "Agriculture" },
   ],
   courses: [
-    { stream: "Undergraduate", title: "B.Sc Agriculture", description: "Modern agricultural techniques and soil science.", details: JSON.stringify(["Agronomy", "Plant Breeding", "Soil Science"]) },
-    { stream: "Postgraduate", title: "M.Sc Agriculture", description: "Advanced research in agricultural sciences.", details: JSON.stringify(["Research Methodology", "Agri-Biotechnology", "Sustainable Farming"]) },
-    { stream: "Postgraduate", title: "M.Sc Biology, Chemistry & Zoology", description: "Core science research degrees.", details: JSON.stringify(["M.Sc Biology", "M.Sc Chemistry", "M.Sc Zoology"]) },
+    {
+      stream: "Undergraduate",
+      title: "B.Sc Agriculture",
+      badge: "Agriculture Stream",
+      description: "A comprehensive undergraduate program focusing on modern agricultural techniques, soil science, and sustainable farming.",
+      details: JSON.stringify(["Agronomy · Study of crops and soil management", "Plant Breeding · Genetic improvement of plants", "Soil Science · Fertility and chemistry of soil"]),
+      eligibility: "Intermediate/Higher Secondary Pass in Science",
+      seats_label: "40 Seats — Limited",
+      head_class: "bsc-agri"
+    },
+    {
+      stream: "Postgraduate",
+      title: "M.Sc Agriculture",
+      badge: "Agriculture Stream",
+      description: "Advanced research and specialized postgraduate training across multiple agriculture science disciplines.",
+      details: JSON.stringify(["Msc Soil Science", "Msc Horticulture", "Msc Agronomy", "Msc Plant Breeding & Genetics", "Msc Zoology", "Msc Chemistry"]),
+      eligibility: "B.Sc Agriculture or equivalent degree",
+      seats_label: "Target 40 — Limited",
+      head_class: "msc-agri"
+    },
   ],
   stories: [
     { name: "K. Rakesh", initials: "KR", place: "Agronomy Research Fellow", category: "B.Sc Agriculture" },
@@ -38,9 +55,37 @@ const DATA = {
     { student_name: "K. Divya", rank: "Top Performer", exam: "M.Sc Biology", stream: "Biological Sci", hall_ticket_number: "BS2482", year: 2024 },
   ],
   gallery: [
-    { image: "/gallery/1.png", sub_label: "Main Campus", label: "Main Academic Block" },
-    { image: "/gallery/2.png", sub_label: "Research Lab", label: "Advanced Soil Analysis" },
-    { image: "/gallery/3.png", sub_label: "Field Work", label: "Experimental Research Plot" },
+    // Internship Photos
+    { image: "/internship-photos/intern-1.png", sub_label: "Internship", label: "Prasad Seeds MNC Placement", category: "internship" },
+    { image: "/internship-photos/intern-2.png", sub_label: "Internship", label: "Quality Control Training", category: "internship" },
+    { image: "/internship-photos/intern-3.png", sub_label: "Internship", label: "Seed Processing Visit", category: "internship" },
+    { image: "/internship-photos/intern-4.png", sub_label: "Internship", label: "Industrial Exposure", category: "internship" },
+    // Field Visits
+    { image: "/field-visit-media/field-1.png", sub_label: "Field Visit", label: "Research Plot Analysis", category: "field-visit" },
+    { image: "/field-visit-media/field-2.png", sub_label: "Field Visit", label: "Crop Health Monitoring", category: "field-visit" },
+    { image: "/field-visit-media/field-3.png", sub_label: "Field Visit", label: "Modern Irrigation Study", category: "field-visit" },
+    { image: "/field-visit-media/field-4.png", sub_label: "Field Work", label: "Hands-on Farming Experience", category: "field-visit" },
+    { image: "/field-visit-media/field-5.png", sub_label: "Field Work", label: "Soil Testing Session", category: "field-visit" },
+    { image: "/field-visit-media/field-6.png", sub_label: "Field Visit", label: "Expert Interaction", category: "field-visit" },
+    { image: "/field-visit-media/field-7.png", sub_label: "Field Visit", label: "Livestock Management", category: "field-visit" },
+    { image: "/field-visit-media/field-8.png", sub_label: "Field Work", label: "Sustainable Agriculture", category: "field-visit" },
+    // Events
+    { image: "/events-photos/event-1.png", sub_label: "Campus Event", label: "Agri-Fest Celebration", category: "event" },
+    { image: "/events-photos/event-2.png", sub_label: "Campus Event", label: "Cultural Program", category: "event" },
+    { image: "/events-photos/event-3.png", sub_label: "Campus Event", label: "Annual Symposium", category: "event" },
+    { image: "/events-photos/event-4.png", sub_label: "Campus Event", label: "Sports Meet", category: "event" },
+    { image: "/events-photos/event-5.png", sub_label: "Campus Event", label: "Technical Workshop", category: "event" },
+    { image: "/events-photos/event-6.png", sub_label: "Campus Event", label: "Student Seminars", category: "event" },
+    // Trip Photos
+    { image: "/trip-photos/trip-1.png", sub_label: "Educational Trip", label: "Excursion Memories", category: "trip" },
+    { image: "/trip-photos/trip-2.png", sub_label: "Educational Trip", label: "Nature Study Tour", category: "trip" },
+    { image: "/trip-photos/trip-3.png", sub_label: "Educational Trip", label: "Industrial Visit", category: "trip" },
+    { image: "/trip-photos/trip-4.png", sub_label: "Educational Trip", label: "Team Outing", category: "trip" },
+    // Default Videos
+    { image: "/field-visit-media/field-video.mp4", sub_label: "Field Visit", label: "Agriculture Field Research", category: "field-visit", type: "video" },
+    { image: "/field-visit-media/field-video.mp4", sub_label: "Internship", label: "Student Internship Overview", category: "internship", type: "video" },
+    { image: "/field-visit-media/field-video.mp4", sub_label: "Campus Event", label: "College Event Highlight", category: "event", type: "video" },
+    { image: "/field-visit-media/field-video.mp4", sub_label: "Educational Trip", label: "Trip Memories", category: "trip", type: "video" },
   ],
   hero: [
     { 
@@ -53,7 +98,7 @@ const DATA = {
       btn2_label: "Explore Our Programs",
       btn2_href: "/about",
       bg_gradient: "linear-gradient(115deg,#071428 0%,#065f46 45%,#15803d 100%)", 
-      image: "/gallery/1.png" 
+      image: "/internship-photos/intern-1.png" 
     },
     { 
       tag: "Limited Intake – Register Today", 
@@ -65,7 +110,7 @@ const DATA = {
       btn2_label: "About Our Institute",
       btn2_href: "/about",
       bg_gradient: "linear-gradient(115deg,#064e3b 0%,#065f46 45%,#047857 100%)", 
-      image: "/gallery/2.png" 
+      image: "/field-visit-media/field-1.png" 
     }
   ],
   students: [
@@ -83,19 +128,7 @@ router.post("/sync", authenticate, async (req, res) => {
         // 1. Check if table has data
         const [existing] = await pool.query(`SELECT id FROM ${table} LIMIT 1`);
         
-        const tablesToReset = ['stories', 'hero', 'students', 'faculty', 'courses', 'ranks', 'gallery', 'testimonials'];
-        
-        if (existing.length === 0 || tablesToReset.includes(table)) {
-          if (tablesToReset.includes(table)) {
-            // For these, we allow refreshing/resetting
-            if (table === 'students' && existing.length > 0) {
-              results[table] = "Skipped (Students already exist)";
-              continue;
-            } else {
-              await pool.query(`DELETE FROM \`${table}\``);
-            }
-          }
-          
+        if (existing.length === 0) {
           for (const item of data) {
             const keys = Object.keys(item);
             const values = Object.values(item);
@@ -112,7 +145,7 @@ router.post("/sync", authenticate, async (req, res) => {
           }
           results[table] = `Synced ${data.length} records`;
         } else {
-          results[table] = "Skipped (Already has data)";
+          results[table] = "Skipped (Table already has data)";
         }
       } catch (tableErr) {
         console.error(`Sync Error for ${table}:`, tableErr.message);
