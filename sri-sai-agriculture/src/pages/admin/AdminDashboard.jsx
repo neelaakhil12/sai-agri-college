@@ -1092,7 +1092,24 @@ export default function AdminDashboard() {
                             <div key={year} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
                               <div className="flex items-center justify-between mb-6">
                                 <span className="px-4 py-1.5 bg-ink text-white text-[10px] font-black uppercase tracking-widest rounded-full">{year}</span>
-                                <div className="flex gap-4">
+                               <div className="flex items-center gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer group/check">
+                                    <div className="relative">
+                                      <input 
+                                        type="checkbox" 
+                                        className="peer sr-only"
+                                        checked={fee.status === 'Completed'}
+                                        onChange={(e) => updateFee({ status: e.target.checked ? 'Completed' : 'Pending' })}
+                                      />
+                                      <div className="w-5 h-5 border-2 border-gray-200 rounded-lg peer-checked:bg-[#15803d] peer-checked:border-[#15803d] transition-all flex items-center justify-center">
+                                        <div className="w-1.5 h-3 border-r-2 border-b-2 border-white rotate-45 mb-1 scale-0 peer-checked:scale-100 transition-transform"></div>
+                                      </div>
+                                    </div>
+                                    <span className={`text-[10px] font-black uppercase tracking-widest ${fee.status === 'Completed' ? 'text-green-600' : 'text-gray-400'}`}>
+                                      {fee.status === 'Completed' ? 'PAID' : 'MARK AS PAID'}
+                                    </span>
+                                  </label>
+                                  <div className="h-6 w-[1px] bg-gray-100 mx-2"></div>
                                   <div className="text-right">
                                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Balance</p>
                                     <p className="text-sm font-black text-blue">₹{(Number(fee.total_fee || 0) + Number(fee.hostel_total_fee || 0)) - (Number(fee.fee_paid || 0) + Number(fee.hostel_fee_paid || 0))}</p>
