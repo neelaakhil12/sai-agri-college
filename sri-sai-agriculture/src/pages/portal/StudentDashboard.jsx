@@ -279,8 +279,10 @@ export default function StudentDashboard() {
                                     </button>
                                   ) : (
                                     (parseFloat(fee.total_fee) > 0 || parseFloat(fee.hostel_total_fee) > 0) && (
-                                      <div className="h-8 w-8 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-green-200">
-                                         <Check size={16} />
+                                      <div className="flex items-center justify-center">
+                                         <span className="px-5 py-2 bg-green-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-100 flex items-center gap-2">
+                                            <Check size={12} strokeWidth={3} /> Fully Paid
+                                         </span>
                                       </div>
                                     )
                                   )}
