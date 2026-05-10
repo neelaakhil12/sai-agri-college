@@ -234,22 +234,34 @@ export default function StudentDashboard() {
                                   <span className="font-black text-ink text-sm uppercase">{fee.academic_year}</span>
                                </td>
                                <td className="px-8 py-6 text-center">
-                                  <div className="flex flex-col items-center gap-0.5">
-                                     <span className="text-[10px] font-bold text-gray-400">₹{fee.total_fee || '0'} / ₹{fee.fee_paid || '0'}</span>
-                                     <span className="text-sm font-black text-blue">₹{fee.due_amount || '0'}</span>
-                                  </div>
+                                  {parseFloat(fee.total_fee) === 0 ? (
+                                    <span className="text-[10px] font-bold text-gray-300 uppercase italic">Not Updated</span>
+                                  ) : (
+                                    <div className="flex flex-col items-center gap-0.5">
+                                       <span className="text-[10px] font-bold text-gray-400">₹{fee.total_fee || '0'} / ₹{fee.fee_paid || '0'}</span>
+                                       <span className="text-sm font-black text-blue">₹{fee.due_amount || '0'}</span>
+                                    </div>
+                                  )}
                                </td>
                                <td className="px-8 py-6 text-center">
-                                  <div className="flex flex-col items-center gap-0.5">
-                                     <span className="text-[10px] font-bold text-gray-400">₹{fee.hostel_total_fee || '0'} / ₹{fee.hostel_fee_paid || '0'}</span>
-                                     <span className="text-sm font-black text-orange">₹{fee.hostel_due_amount || '0'}</span>
-                                  </div>
+                                  {parseFloat(fee.hostel_total_fee) === 0 ? (
+                                    <span className="text-[10px] font-bold text-gray-300 uppercase italic">Not Updated</span>
+                                  ) : (
+                                    <div className="flex flex-col items-center gap-0.5">
+                                       <span className="text-[10px] font-bold text-gray-400">₹{fee.hostel_total_fee || '0'} / ₹{fee.hostel_fee_paid || '0'}</span>
+                                       <span className="text-sm font-black text-orange">₹{fee.hostel_due_amount || '0'}</span>
+                                    </div>
+                                  )}
                                </td>
                                <td className="px-8 py-6">
-                                  {(parseFloat(fee.due_amount) === 0 && parseFloat(fee.hostel_due_amount) === 0) ? (
-                                    <span className="px-3 py-1 bg-green-100 text-green-600 text-[9px] font-black uppercase rounded-lg border border-green-200">Fully Paid</span>
+                                  {(parseFloat(fee.total_fee) === 0 && parseFloat(fee.hostel_total_fee) === 0) ? (
+                                    <span className="px-3 py-1 bg-gray-50 text-gray-400 text-[9px] font-black uppercase rounded-lg border border-gray-100">Waiting for Admin</span>
                                   ) : (
-                                    <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-black uppercase rounded-lg border border-orange-100">Pending</span>
+                                    (parseFloat(fee.due_amount) === 0 && parseFloat(fee.hostel_due_amount) === 0) ? (
+                                      <span className="px-3 py-1 bg-green-100 text-green-600 text-[9px] font-black uppercase rounded-lg border border-green-200">Fully Paid</span>
+                                    ) : (
+                                      <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-black uppercase rounded-lg border border-orange-100">Pending</span>
+                                    )
                                   )}
                                </td>
                                <td className="px-8 py-6">
@@ -258,7 +270,7 @@ export default function StudentDashboard() {
                                   </span>
                                </td>
                                <td className="px-8 py-6">
-                                  {parseFloat(fee.due_amount) > 0 ? (
+                                  {(parseFloat(fee.due_amount) > 0 || parseFloat(fee.hostel_due_amount) > 0) ? (
                                     <button 
                                        onClick={() => openPayModal('Academic Fee', fee.due_amount, fee.academic_year)}
                                        className="px-5 py-2 bg-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ink transition-all shadow-lg shadow-blue/20"
@@ -266,9 +278,11 @@ export default function StudentDashboard() {
                                        Pay Now
                                     </button>
                                   ) : (
-                                    <div className="h-8 w-8 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-green-200">
-                                       <Check size={16} />
-                                    </div>
+                                    (parseFloat(fee.total_fee) > 0 || parseFloat(fee.hostel_total_fee) > 0) && (
+                                      <div className="h-8 w-8 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-green-200">
+                                         <Check size={16} />
+                                      </div>
+                                    )
                                   )}
                                </td>
                             </tr>
