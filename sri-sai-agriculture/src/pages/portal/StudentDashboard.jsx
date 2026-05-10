@@ -402,6 +402,10 @@ export default function StudentDashboard() {
                        <option value="3rd year">3rd Year</option>
                        <option value="4th year">4th Year</option>
                     </select>
+                    {/* DEBUG PANEL - DELETE AFTER FIX */}
+                    <div className="mt-2 p-2 bg-black text-[8px] text-green-400 font-mono rounded overflow-auto max-h-20">
+                       RAW DATA: {JSON.stringify(student.student_fees?.map(f => f.academic_year))}
+                    </div>
                  </div>
 
                  {/* Amount Alert */}
