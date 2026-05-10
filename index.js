@@ -45,7 +45,7 @@ try {
   console.log("✅ Routes initialized");
 
   // Serve static files
-  const buildPath = path.join(__dirname, "../sri-sai-agriculture/build");
+  const buildPath = path.join(__dirname, "sri-sai-agriculture/build");
   app.use(express.static(buildPath));
   
   // Use a general middleware for the SPA fallback to avoid path-to-regexp issues
