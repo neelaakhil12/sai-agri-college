@@ -47,6 +47,15 @@ export default function StudentDashboard() {
     fetchProfile();
   }, [navigate]);
 
+   const openPayModal = (type, amount, year) => {
+      setPayData({ type, amount, year });
+      setShowPayModal(true);
+      // Re-fetch to get latest balances from Admin Panel
+      axios.get(`${API_URL}/students/profile`, { withCredentials: true })
+         .then(res => setStudent(res.data))
+         .catch(err => console.error("Sync failed", err));
+   };
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -204,28 +213,19 @@ export default function StudentDashboard() {
                         icon="Book" 
                         title="Pay Academic Fees" 
                         detail="College Tuition Fees" 
-                        onClick={() => {
-                          setPayData({ type: 'Academic Fee', amount: 0, year: '' });
-                          setShowPayModal(true);
-                        }}
+                        onClick={() => openPayModal('Academic Fee', 0, '')}
                      />
                      <PaymentOption 
                         icon="Home" 
                         title="Pay Hostel Fees" 
                         detail="Hostel & Mess Charges" 
-                        onClick={() => {
-                          setPayData({ type: 'Hostel Fee', amount: 0, year: '' });
-                          setShowPayModal(true);
-                        }}
+                        onClick={() => openPayModal('Hostel Fee', 0, '')}
                      />
                      <PaymentOption 
                         icon="FileText" 
                         title="Pay Examination Fees" 
                         detail="Regular & Supplementary" 
-                        onClick={() => {
-                          setPayData({ type: 'Examination Fee', amount: 1500, year: 'Semester Exam' });
-                          setShowPayModal(true);
-                        }}
+                        onClick={() => openPayModal('Examination Fee', 1500, 'Semester Exam')}
                      />
                   </div>
                </div>
@@ -254,15 +254,12 @@ export default function StudentDashboard() {
                               <td className="px-8 py-5 font-bold text-orange">₹{fee.hostel_due_amount || '0'}</td>
                               <td className="px-8 py-5 font-bold text-gray-400 text-xs">{fee.last_payment_date ? new Date(fee.last_payment_date).toLocaleDateString() : 'No record'}</td>
                               <td className="px-8 py-5">
-                                 <button 
-                                    onClick={() => {
-                                      setPayData({ type: 'Academic Fee', amount: fee.due_amount, year: fee.academic_year });
-                                      setShowPayModal(true);
-                                    }}
-                                    className="px-4 py-1.5 bg-blue text-white rounded-xl text-[9px] font-black uppercase shadow-lg shadow-blue/20 hover:scale-105 transition-transform"
-                                 >
-                                    Pay Now
-                                 </button>
+                                   <button 
+                                      onClick={() => openPayModal('Academic Fee', fee.due_amount, fee.academic_year)}
+                                      className="px-5 py-2 bg-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ink transition-all shadow-lg shadow-blue/20"
+                                   >
+                                      Pay Now
+                                   </button>
                               </td>
                            </tr>
                         ))}
