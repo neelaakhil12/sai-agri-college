@@ -236,35 +236,67 @@ export default function StudentDashboard() {
                      <h3 className="font-black text-sm uppercase tracking-wider text-ink">Detailed Fee Breakdown</h3>
                      <span className="px-3 py-1 bg-green-100 text-green-600 text-[10px] font-black rounded-full uppercase">Live Status</span>
                   </div>
-                  <table className="w-full text-left">
-                     <thead>
-                        <tr className="bg-white border-b border-gray-100">
-                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">Academic Year</th>
-                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">College Due</th>
-                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">Hostel Due</th>
-                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">Last Payment</th>
-                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">Action</th>
-                        </tr>
-                     </thead>
-                     <tbody className="divide-y divide-gray-50">
-                        {student.student_fees?.map((fee, idx) => (
-                           <tr key={idx} className="hover:bg-sky/30 transition-colors">
-                              <td className="px-8 py-5 font-bold text-ink">{fee.academic_year}</td>
-                              <td className="px-8 py-5 font-bold text-blue">₹{fee.due_amount || '0'}</td>
-                              <td className="px-8 py-5 font-bold text-orange">₹{fee.hostel_due_amount || '0'}</td>
-                              <td className="px-8 py-5 font-bold text-gray-400 text-xs">{fee.last_payment_date ? new Date(fee.last_payment_date).toLocaleDateString() : 'No record'}</td>
-                              <td className="px-8 py-5">
-                                   <button 
-                                      onClick={() => openPayModal('Academic Fee', fee.due_amount, fee.academic_year)}
-                                      className="px-5 py-2 bg-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ink transition-all shadow-lg shadow-blue/20"
-                                   >
-                                      Pay Now
-                                   </button>
-                              </td>
-                           </tr>
-                        ))}
-                     </tbody>
-                  </table>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                       <thead>
+                          <tr className="border-b border-gray-100">
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Academic Year</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">College (Total / Paid / Due)</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Hostel (Total / Paid / Due)</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Last Update</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Action</th>
+                          </tr>
+                       </thead>
+                       <tbody className="divide-y divide-gray-50">
+                          {student.student_fees?.map((fee, idx) => (
+                            <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                               <td className="px-8 py-6">
+                                  <span className="font-black text-ink text-sm uppercase">{fee.academic_year}</span>
+                               </td>
+                               <td className="px-8 py-6 text-center">
+                                  <div className="flex flex-col items-center gap-0.5">
+                                     <span className="text-[10px] font-bold text-gray-400">₹{fee.total_fee || '0'} / ₹{fee.fee_paid || '0'}</span>
+                                     <span className="text-sm font-black text-blue">₹{fee.due_amount || '0'}</span>
+                                  </div>
+                               </td>
+                               <td className="px-8 py-6 text-center">
+                                  <div className="flex flex-col items-center gap-0.5">
+                                     <span className="text-[10px] font-bold text-gray-400">₹{fee.hostel_total_fee || '0'} / ₹{fee.hostel_fee_paid || '0'}</span>
+                                     <span className="text-sm font-black text-orange">₹{fee.hostel_due_amount || '0'}</span>
+                                  </div>
+                               </td>
+                               <td className="px-8 py-6">
+                                  {(parseFloat(fee.due_amount) === 0 && parseFloat(fee.hostel_due_amount) === 0) ? (
+                                    <span className="px-3 py-1 bg-green-100 text-green-600 text-[9px] font-black uppercase rounded-lg border border-green-200">Fully Paid</span>
+                                  ) : (
+                                    <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-black uppercase rounded-lg border border-orange-100">Pending</span>
+                                  )}
+                               </td>
+                               <td className="px-8 py-6">
+                                  <span className="text-[10px] font-bold text-gray-400 uppercase">
+                                     {fee.last_payment_date ? new Date(fee.last_payment_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '---'}
+                                  </span>
+                               </td>
+                               <td className="px-8 py-6">
+                                  {parseFloat(fee.due_amount) > 0 ? (
+                                    <button 
+                                       onClick={() => openPayModal('Academic Fee', fee.due_amount, fee.academic_year)}
+                                       className="px-5 py-2 bg-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ink transition-all shadow-lg shadow-blue/20"
+                                    >
+                                       Pay Now
+                                    </button>
+                                  ) : (
+                                    <div className="h-8 w-8 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-green-200">
+                                       <Check size={16} />
+                                    </div>
+                                  )}
+                               </td>
+                            </tr>
+                          ))}
+                       </tbody>
+                    </table>
+                  </div>
                </div>
             </div>
           )}
