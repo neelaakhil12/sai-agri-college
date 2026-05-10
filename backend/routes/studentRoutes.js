@@ -5,6 +5,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const upload = require("../utils/multerConfig");
 const authenticate = require("../utils/authMiddleware");
+const { sendEmail } = require('../utils/mailer');
+const crypto = require('crypto');
 
 // Register Student
 router.post("/register", upload.single("photo"), async (req, res) => {
@@ -200,6 +202,97 @@ router.delete("/admin/delete/:id", authenticate, async (req, res) => {
     
     res.json({ message: "Student deleted successfully" });
   } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// @route   POST api/students/forgot-password
+// @desc    Request password reset
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  try {
+    const [students] = await pool.query('SELECT * FROM students WHERE email = ?', [email]);
+    if (students.length === 0) {
+      return res.status(404).json({ message: 'No student found with this email' });
+    }
+
+    const student = students[0];
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiry = new Date(Date.now() + 3600000); // 1 hour
+
+    await pool.query('UPDATE students SET reset_token = ?, reset_token_expiry = ? WHERE id = ?', [token, expiry, student.id]);
+
+    const resetUrl = `${req.protocol}://${req.get('host')}/portal/reset-password/${token}`;
+    
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; border: 1px solid #eef2f6; border-radius: 24px; background-color: #ffffff;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h1 style="color: #1a6b3c; margin: 0; font-size: 24px;">Sri Sai Agricultural College</h1>
+          <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Student Portal Access</p>
+        </div>
+        
+        <p style="font-size: 16px; color: #1e293b; margin-bottom: 24px;">Hello <strong>${student.student_name}</strong>,</p>
+        
+        <p style="font-size: 16px; color: #475569; line-height: 1.6; margin-bottom: 32px;">
+          We received a request to reset the password for your student portal account. 
+          If you made this request, please click the button below:
+        </p>
+        
+        <div style="text-align: center; margin-bottom: 32px;">
+          <a href="${resetUrl}" style="display: inline-block; padding: 16px 32px; background-color: #1a6b3c; color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 4px 12px rgba(26, 107, 60, 0.2);">
+            Reset My Password
+          </a>
+        </div>
+        
+        <div style="padding: 24px; background-color: #f8fafc; border-radius: 16px; margin-bottom: 32px;">
+          <p style="font-size: 13px; color: #64748b; margin: 0; word-break: break-all;">
+            <strong>Link not working?</strong> Copy and paste this URL into your browser:<br/>
+            <span style="color: #1a6b3c;">${resetUrl}</span>
+          </p>
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid #eef2f6; margin-bottom: 24px;"/>
+        
+        <p style="font-size: 13px; color: #94a3b8; text-align: center; margin: 0;">
+          This link will expire in 1 hour.<br/>
+          If you didn't request this, you can safely ignore this email.
+        </p>
+      </div>
+    `;
+
+    const success = await sendEmail(email, 'Password Reset Request - Sri Sai Agri', html);
+    if (success) {
+      res.json({ message: 'Reset link sent to your email' });
+    } else {
+      res.status(500).json({ message: 'Failed to send email. Check SMTP settings.' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// @route   POST api/students/reset-password/:token
+// @desc    Reset password using token
+router.post('/reset-password/:token', async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const [students] = await pool.query('SELECT * FROM students WHERE reset_token = ? AND reset_token_expiry > NOW()', [token]);
+    
+    if (students.length === 0) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    const student = students[0];
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await pool.query('UPDATE students SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?', [hashedPassword, student.id]);
+
+    res.json({ message: 'Password reset successful! You can now log in.' });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 });

@@ -20,6 +20,7 @@ import ActivitiesPage   from "./pages/ActivitiesPage";
 import StudentLogin     from "./pages/portal/StudentLogin";
 import StudentRegister  from "./pages/portal/StudentRegister";
 import StudentDashboard from "./pages/portal/StudentDashboard";
+import ResetPassword    from "./pages/portal/ResetPassword";
 
 export default function App() {
   const location = useLocation();
@@ -55,6 +56,7 @@ export default function App() {
           {/* Student Portal Routes */}
           <Route path="/portal/login" element={<StudentLogin />} />
           <Route path="/portal/register" element={<StudentRegister />} />
+          <Route path="/portal/reset-password/:token" element={<ResetPassword />} />
           <Route path="/portal/dashboard" element={<StudentDashboard />} />
         </Routes>
 

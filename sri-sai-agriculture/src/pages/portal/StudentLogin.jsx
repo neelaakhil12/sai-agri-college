@@ -23,6 +23,21 @@ export default function StudentLogin() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    const userEmail = prompt("Please enter your registered email address:");
+    if (!userEmail) return;
+
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API_URL}/students/forgot-password`, { email: userEmail });
+      alert(res.data.message || "A reset link has been sent to your email.");
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F3F4F9] flex items-center justify-center p-6">
       <div className="max-w-md w-full bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100">
@@ -76,7 +91,7 @@ export default function StudentLogin() {
                 <input type="checkbox" className="w-4 h-4 rounded-lg border-gray-300 text-blue focus:ring-blue" />
                 <span className="text-[12px] font-bold text-muted group-hover:text-ink transition-colors">Remember me</span>
              </label>
-             <button type="button" onClick={() => alert("Please contact the administrator to reset your password.")} className="text-[12px] font-bold text-blue hover:underline">Forgot Password?</button>
+             <button type="button" onClick={handleForgotPassword} className="text-[12px] font-bold text-blue hover:underline">Forgot Password?</button>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
