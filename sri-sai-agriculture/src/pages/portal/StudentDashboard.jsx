@@ -5,43 +5,53 @@ import axios from "axios";
 const API_URL = "/api";
 
 export default function StudentDashboard() {
-  const [student, setStudent] = useState(null);
-  const [activeTab, setActiveTab] = useState("home");
-  const navigate = useNavigate();
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [payData, setPayData] = useState({ type: '', amount: 0, year: '' });
+  const [screenshot, setScreenshot] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/students/profile`, { withCredentials: true });
-        setStudent(res.data);
-      } catch (err) {
-        // Fallback to Mock Data for Demo/Development
-        setStudent({
-          id: "DEMO-2026-001",
-          student_name: "Sri Sai Student",
-          father_name: "G. Satyanarayana",
-          mother_name: "G. Lakshmi",
-          dob: "2005-06-15",
-          gender: "Male",
-          mobile1: "9100061091",
-          email_personal: "student@srisai.edu",
-          branch: "Vijayawada Main",
-          course_applied: "Ag. B.Sc.",
-          medium: "English",
-          door_no: "4-12",
-          village: "Poranki",
-          mandal: "Penamaluru",
-          district: "Krishna",
-          pin: "521137",
-          student_fees: [
-            { academic_year: "1st Year", total_fee: "1,50,000", committed_fee: "1,25,000", paid_amount: "25,000", payment_status: "paid" },
-            { academic_year: "2nd Year", total_fee: "1,50,000", committed_fee: "1,25,000", paid_amount: "0", payment_status: "pending" }
-          ]
-        });
-      }
-    };
-    fetchProfile();
-  }, [navigate]);
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate PNG
+    if (file.type !== "image/png") {
+      alert("Only PNG files are allowed!");
+      e.target.value = "";
+      return;
+    }
+
+    // Validate 100KB
+    if (file.size > 100 * 1024) {
+      alert("File size must be less than 100KB!");
+      e.target.value = "";
+      return;
+    }
+
+    setScreenshot(file);
+  };
+
+  const handlePaymentSubmit = async () => {
+    if (!screenshot) return alert("Please upload payment screenshot");
+    
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("screenshot", screenshot);
+    formData.append("fee_type", payData.type);
+    formData.append("amount", payData.amount);
+    formData.append("academic_year", payData.year);
+
+    try {
+      await axios.post(`${API_URL}/student-fees/upload-proof`, formData, { withCredentials: true });
+      alert("Payment proof uploaded successfully! Admin will verify soon.");
+      setShowPayModal(false);
+      setScreenshot(null);
+    } catch (err) {
+      alert("Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   if (!student) return <div className="min-h-screen flex items-center justify-center bg-white text-blue font-bold">Loading Sri Sai Portal...</div>;
 
@@ -153,9 +163,35 @@ export default function StudentDashboard() {
                   <p className="text-muted font-medium mb-8">Select the type of Fee to Continue</p>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                     <PaymentOption icon="Book" title="Pay Academic Fees" detail="Tuition Fee, Hostel & Transport" />
-                     <PaymentOption icon="FileText" title="Pay Examination Fees" detail="Regular & Supplementary" />
-                     <PaymentOption icon="Truck" title="Transport Registration" detail="Register for bus service" />
+                     <PaymentOption 
+                        icon="Book" 
+                        title="Pay Academic Fees" 
+                        detail="College Tuition Fees" 
+                        onClick={() => {
+                          const due = student.student_fees?.reduce((acc, f) => acc + (f.due_amount || 0), 0) || 0;
+                          setPayData({ type: 'Academic Fee', amount: due, year: 'Current Year' });
+                          setShowPayModal(true);
+                        }}
+                     />
+                     <PaymentOption 
+                        icon="Home" 
+                        title="Pay Hostel Fees" 
+                        detail="Hostel & Mess Charges" 
+                        onClick={() => {
+                          const due = student.student_fees?.reduce((acc, f) => acc + (f.hostel_due_amount || 0), 0) || 0;
+                          setPayData({ type: 'Hostel Fee', amount: due, year: 'Current Year' });
+                          setShowPayModal(true);
+                        }}
+                     />
+                     <PaymentOption 
+                        icon="FileText" 
+                        title="Pay Examination Fees" 
+                        detail="Regular & Supplementary" 
+                        onClick={() => {
+                          setPayData({ type: 'Examination Fee', amount: 1500, year: 'Semester Exam' });
+                          setShowPayModal(true);
+                        }}
+                     />
                   </div>
                </div>
 
@@ -168,24 +204,30 @@ export default function StudentDashboard() {
                   <table className="w-full text-left">
                      <thead>
                         <tr className="bg-white border-b border-gray-100">
-                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">Year</th>
-                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">Total Fee</th>
-                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">Committed</th>
-                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">Paid</th>
-                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">Status</th>
+                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">Academic Year</th>
+                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">College Due</th>
+                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">Hostel Due</th>
+                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">Last Payment</th>
+                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase">Action</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-gray-50">
                         {student.student_fees?.map((fee, idx) => (
                            <tr key={idx} className="hover:bg-sky/30 transition-colors">
                               <td className="px-8 py-5 font-bold text-ink">{fee.academic_year}</td>
-                              <td className="px-8 py-5 font-bold text-blue">₹{fee.total_fee || '0'}</td>
-                              <td className="px-8 py-5 font-bold text-gray-500">₹{fee.committed_fee || '0'}</td>
-                              <td className="px-8 py-5 font-bold text-green-600">₹{fee.paid_amount || '0'}</td>
+                              <td className="px-8 py-5 font-bold text-blue">₹{fee.due_amount || '0'}</td>
+                              <td className="px-8 py-5 font-bold text-orange">₹{fee.hostel_due_amount || '0'}</td>
+                              <td className="px-8 py-5 font-bold text-gray-400 text-xs">{fee.last_payment_date ? new Date(fee.last_payment_date).toLocaleDateString() : 'No record'}</td>
                               <td className="px-8 py-5">
-                                 <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase ${fee.payment_status === 'pending' ? 'bg-orange/10 text-orange' : 'bg-green-100 text-green-600'}`}>
-                                    {fee.payment_status || 'Unallocated'}
-                                 </span>
+                                 <button 
+                                    onClick={() => {
+                                      setPayData({ type: 'Academic Fee', amount: fee.due_amount, year: fee.academic_year });
+                                      setShowPayModal(true);
+                                    }}
+                                    className="px-4 py-1.5 bg-blue text-white rounded-xl text-[9px] font-black uppercase shadow-lg shadow-blue/20 hover:scale-105 transition-transform"
+                                 >
+                                    Pay Now
+                                 </button>
                               </td>
                            </tr>
                         ))}
@@ -243,10 +285,111 @@ export default function StudentDashboard() {
             </div>
           )}
 
-
-
         </div>
       </main>
+
+      {/* --- Payment Modal --- */}
+      {showPayModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-md bg-ink/40 animate-fadeIn">
+           <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden flex flex-col animate-slideUp">
+              <div className="p-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
+                 <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 bg-blue/10 rounded-xl flex items-center justify-center text-blue">
+                       <Wallet size={20} />
+                    </div>
+                    <div>
+                       <h3 className="font-black text-ink leading-tight">Pay {payData.type}</h3>
+                       <p className="text-[10px] text-muted font-black uppercase tracking-widest">{payData.year}</p>
+                    </div>
+                 </div>
+                 <button onClick={() => setShowPayModal(false)} className="p-2 hover:bg-red-50 text-red-400 rounded-xl transition-all">
+                    <X size={20} />
+                 </button>
+              </div>
+
+              <div className="p-8 space-y-6 overflow-y-auto max-h-[70vh]">
+                 {/* Amount Alert */}
+                 <div className="bg-blue/5 border border-blue/10 p-5 rounded-2xl text-center">
+                    <p className="text-xs font-bold text-blue uppercase tracking-widest mb-1">Total Due Amount</p>
+                    <h2 className="text-3xl font-black text-blue">₹{payData.amount}</h2>
+                 </div>
+
+                 {/* QR Code Section */}
+                 <div className="text-center space-y-3">
+                    <div className="h-48 w-48 bg-white border-4 border-sky rounded-3xl mx-auto flex items-center justify-center p-2 shadow-inner">
+                       <img src="/payment_qr.png" alt="Payment QR" className="h-full w-full object-contain" onError={(e) => e.target.src = "https://via.placeholder.com/200?text=Scan+To+Pay"} />
+                    </div>
+                    <div className="flex flex-col items-center">
+                       <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">UPI ID</span>
+                       <span className="text-sm font-bold text-ink">43564790508@sbi</span>
+                    </div>
+                 </div>
+
+                 {/* Bank Details Section */}
+                 <div className="bg-sky/30 p-6 rounded-3xl border border-sky/50 space-y-4">
+                    <div className="flex items-center gap-3 border-b border-sky pb-3">
+                       <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-blue shadow-sm font-bold text-xs">SBI</div>
+                       <span className="font-black text-[10px] text-blue uppercase tracking-widest">Official Bank Details</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-4">
+                       <div>
+                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Bank Name</p>
+                          <p className="text-xs font-bold text-ink">State Bank Of India</p>
+                       </div>
+                       <div>
+                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">IFSC Code</p>
+                          <p className="text-xs font-bold text-blue">SBIN0018251</p>
+                       </div>
+                       <div className="col-span-2">
+                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Account Number</p>
+                          <p className="text-base font-black text-ink tracking-widest">43564790508</p>
+                       </div>
+                       <div className="col-span-2">
+                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Account Name</p>
+                          <p className="text-xs font-bold text-ink">SRI SAI INSTITUTE OF AGRICULTURE</p>
+                       </div>
+                    </div>
+                 </div>
+
+                 {/* Upload Section */}
+                 <div className="space-y-3">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Upload Payment Screenshot (PNG only, Max 100KB)</label>
+                    <div className="relative group">
+                       <input 
+                          type="file" 
+                          accept=".png" 
+                          onChange={handleFileChange}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                       />
+                       <div className={`p-6 border-2 border-dashed rounded-3xl text-center transition-all ${screenshot ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-gray-50 group-hover:border-blue'}`}>
+                          {screenshot ? (
+                            <div className="flex items-center justify-center gap-3 text-green-600">
+                               <Check size={20} />
+                               <span className="text-sm font-bold">Screenshot Attached!</span>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center gap-2 text-gray-400">
+                               <Plus size={24} />
+                               <span className="text-xs font-bold uppercase tracking-widest">Click to Upload PNG</span>
+                            </div>
+                          )}
+                       </div>
+                    </div>
+                 </div>
+              </div>
+
+              <div className="p-8 bg-gray-50 border-t border-gray-100">
+                 <button 
+                    disabled={!screenshot || uploading}
+                    onClick={handlePaymentSubmit}
+                    className="w-full bg-blue text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-blue/20 hover:bg-ink transition-all active:scale-[0.98] disabled:opacity-50 disabled:grayscale"
+                 >
+                    {uploading ? 'Processing...' : 'Confirm Payment Submission'}
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -306,10 +449,10 @@ function ToolCard({ icon, title, onClick }) {
   );
 }
 
-function PaymentOption({ icon, title, detail }) {
+function PaymentOption({ icon, title, detail, onClick }) {
   const Icon = require('lucide-react')[icon];
   return (
-    <div className="p-8 border border-gray-100 rounded-3xl hover:border-blue hover:bg-sky/20 transition-all cursor-pointer group text-center flex flex-col items-center">
+    <div onClick={onClick} className="p-8 border border-gray-100 rounded-3xl hover:border-blue hover:bg-sky/20 transition-all cursor-pointer group text-center flex flex-col items-center">
        <div className="h-14 w-14 bg-gray-50 text-gray-400 group-hover:bg-blue group-hover:text-white rounded-2xl flex items-center justify-center mb-4 transition-colors">
           <Icon size={24} />
        </div>
@@ -390,3 +533,6 @@ function CalendarItem({ type, title, date, color }) {
 function LogOut(props) { return <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>; }
 function ArrowRight(props) { return <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>; }
 function Wallet(props) { return <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"></path><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"></path><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"></path></svg>; }
+function X(props) { return <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>; }
+function Plus(props) { return <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>; }
+function Check(props) { return <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>; }

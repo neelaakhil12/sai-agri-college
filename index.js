@@ -72,6 +72,22 @@ try {
         await pool.query("UPDATE admins SET password = ? WHERE username = ?", [hashedPassword, username]);
         console.log("✨ Admin account verified.");
       }
+
+      // Initialize Tables
+      console.log("ℹ️ Initializing database tables...");
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS payment_proofs (
+          id INT AUTO_INCREMENT PRIMARY KEY, 
+          student_id INT, 
+          fee_type VARCHAR(50), 
+          amount DECIMAL(10,2), 
+          academic_year VARCHAR(20), 
+          screenshot VARCHAR(255), 
+          status VARCHAR(20) DEFAULT 'Pending', 
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      console.log("✅ Database tables verified.");
     } catch (err) {
       console.error("❌ Admin init failed:", err.message);
     }

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../utils/db");
 const authenticate = require("../utils/authMiddleware");
+const upload = require("../utils/multerConfig");
 
 // Update Student Fees (Admin Only)
 router.put("/admin/update/:studentId", authenticate, async (req, res) => {
@@ -39,6 +40,25 @@ router.get("/:studentId", async (req, res) => {
     res.json(rows);
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+});
+
+// Upload Payment Proof
+router.post("/upload-proof", authenticate, upload.single("screenshot"), async (req, res) => {
+  const { fee_type, amount, academic_year } = req.body;
+  const studentId = req.user.id;
+  const screenshot = req.file ? req.file.path.replace(/\\/g, "/") : "";
+
+  if (!screenshot) return res.status(400).json({ message: "Screenshot required" });
+
+  try {
+    await pool.query(
+      "INSERT INTO payment_proofs (student_id, fee_type, amount, academic_year, screenshot) VALUES (?, ?, ?, ?, ?)",
+      [studentId, fee_type, amount, academic_year, screenshot]
+    );
+    res.status(201).json({ message: "Payment proof submitted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
