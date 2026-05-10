@@ -350,17 +350,17 @@ export default function StudentDashboard() {
                        value={payData.year} 
                        onChange={(e) => {
                           const year = e.target.value;
-                          const fee = student.student_fees?.find(f => f.academic_year === year);
+                          const fee = student.student_fees?.find(f => f.academic_year.toLowerCase() === year.toLowerCase());
                           const amount = payData.type === 'Hostel Fee' ? (fee?.hostel_due_amount || 0) : (fee?.due_amount || 0);
                           setPayData({ ...payData, year, amount });
                        }}
                        className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl font-bold text-ink focus:outline-none focus:ring-2 focus:ring-blue/20 transition-all"
                     >
                        <option value="" disabled>Select Year</option>
-                       <option value="1st Year">1st Year</option>
-                       <option value="2nd Year">2nd Year</option>
-                       <option value="3rd Year">3rd Year</option>
-                       <option value="4th Year">4th Year</option>
+                       <option value="1st year">1st Year</option>
+                       <option value="2nd year">2nd Year</option>
+                       <option value="3rd year">3rd Year</option>
+                       <option value="4th year">4th Year</option>
                     </select>
                  </div>
 
