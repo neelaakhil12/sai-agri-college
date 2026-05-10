@@ -64,8 +64,6 @@ export default function StudentDashboard() {
           <SidebarLink active={activeTab === 'home'} icon="Home" label="Home" onClick={() => setActiveTab('home')} />
           <SidebarLink active={activeTab === 'profile'} icon="User" label="My Profile" onClick={() => setActiveTab('profile')} />
           <SidebarLink active={activeTab === 'fees'} icon="Wallet" label="Fee Payments" onClick={() => setActiveTab('fees')} />
-          <SidebarLink active={activeTab === 'learning'} icon="BookOpen" label="Learning" onClick={() => setActiveTab('learning')} />
-          <SidebarLink active={activeTab === 'calendar'} icon="Calendar" label="Calendar" onClick={() => setActiveTab('calendar')} />
         </nav>
 
         <div className="p-6 border-t border-white/10">
@@ -138,7 +136,6 @@ export default function StudentDashboard() {
               <section>
                  <h3 className="text-[12px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Tools</h3>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <ToolCard icon="Calendar" title="Calendar" onClick={() => setActiveTab('calendar')} />
                     <ToolCard icon="MessageSquare" title="Feedbacks" />
                  </div>
               </section>
@@ -246,36 +243,7 @@ export default function StudentDashboard() {
             </div>
           )}
 
-          {activeTab === 'learning' && (
-            <div className="animate-fadeIn space-y-10">
-               <div className="flex items-center gap-4 border-b border-gray-200 pb-4">
-                  <button className="px-6 py-2 bg-blue text-white rounded-xl font-bold text-sm shadow-lg shadow-blue/20">Courses</button>
-                  <button className="px-6 py-2 text-muted font-bold text-sm hover:text-blue transition-colors">Growth</button>
-               </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  <CourseCard initials="AB" title="AGRONOMY BASICS" teacher="Dr. Thomas" color="sky" />
-                  <CourseCard initials="SS" title="SOIL SCIENCE" teacher="Prof. Krishna" color="green" />
-                  <CourseCard initials="EP" title="ENTOMOLOGY PRINCIPLES" teacher="Dr. Ramesh" color="pink" />
-               </div>
-            </div>
-          )}
-
-          {activeTab === 'calendar' && (
-            <div className="animate-fadeIn max-w-2xl mx-auto bg-white rounded-3xl p-10 border border-gray-100 shadow-sm">
-               <div className="flex items-center justify-between mb-10">
-                  <h3 className="text-xl font-black text-ink uppercase tracking-tight">Academic Calendar</h3>
-                  <span className="text-[10px] font-black text-blue bg-sky px-4 py-1.5 rounded-xl uppercase">2026 - 2027</span>
-               </div>
-               
-               <div className="space-y-10 relative before:content-[''] before:absolute before:left-4 before:top-2 before:bottom-2 before:w-[2px] before:bg-gray-100">
-                  <CalendarItem type="classroom" title="Academic Session Start" date="August 01, 2026" color="blue" />
-                  <CalendarItem type="holiday" title="Independence Day Holiday" date="August 15, 2026" color="orange" />
-                  <CalendarItem type="classroom" title="Mid-Term Examinations" date="October 10 - 20, 2026" color="blue" />
-                  <CalendarItem type="holiday" title="Deepavali Vacation" date="November 01 - 05, 2026" color="orange" />
-               </div>
-            </div>
-          )}
 
         </div>
       </main>
