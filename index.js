@@ -87,6 +87,33 @@ try {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS site_settings (
+          id INT AUTO_INCREMENT PRIMARY KEY, 
+          setting_key VARCHAR(50) UNIQUE, 
+          setting_value TEXT,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )
+      `);
+      
+      // Seed default registration fee if not exists
+      await pool.query(`
+        INSERT IGNORE INTO site_settings (setting_key, setting_value) 
+        VALUES ('registration_fee', '2000')
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS registration_fields (
+          id INT AUTO_INCREMENT PRIMARY KEY, 
+          field_name VARCHAR(100), 
+          field_label VARCHAR(255), 
+          field_type VARCHAR(20) DEFAULT 'text',
+          is_required BOOLEAN DEFAULT FALSE,
+          is_active BOOLEAN DEFAULT TRUE,
+          sort_order INT DEFAULT 0
+        )
+      `);
       console.log("✅ Database tables verified.");
     } catch (err) {
       console.error("❌ Admin init failed:", err.message);

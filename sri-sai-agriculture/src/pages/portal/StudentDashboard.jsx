@@ -87,10 +87,10 @@ export default function StudentDashboard() {
       <aside className="hidden lg:flex w-72 bg-blue flex-col shadow-2xl">
         <div className="p-8 border-b border-white/10">
           <div className="flex items-center gap-3">
-             <img src="/logo.png" alt="Logo" className="h-10 w-10 brightness-0 invert" />
+             <img src="/logo2.png" alt="Logo" className="h-12 w-12 object-contain" />
              <div className="flex flex-col">
-                <span className="text-white font-bold text-sm tracking-tight">Sri Sai Institute</span>
-                <span className="text-white/50 text-[10px] uppercase font-black tracking-widest -mt-1">Agri Sciences</span>
+                <span className="text-white font-bold text-sm tracking-tight leading-tight">Sri Sai Institute</span>
+                <span className="text-white/50 text-[10px] uppercase font-black tracking-widest">Agri Sciences</span>
              </div>
           </div>
         </div>

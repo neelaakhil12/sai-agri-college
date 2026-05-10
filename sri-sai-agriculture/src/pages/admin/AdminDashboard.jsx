@@ -18,6 +18,7 @@ import {
   ExternalLink,
   HelpCircle,
   MessageSquare,
+  Settings,
   X,
   ChevronDown,
   Filter
@@ -33,6 +34,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
 
   const [activeTab, setActiveTab] = useState("students");
+  const [siteSettings, setSiteSettings] = useState({});
+  const [regFields, setRegFields] = useState([]);
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [studentFees, setStudentFees] = useState([]);
@@ -72,6 +75,7 @@ export default function AdminDashboard() {
     { id: 'ranks', label: 'Rankings & Results', icon: Award },
     { id: 'stories', label: 'Success Stories', icon: History },
     { id: 'gallery', label: 'Gallery Management', icon: ImageIcon },
+    { id: 'settings', label: 'Site Settings & Form', icon: Settings },
   ];
 
   const checkAuth = useCallback(async () => {
@@ -94,6 +98,24 @@ export default function AdminDashboard() {
       console.error(err);
     }
   }, [activeTab]);
+
+  const fetchSettings = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API_URL}/admin/settings`, { withCredentials: true });
+      setSiteSettings(res.data);
+    } catch (err) {
+      console.error("Failed to fetch settings", err);
+    }
+  }, []);
+
+  const fetchRegFields = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API_URL}/admin/registration-fields`, { withCredentials: true });
+      setRegFields(res.data);
+    } catch (err) {
+      console.error("Failed to fetch reg fields", err);
+    }
+  }, []);
 
   useEffect(() => {
     checkAuth();
@@ -1528,9 +1550,209 @@ export default function AdminDashboard() {
                 </table>
               </div>
             </div>
+            </div>
+          ) : activeTab === 'settings' ? (
+             <SettingsView 
+               settings={siteSettings} 
+               fields={regFields} 
+               onSaveSetting={async (key, value) => {
+                 try {
+                   await axios.post(`${API_URL}/admin/settings`, { key, value }, { withCredentials: true });
+                   alert("Setting updated!");
+                 } catch (err) { alert("Failed to update setting"); }
+               }}
+               onSaveFields={async (fields) => {
+                 try {
+                   await axios.post(`${API_URL}/admin/registration-fields`, { fields }, { withCredentials: true });
+                   alert("Fields updated!");
+                 } catch (err) { alert("Failed to update fields"); }
+               }}
+               onDeleteField={async (id) => {
+                 if (window.confirm("Delete this field?")) {
+                   try {
+                     await axios.delete(`${API_URL}/admin/registration-fields/${id}`, { withCredentials: true });
+                     alert("Field deleted");
+                   } catch (err) { alert("Delete failed"); }
+                 }
+               }}
+             />
           ) : null}
         </div>
       </main>
+    </div>
+  );
+}
+
+function SettingsView({ settings, fields, onSaveSetting, onSaveFields, onDeleteField }) {
+  const [fee, setFee] = useState(settings.registration_fee || '2000');
+  const [editingFields, setEditingFields] = useState(fields);
+
+  useEffect(() => {
+    setFee(settings.registration_fee || '2000');
+  }, [settings]);
+
+  useEffect(() => {
+    setEditingFields(fields);
+  }, [fields]);
+
+  const addField = () => {
+    const newField = {
+      field_name: `custom_${Date.now()}`,
+      field_label: 'New Field',
+      field_type: 'text',
+      is_required: 0,
+      is_active: 1,
+      sort_order: editingFields.length
+    };
+    setEditingFields([...editingFields, newField]);
+  };
+
+  return (
+    <div className="p-8 animate-fadeIn space-y-10">
+       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <h3 className="text-2xl font-black text-ink uppercase tracking-tight">Master Site Settings</h3>
+            <p className="text-[10px] text-muted font-bold tracking-widest mt-1 uppercase">Configure global portal behavior</p>
+          </div>
+       </div>
+
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          {/* Fee Management */}
+          <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
+             <div className="flex items-center gap-4">
+                <div className="h-12 w-12 bg-sky text-blue rounded-2xl flex items-center justify-center shadow-lg shadow-blue/5">
+                   <LayoutDashboard size={24} />
+                </div>
+                <h4 className="font-black text-ink text-sm uppercase tracking-widest">Registration Fee</h4>
+             </div>
+             
+             <div className="space-y-4">
+                <div className="space-y-1">
+                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Fee Amount (₹)</label>
+                   <input 
+                     type="number" 
+                     value={fee} 
+                     onChange={(e) => setFee(e.target.value)}
+                     className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:border-blue outline-none transition-all font-black text-xl text-ink" 
+                   />
+                </div>
+                <button 
+                  onClick={() => onSaveSetting('registration_fee', fee)}
+                  className="w-full bg-[#15803d] text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-green-500/10 hover:bg-[#166534] transition-all"
+                >
+                   Update Global Fee
+                </button>
+             </div>
+          </div>
+
+          {/* Form Builder */}
+          <div className="lg:col-span-2 bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+             <div className="p-8 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                   <div className="h-10 w-10 bg-orange/10 text-orange rounded-xl flex items-center justify-center">
+                      <Plus size={20} />
+                   </div>
+                   <h4 className="font-black text-ink text-sm uppercase tracking-widest">Registration Form Builder</h4>
+                </div>
+                <button 
+                  onClick={addField}
+                  className="px-6 py-3 bg-blue text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-ink transition-all shadow-lg shadow-blue/20"
+                >
+                   Add New Field
+                </button>
+             </div>
+             
+             <div className="overflow-x-auto">
+                <table className="w-full">
+                   <thead>
+                      <tr className="bg-gray-50">
+                         <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-widest">Label</th>
+                         <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-widest">Type</th>
+                         <th className="px-6 py-4 text-center text-[9px] font-black text-gray-400 uppercase tracking-widest">Required</th>
+                         <th className="px-6 py-4 text-center text-[9px] font-black text-gray-400 uppercase tracking-widest">Active</th>
+                         <th className="px-6 py-4 text-right text-[9px] font-black text-gray-400 uppercase tracking-widest">Action</th>
+                      </tr>
+                   </thead>
+                   <tbody className="divide-y divide-gray-50">
+                      {editingFields.map((field, idx) => (
+                        <tr key={field.id || idx}>
+                           <td className="px-6 py-4">
+                              <input 
+                                value={field.field_label}
+                                onChange={(e) => {
+                                  const newFields = [...editingFields];
+                                  newFields[idx].field_label = e.target.value;
+                                  setEditingFields(newFields);
+                                }}
+                                className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-bold text-ink focus:border-blue outline-none"
+                              />
+                           </td>
+                           <td className="px-6 py-4">
+                              <select 
+                                value={field.field_type}
+                                onChange={(e) => {
+                                  const newFields = [...editingFields];
+                                  newFields[idx].field_type = e.target.value;
+                                  setEditingFields(newFields);
+                                }}
+                                className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-[10px] font-black uppercase tracking-wider outline-none"
+                              >
+                                 <option value="text">TEXT</option>
+                                 <option value="number">NUMBER</option>
+                                 <option value="date">DATE</option>
+                              </select>
+                           </td>
+                           <td className="px-6 py-4 text-center">
+                              <input 
+                                type="checkbox" 
+                                checked={field.is_required} 
+                                onChange={(e) => {
+                                  const newFields = [...editingFields];
+                                  newFields[idx].is_required = e.target.checked ? 1 : 0;
+                                  setEditingFields(newFields);
+                                }}
+                                className="w-4 h-4 rounded border-gray-300 text-blue focus:ring-0" 
+                              />
+                           </td>
+                           <td className="px-6 py-4 text-center">
+                              <input 
+                                type="checkbox" 
+                                checked={field.is_active} 
+                                onChange={(e) => {
+                                  const newFields = [...editingFields];
+                                  newFields[idx].is_active = e.target.checked ? 1 : 0;
+                                  setEditingFields(newFields);
+                                }}
+                                className="w-4 h-4 rounded border-gray-300 text-green-500 focus:ring-0" 
+                              />
+                           </td>
+                           <td className="px-6 py-4 text-right">
+                              <button 
+                                onClick={() => field.id ? onDeleteField(field.id) : setEditingFields(editingFields.filter((_, i) => i !== idx))}
+                                className="p-2 text-red-400 hover:text-red-600 transition-colors"
+                              >
+                                 <Trash2 size={16} />
+                              </button>
+                           </td>
+                        </tr>
+                      ))}
+                      {editingFields.length === 0 && (
+                        <tr><td colSpan="5" className="px-6 py-20 text-center text-gray-300 font-bold uppercase tracking-widest text-[10px]">No custom fields added yet</td></tr>
+                      )}
+                   </tbody>
+                </table>
+             </div>
+             
+             <div className="p-8 bg-gray-50/50 border-t border-gray-100">
+                <button 
+                  onClick={() => onSaveFields(editingFields)}
+                  className="w-full bg-[#15803d] text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-green-500/10 hover:bg-[#166534] transition-all"
+                >
+                   Save Form Changes
+                </button>
+             </div>
+          </div>
+       </div>
     </div>
   );
 }

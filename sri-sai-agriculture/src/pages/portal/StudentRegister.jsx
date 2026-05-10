@@ -46,6 +46,26 @@ export default function StudentRegister() {
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
 
+  const [settings, setSettings] = useState({ registration_fee: "2000" });
+  const [dynamicFields, setDynamicFields] = useState([]);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/admin/settings/public`);
+        setSettings(res.data);
+      } catch (err) { console.error(err); }
+    };
+    const fetchFields = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/admin/registration-fields`);
+        setDynamicFields(res.data);
+      } catch (err) { console.error(err); }
+    };
+    fetchSettings();
+    fetchFields();
+  }, []);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -87,7 +107,7 @@ export default function StudentRegister() {
     const payload = new FormData();
     payload.append("screenshot", screenshot);
     payload.append("fee_type", "Registration Fee");
-    payload.append("amount", "2000");
+    payload.append("amount", settings.registration_fee || "2000");
     payload.append("academic_year", "1st year");
     
     try {
@@ -142,7 +162,7 @@ export default function StudentRegister() {
           <div className="p-10 space-y-8">
              <div className="bg-[#1a6b3c]/5 border-2 border-dashed border-[#1a6b3c]/20 p-8 rounded-[2.5rem] text-center">
                 <h3 className="text-[#1a6b3c] font-black text-xs uppercase tracking-[0.2em] mb-2">Registration Fee Due</h3>
-                <p className="text-4xl font-black text-ink">₹ 2,000.00</p>
+                <p className="text-4xl font-black text-ink">₹ {settings.registration_fee || "2,000.00"}</p>
                 <p className="text-[10px] font-black text-muted mt-3 uppercase tracking-widest opacity-60">Application & Processing Fee</p>
              </div>
 
@@ -151,7 +171,7 @@ export default function StudentRegister() {
                    <h4 className="font-black text-ink text-xs uppercase tracking-widest ml-1">Scan UPI QR</h4>
                    <div className="aspect-square w-full max-w-[180px] bg-white border-2 border-gray-100 rounded-[2rem] flex items-center justify-center p-3 shadow-inner">
                       <img 
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('upi://pay?pa=43564790508@sbi&pn=SRI SAI INSTITUTE&am=2000&cu=INR')}`} 
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=43564790508@sbi&pn=SRI SAI INSTITUTE&am=${settings.registration_fee || '2000'}&cu=INR`)}`} 
                         alt="QR Code" 
                         className="w-full h-full" 
                       />
@@ -439,6 +459,32 @@ export default function StudentRegister() {
                       <input placeholder="Personal Email" name="email_personal" value={formData.email_personal} onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue outline-none transition-all" />
                     </div>
                   </div>
+
+                  {/* Dynamic Fields Section */}
+                  {dynamicFields.length > 0 && (
+                    <div className="pt-10 border-t border-gray-100">
+                      <h2 className="text-xl font-bold text-ink mb-6 flex items-center gap-2">
+                        <span className="h-6 w-1 bg-blue rounded-full"></span>
+                        Additional Information
+                      </h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {dynamicFields.map(field => (
+                          <div key={field.id} className="space-y-2">
+                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider ml-1">{field.field_label}</label>
+                            <input 
+                              type={field.field_type}
+                              name={field.field_name}
+                              required={field.is_required}
+                              value={formData[field.field_name] || ""}
+                              onChange={handleChange}
+                              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue outline-none transition-all"
+                              placeholder={`Enter ${field.field_label.toLowerCase()}`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                 </div>
               </div>
