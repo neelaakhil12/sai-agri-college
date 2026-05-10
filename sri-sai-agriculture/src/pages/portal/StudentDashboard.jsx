@@ -221,7 +221,13 @@ export default function StudentDashboard() {
 
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <InfoSection title="Personal Details">
-                     <InfoField label="Date of Birth" value={student.dob ? new Date(student.dob).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }) : 'Not Provided'} />
+                     <InfoField 
+                        label="Date of Birth" 
+                        value={student.dob ? (() => {
+                           const d = new Date(student.dob);
+                           return isNaN(d.getTime()) ? student.dob : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+                        })() : 'Not Provided'} 
+                     />
                      <InfoField label="Gender" value={student.gender || 'Not Provided'} />
                      <InfoField label="Nationality" value={student.nationality || 'Indian'} />
                   </InfoSection>

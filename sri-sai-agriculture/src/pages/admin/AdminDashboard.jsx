@@ -231,20 +231,27 @@ export default function AdminDashboard() {
     }
   };
 
+  const formatDobForInput = (dob) => {
+    if (!dob) return '';
+    let dateObj = new Date(dob);
+    if (isNaN(dateObj.getTime()) && typeof dob === 'string' && dob.includes('-')) {
+      const parts = dob.split('-');
+      if (parts.length === 3) {
+        if (parts[0].length === 4) dateObj = new Date(dob); // YYYY-MM-DD
+        else if (parts[2].length === 4) dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`); // DD-MM-YYYY
+      }
+    }
+    if (!isNaN(dateObj.getTime())) return dateObj.toISOString().split('T')[0];
+    return '';
+  };
+
   const handleEdit = (item) => {
     setEditingId(item.id || item._id);
     let mapped = { ...item };
     
     // Format Date of Birth for HTML date input (YYYY-MM-DD)
     if (activeTab === 'students' && mapped.dob) {
-      try {
-        const dateObj = new Date(mapped.dob);
-        if (!isNaN(dateObj.getTime())) {
-          mapped.dob = dateObj.toISOString().split('T')[0];
-        }
-      } catch (err) {
-        console.error("Date parsing error:", err);
-      }
+      mapped.dob = formatDobForInput(mapped.dob);
     }
 
     if (activeTab === 'testimonials' || activeTab === 'ranks') {
@@ -1338,7 +1345,10 @@ export default function AdminDashboard() {
                            <button 
                              onClick={() => { 
                                setSelectedStudent(student); 
-                               setFormData({...student});
+                               setFormData({
+                                 ...student,
+                                 dob: formatDobForInput(student.dob)
+                               });
                                setViewMode('student-manage'); 
                              }}
                              className="flex-1 bg-[#15803d] text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#166534] transition-all"

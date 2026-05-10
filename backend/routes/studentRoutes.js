@@ -135,6 +135,7 @@ router.get("/admin/list", authenticate, async (req, res) => {
 router.put("/admin/update/:id", authenticate, upload.single("photo"), async (req, res) => {
   const { id } = req.params;
   const updates = { ...req.body };
+  console.log("Incoming updates for student:", req.params.id, updates);
   
   try {
     if (updates.password) {
