@@ -205,8 +205,7 @@ export default function StudentDashboard() {
                         title="Pay Academic Fees" 
                         detail="College Tuition Fees" 
                         onClick={() => {
-                          const due = student.student_fees?.reduce((acc, f) => acc + (f.due_amount || 0), 0) || 0;
-                          setPayData({ type: 'Academic Fee', amount: due, year: 'Current Year' });
+                          setPayData({ type: 'Academic Fee', amount: 0, year: '' });
                           setShowPayModal(true);
                         }}
                      />
@@ -215,8 +214,7 @@ export default function StudentDashboard() {
                         title="Pay Hostel Fees" 
                         detail="Hostel & Mess Charges" 
                         onClick={() => {
-                          const due = student.student_fees?.reduce((acc, f) => acc + (f.hostel_due_amount || 0), 0) || 0;
-                          setPayData({ type: 'Hostel Fee', amount: due, year: 'Current Year' });
+                          setPayData({ type: 'Hostel Fee', amount: 0, year: '' });
                           setShowPayModal(true);
                         }}
                      />
@@ -345,10 +343,32 @@ export default function StudentDashboard() {
               </div>
 
               <div className="p-8 space-y-6 overflow-y-auto max-h-[70vh]">
+                 {/* Year Selector */}
+                 <div className="space-y-3">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select Academic Year</label>
+                    <select 
+                       value={payData.year} 
+                       onChange={(e) => {
+                          const year = e.target.value;
+                          const fee = student.student_fees?.find(f => f.academic_year === year);
+                          const amount = payData.type === 'Hostel Fee' ? (fee?.hostel_due_amount || 0) : (fee?.due_amount || 0);
+                          setPayData({ ...payData, year, amount });
+                       }}
+                       className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl font-bold text-ink focus:outline-none focus:ring-2 focus:ring-blue/20 transition-all"
+                    >
+                       <option value="" disabled>Select Year</option>
+                       <option value="1st Year">1st Year</option>
+                       <option value="2nd Year">2nd Year</option>
+                       <option value="3rd Year">3rd Year</option>
+                       <option value="4th Year">4th Year</option>
+                    </select>
+                 </div>
+
                  {/* Amount Alert */}
                  <div className="bg-blue/5 border border-blue/10 p-5 rounded-2xl text-center">
                     <p className="text-xs font-bold text-blue uppercase tracking-widest mb-1">Total Due Amount</p>
                     <h2 className="text-3xl font-black text-blue">₹{payData.amount}</h2>
+                    {payData.amount === 0 && payData.year && <p className="text-[10px] font-bold text-green-500 uppercase mt-2">No Dues for this year! ✨</p>}
                  </div>
 
                  {/* QR Code Section */}
