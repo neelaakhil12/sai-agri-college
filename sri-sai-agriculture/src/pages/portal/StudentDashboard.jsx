@@ -374,7 +374,14 @@ export default function StudentDashboard() {
                  {/* QR Code Section */}
                  <div className="text-center space-y-3">
                     <div className="h-48 w-48 bg-white border-4 border-sky rounded-3xl mx-auto flex items-center justify-center p-2 shadow-inner">
-                       <img src="/payment_qr.png" alt="Payment QR" className="h-full w-full object-contain" onError={(e) => e.target.src = "https://via.placeholder.com/200?text=Scan+To+Pay"} />
+                       <img 
+                          src="/payment_qr.png" 
+                          alt="Payment QR" 
+                          className="h-full w-full object-contain" 
+                          onError={(e) => {
+                             e.target.src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=43564790508@sbi&pn=SRI%20SAI%20INSTITUTE%20OF%20AGRICULTURE&cu=INR";
+                          }} 
+                       />
                     </div>
                     <div className="flex flex-col items-center">
                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">UPI ID</span>
