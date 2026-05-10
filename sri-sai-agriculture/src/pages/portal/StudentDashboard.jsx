@@ -220,6 +220,11 @@ export default function StudentDashboard() {
                </div>
 
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <InfoSection title="Personal Details">
+                     <InfoField label="Date of Birth" value={student.dob ? new Date(student.dob).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }) : 'Not Provided'} />
+                     <InfoField label="Gender" value={student.gender || 'Not Provided'} />
+                     <InfoField label="Nationality" value={student.nationality || 'Indian'} />
+                  </InfoSection>
                   <InfoSection title="Parent Details">
                      <InfoField label="Father's Name" value={student.father_name} />
                      <InfoField label="Mother's Name" value={student.mother_name} />

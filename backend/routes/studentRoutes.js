@@ -140,6 +140,11 @@ router.put("/admin/update/:id", authenticate, upload.single("photo"), async (req
     if (updates.password) {
       updates.password = await bcrypt.hash(updates.password, 10);
     }
+
+    // Handle empty date strings for MySQL
+    if (updates.dob === "") {
+      updates.dob = null;
+    }
     
     let updateQuery = "UPDATE students SET ";
     let queryParams = [];

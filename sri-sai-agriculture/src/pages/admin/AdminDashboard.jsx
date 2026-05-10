@@ -235,6 +235,18 @@ export default function AdminDashboard() {
     setEditingId(item.id || item._id);
     let mapped = { ...item };
     
+    // Format Date of Birth for HTML date input (YYYY-MM-DD)
+    if (activeTab === 'students' && mapped.dob) {
+      try {
+        const dateObj = new Date(mapped.dob);
+        if (!isNaN(dateObj.getTime())) {
+          mapped.dob = dateObj.toISOString().split('T')[0];
+        }
+      } catch (err) {
+        console.error("Date parsing error:", err);
+      }
+    }
+
     if (activeTab === 'testimonials' || activeTab === 'ranks') {
        mapped.studentName = item.student_name || item.studentName;
     }
