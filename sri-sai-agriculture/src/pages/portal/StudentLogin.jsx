@@ -94,22 +94,13 @@ export default function StudentLogin() {
              <button type="button" onClick={handleForgotPassword} className="text-[12px] font-bold text-blue hover:underline">Forgot Password?</button>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <button 
-              disabled={loading}
-              type="submit" 
-              className="bg-blue text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-blue/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
-            >
-              {loading ? "Authenticating..." : "Login"}
-            </button>
-            <button 
-              type="button"
-              onClick={() => navigate("/portal/dashboard")}
-              className="bg-sky text-blue py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all"
-            >
-              Demo Login
-            </button>
-          </div>
+          <button 
+            disabled={loading}
+            type="submit" 
+            className="w-full bg-blue text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-blue/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+          >
+            {loading ? "Authenticating..." : "Login"}
+          </button>
 
           <div className="text-center pt-4">
              <p className="text-[12px] font-bold text-muted">
