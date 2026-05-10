@@ -350,8 +350,19 @@ export default function StudentDashboard() {
                        value={payData.year} 
                        onChange={(e) => {
                           const year = e.target.value;
-                          const fee = student.student_fees?.find(f => f.academic_year.toLowerCase() === year.toLowerCase());
-                          const amount = payData.type === 'Hostel Fee' ? (fee?.hostel_due_amount || 0) : (fee?.due_amount || 0);
+                          // Robust finding logic
+                          const fee = student.student_fees?.find(f => 
+                             f.academic_year.toLowerCase().trim() === year.toLowerCase().trim()
+                          );
+                          
+                          // Calculate amount based on type
+                          let amount = 0;
+                          if (payData.type.includes('Hostel')) {
+                             amount = parseFloat(fee?.hostel_due_amount || 0);
+                          } else if (payData.type.includes('Academic') || payData.type.includes('Examination')) {
+                             amount = payData.type.includes('Examination') ? 1500 : parseFloat(fee?.due_amount || 0);
+                          }
+                          
                           setPayData({ ...payData, year, amount });
                        }}
                        className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl font-bold text-ink focus:outline-none focus:ring-2 focus:ring-blue/20 transition-all"
