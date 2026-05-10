@@ -129,11 +129,9 @@ export default function StudentDashboard() {
               {/* Essentials Grid */}
               <section>
                  <h3 className="text-[12px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Essentials</h3>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <PortalCard color="green" icon="BarChart3" title="Attendance" subtitle="89.39%" detail="As on Apr 29, 16:48" />
                     <PortalCard color="pink" icon="Wallet" title="Fee Payments" subtitle="View Details" detail="Check Dues & Payments" onClick={() => setActiveTab('fees')} />
-                    <PortalCard color="purple" icon="MapPin" title="Campus Events" subtitle="Upcoming" detail="Symposium 2026" />
-                    <PortalCard color="sky" icon="Users" title="Campus Clubs" subtitle="Active" detail="Agri-Tech Club" />
                  </div>
               </section>
 
