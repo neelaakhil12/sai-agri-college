@@ -158,16 +158,14 @@ export default function StudentDashboard() {
                  </div>
               </div>
 
-              {/* Essentials Grid */}
               <section>
                  <h3 className="text-[12px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Essentials</h3>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <PortalCard color="green" icon="BarChart3" title="Attendance" subtitle="89.39%" detail="As on Apr 29, 16:48" />
+                    <PortalCard color="green" icon="BarChart3" title="Attendance" subtitle={`${student.attendance_percentage || "0.00"}%`} detail="Live Faculty Record" />
                     <PortalCard color="pink" icon="Wallet" title="Fee Payments" subtitle="View Details" detail="Check Dues & Payments" onClick={() => setActiveTab('fees')} />
                  </div>
               </section>
 
-              {/* Tools Section */}
               <section>
                  <h3 className="text-[12px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Tools</h3>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

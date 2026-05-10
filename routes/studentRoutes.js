@@ -114,8 +114,22 @@ router.get("/profile", async (req, res) => {
     const [qualifications] = await pool.query("SELECT * FROM qualifications WHERE student_id = ?", [student.id]);
     const [fees] = await pool.query("SELECT * FROM student_fees WHERE student_id = ?", [student.id]);
 
+    // Calculate attendance percentage
+    const [attRows] = await pool.query(
+      "SELECT status, COUNT(*) as count FROM attendance WHERE student_id = ? GROUP BY status",
+      [student.id]
+    );
+    let totalDays = 0;
+    let presentDays = 0;
+    attRows.forEach(row => {
+      totalDays += row.count;
+      if (row.status === 'Present') presentDays += row.count;
+    });
+    const attendancePercentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : "0.00";
+
     student.qualifications = qualifications;
     student.student_fees = fees;
+    student.attendance_percentage = attendancePercentage;
 
     res.json(student);
   } catch (err) {

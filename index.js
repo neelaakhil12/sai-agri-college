@@ -42,6 +42,7 @@ try {
   app.use("/api/admin", require("./routes/adminRoutes"));
   app.use("/api/admin", require("./routes/syncRoutes"));
   app.use("/api/student-fees", require("./routes/feeRoutes"));
+  app.use("/api/staff", require("./routes/staffRoutes"));
   console.log("✅ Routes initialized");
 
   // Serve static files
@@ -112,6 +113,29 @@ try {
           is_required BOOLEAN DEFAULT FALSE,
           is_active BOOLEAN DEFAULT TRUE,
           sort_order INT DEFAULT 0
+        )
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS staff (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          name VARCHAR(255),
+          email VARCHAR(255) UNIQUE NOT NULL,
+          password VARCHAR(255) NOT NULL,
+          department VARCHAR(100),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS attendance (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          student_id INT,
+          date DATE,
+          status ENUM('Present', 'Absent', 'Leave') DEFAULT 'Present',
+          marked_by INT, -- staff_id
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE KEY (student_id, date)
         )
       `);
       console.log("✅ Database tables verified.");

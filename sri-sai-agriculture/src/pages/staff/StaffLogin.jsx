@@ -1,0 +1,87 @@
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+
+export default function StaffLogin() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const API_URL = "/api";
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API_URL}/staff/login`, { email, password }, { withCredentials: true });
+      navigate("/staff/dashboard");
+    } catch (err) {
+      alert(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-6">
+      <Link to="/" className="mb-10 group">
+         <div className="flex items-center gap-4 bg-white p-4 rounded-[2rem] shadow-xl shadow-blue/5 border border-gray-100 pr-8">
+            <div className="h-12 w-12 bg-blue rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue/20">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </div>
+            <div className="flex flex-col">
+               <span className="font-black text-ink text-sm uppercase tracking-tight leading-tight">Sri Sai Institute</span>
+               <span className="text-[10px] font-black text-muted uppercase tracking-widest">Agri Sciences</span>
+            </div>
+         </div>
+      </Link>
+
+      <div className="max-w-md w-full bg-white rounded-[3rem] shadow-2xl shadow-blue/5 border border-gray-100 p-10 space-y-8 animate-fadeIn">
+        <div className="text-center">
+          <div className="h-20 w-20 bg-sky text-blue rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue/5">
+             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+          </div>
+          <h2 className="text-3xl font-black text-ink uppercase tracking-tight">Staff Portal</h2>
+          <p className="text-muted font-bold text-[10px] uppercase tracking-[0.2em] mt-2">Faculty & Administration Access</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Work Email</label>
+            <input 
+              required
+              type="email" 
+              placeholder="name@srisai.edu"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-blue transition-all font-bold text-ink"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Password</label>
+            <input 
+              required
+              type="password" 
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-blue transition-all font-bold text-ink"
+            />
+          </div>
+          <button 
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue text-white py-5 rounded-2xl font-black text-[12px] uppercase tracking-widest shadow-xl shadow-blue/20 hover:bg-ink transition-all disabled:opacity-50"
+          >
+            {loading ? "Verifying..." : "Access Dashboard"}
+          </button>
+        </form>
+
+        <div className="pt-6 text-center border-t border-gray-100">
+           <p className="text-[10px] text-muted font-bold uppercase tracking-widest">Issues logging in? Contact IT Dept.</p>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -99,23 +99,28 @@ export default function AdminDashboard() {
     }
   }, [activeTab]);
 
-  const fetchSettings = useCallback(async () => {
+  const fetchSettings = async () => {
     try {
       const res = await axios.get(`${API_URL}/admin/settings`, { withCredentials: true });
-      setSiteSettings(res.data);
-    } catch (err) {
-      console.error("Failed to fetch settings", err);
-    }
-  }, []);
+      const settingsMap = {};
+      res.data.forEach(s => settingsMap[s.setting_key] = s.setting_value);
+      setSiteSettings(settingsMap);
+    } catch (err) { console.error(err); }
+  };
 
-  const fetchRegFields = useCallback(async () => {
+  const fetchRegFields = async () => {
     try {
       const res = await axios.get(`${API_URL}/admin/registration-fields`, { withCredentials: true });
       setRegFields(res.data);
-    } catch (err) {
-      console.error("Failed to fetch reg fields", err);
-    }
-  }, []);
+    } catch (err) { console.error(err); }
+  };
+
+  const fetchStaff = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/staff/admin/list`, { withCredentials: true });
+      setStaffList(res.data);
+    } catch (err) { console.error(err); }
+  };
 
   useEffect(() => {
     checkAuth();
@@ -1549,7 +1554,26 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
                </div>
-            </div>
+                     <SidebarLink active={activeTab === 'settings'} icon="Settings" label="Settings" onClick={() => setActiveTab('settings')} />
+          <SidebarLink active={activeTab === 'staff'} icon="UserCheck" label="Staff" onClick={() => setActiveTab('staff')} />
+        </nav>
+      </aside>
+
+      <main className="flex-grow flex flex-col h-screen overflow-y-auto">
+        <header className="bg-white px-8 py-5 flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
+           <div className="flex flex-col">
+              <h1 className="text-xl font-black text-ink uppercase tracking-tight">{activeTab}</h1>
+              <p className="text-[10px] text-muted font-bold tracking-widest -mt-0.5 uppercase">Institution Command Center</p>
+           </div>
+        </header>
+
+        <div className="p-0">
+          {activeTab === 'overview' ? (
+             <Overview stats={stats} />
+          ) : activeTab === 'students' ? (
+             <StudentList students={students} />
+          ) : activeTab === 'fees' ? (
+             <FeeManagement students={students} fees={fees} onVerify={handleVerify} />
           ) : activeTab === 'settings' ? (
              <SettingsView 
                settings={siteSettings} 
@@ -1557,20 +1581,37 @@ export default function AdminDashboard() {
                onSaveSetting={async (key, value) => {
                  try {
                    await axios.post(`${API_URL}/admin/settings`, { key, value }, { withCredentials: true });
-                   alert("Setting updated!");
-                 } catch (err) { alert("Failed to update setting"); }
+                   fetchSettings();
+                 } catch (err) { alert("Failed"); }
                }}
                onSaveFields={async (fields) => {
                  try {
                    await axios.post(`${API_URL}/admin/registration-fields`, { fields }, { withCredentials: true });
-                   alert("Fields updated!");
-                 } catch (err) { alert("Failed to update fields"); }
+                   fetchRegFields();
+                 } catch (err) { alert("Failed"); }
                }}
                onDeleteField={async (id) => {
-                 if (window.confirm("Delete this field?")) {
+                 try {
+                   await axios.delete(`${API_URL}/admin/registration-fields/${id}`, { withCredentials: true });
+                   fetchRegFields();
+                 } catch (err) { alert("Failed"); }
+               }}
+             />
+          ) : activeTab === 'staff' ? (
+             <StaffManagementView 
+               staff={staffList} 
+               onRefresh={fetchStaff}
+               onCreate={async (data) => {
+                 try {
+                   await axios.post(`${API_URL}/staff/admin/create`, data, { withCredentials: true });
+                   fetchStaff();
+                 } catch (err) { alert("Create failed"); }
+               }}
+               onDelete={async (id) => {
+                 if (window.confirm("Delete staff?")) {
                    try {
-                     await axios.delete(`${API_URL}/admin/registration-fields/${id}`, { withCredentials: true });
-                     alert("Field deleted");
+                     await axios.delete(`${API_URL}/staff/admin/${id}`, { withCredentials: true });
+                     fetchStaff();
                    } catch (err) { alert("Delete failed"); }
                  }
                }}
@@ -1578,6 +1619,74 @@ export default function AdminDashboard() {
           ) : null}
         </div>
       </main>
+    </div>
+  );
+}
+
+function StaffManagementView({ staff, onRefresh, onCreate, onDelete }) {
+  const [showAdd, setShowAdd] = useState(false);
+  const [newStaff, setNewStaff] = useState({ name: '', email: '', password: '', department: '' });
+
+  return (
+    <div className="p-8 animate-fadeIn space-y-10">
+       <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-2xl font-black text-ink uppercase tracking-tight">Staff Management</h3>
+            <p className="text-[10px] text-muted font-bold tracking-widest mt-1 uppercase">Manage faculty access and credentials</p>
+          </div>
+          <button 
+            onClick={() => setShowAdd(true)}
+            className="px-6 py-3 bg-blue text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue/20 hover:bg-ink transition-all flex items-center gap-2"
+          >
+             <Plus size={16} /> Add Staff Member
+          </button>
+       </div>
+
+       {showAdd && (
+          <div className="bg-white p-8 rounded-[2.5rem] border border-blue/20 shadow-2xl shadow-blue/5 space-y-6">
+             <div className="flex items-center justify-between">
+                <h4 className="font-black text-ink text-sm uppercase tracking-widest">New Staff Account</h4>
+                <button onClick={() => setShowAdd(false)} className="text-muted hover:text-red-500"><X size={20} /></button>
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <input placeholder="Full Name" value={newStaff.name} onChange={e => setNewStaff({...newStaff, name: e.target.value})} className="px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-blue" />
+                <input placeholder="Email Address" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} className="px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-blue" />
+                <input placeholder="Password" type="password" value={newStaff.password} onChange={e => setNewStaff({...newStaff, password: e.target.value})} className="px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-blue" />
+                <input placeholder="Department" value={newStaff.department} onChange={e => setNewStaff({...newStaff, department: e.target.value})} className="px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-blue" />
+             </div>
+             <button 
+               onClick={() => { onCreate(newStaff); setShowAdd(false); setNewStaff({name:'', email:'', password:'', department:''}); }}
+               className="w-full bg-[#15803d] text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest"
+             >
+                Create Staff Account
+             </button>
+          </div>
+       )}
+
+       <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+          <table className="w-full">
+             <thead>
+                <tr className="bg-gray-50">
+                   <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Name</th>
+                   <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Email</th>
+                   <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Department</th>
+                   <th className="px-8 py-5 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">Action</th>
+                </tr>
+             </thead>
+             <tbody className="divide-y divide-gray-50">
+                {staff.map(member => (
+                   <tr key={member.id}>
+                      <td className="px-8 py-6 font-bold text-ink">{member.name}</td>
+                      <td className="px-8 py-6 text-muted font-medium">{member.email}</td>
+                      <td className="px-8 py-6 uppercase text-[10px] font-black tracking-widest text-blue/70">{member.department}</td>
+                      <td className="px-8 py-6 text-right">
+                         <button onClick={() => onDelete(member.id)} className="p-2 text-red-400 hover:text-red-600 transition-colors"><Trash2 size={18} /></button>
+                      </td>
+                   </tr>
+                ))}
+             </tbody>
+          </table>
+       </div>
     </div>
   );
 }
