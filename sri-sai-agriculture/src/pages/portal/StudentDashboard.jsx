@@ -265,8 +265,8 @@ export default function StudentDashboard() {
                                   )}
                                </td>
                                <td className="px-8 py-6">
-                                  <span className="text-[10px] font-bold text-gray-400 uppercase">
-                                     {fee.last_payment_date ? new Date(fee.last_payment_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '---'}
+                                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                     {fee.last_payment_date ? new Date(fee.last_payment_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No Record'}
                                   </span>
                                </td>
                                <td className="px-8 py-6">
