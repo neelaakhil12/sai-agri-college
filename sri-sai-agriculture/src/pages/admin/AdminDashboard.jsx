@@ -1055,7 +1055,6 @@ export default function AdminDashboard() {
                           value={formData.academic_enrolled_year || ''} 
                         />
                       </div>
-                      
                       <div className="space-y-1">
                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">ACADEMIC YEAR</label>
                         <select 
@@ -1071,6 +1070,28 @@ export default function AdminDashboard() {
                         </select>
                       </div>
                    </div>
+
+                    <div className="mt-8 flex justify-end">
+                       <button 
+                         type="button"
+                         onClick={async () => {
+                           if (window.confirm(`Reset password for ${formData.student_name} to their Roll Number (${formData.roll_no})?`)) {
+                             try {
+                               setLoading(true);
+                               await axios.put(`/api/students/admin/update/${selectedStudent.id}`, { password: formData.roll_no }, { withCredentials: true });
+                               alert("Password reset successfully!");
+                             } catch (err) {
+                               alert("Reset failed: " + (err.response?.data?.message || err.message));
+                             } finally {
+                               setLoading(false);
+                             }
+                           }
+                         }}
+                         className="px-6 py-3 bg-orange/10 text-orange rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-orange hover:text-white transition-all border border-orange/20"
+                       >
+                          Reset Password to Roll No
+                       </button>
+                    </div>
 
                    <div className="mt-16 p-10 bg-gray-50/50 rounded-[3rem] border border-gray-100">
                       <div className="flex items-center gap-4 mb-10">
