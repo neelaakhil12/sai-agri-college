@@ -126,9 +126,12 @@ router.get("/profile", async (req, res) => {
 // Get All Students (Admin Only)
 router.get("/admin/list", authenticate, async (req, res) => {
   try {
+    console.log("🔍 Admin requesting student list...");
     const [rows] = await pool.query("SELECT id, roll_no, email, student_name, father_name, mother_name, branch, inter_type, dob, gender, admission_type, course_applied, medium, nationality, religion, door_no, village, mandal, pin, district, mobile1, mobile2, residence_phone, email_personal, reference, photo, status, current_year, academic_enrolled_year, created_at FROM students ORDER BY created_at DESC");
+    console.log(`✅ Found ${rows.length} students in DB.`);
     res.json(rows);
   } catch (err) {
+    console.error("❌ Admin student list error:", err.message);
     res.status(500).json({ message: err.message });
   }
 });
