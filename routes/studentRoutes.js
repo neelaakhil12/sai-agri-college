@@ -22,7 +22,9 @@ router.post("/register", upload.single("photo"), async (req, res) => {
   const photo = req.file ? req.file.path.replace(/\\/g, "/") : "";
 
   try {
-    const hashedPassword = await bcrypt.hash(password || roll_no, 10);
+    // Fallback for initial registration where roll_no/password might be missing
+    const authCredential = password || roll_no || email || "SriSai@123";
+    const hashedPassword = await bcrypt.hash(authCredential, 10);
 
     // 1. Insert Student
     const [result] = await pool.query(
