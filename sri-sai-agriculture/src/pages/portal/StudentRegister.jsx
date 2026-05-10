@@ -64,6 +64,46 @@ export default function StudentRegister() {
     }
   };
 
+  const [screenshot, setScreenshot] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.type !== "image/png") {
+      alert("Only PNG files are allowed!");
+      return;
+    }
+    if (file.size > 100 * 1024) {
+      alert("File size must be under 100KB!");
+      return;
+    }
+    setScreenshot(file);
+  };
+
+  const handlePaymentSubmit = async () => {
+    if (!screenshot) return;
+    setUploading(true);
+    const payload = new FormData();
+    payload.append("screenshot", screenshot);
+    payload.append("fee_type", "Registration Fee");
+    payload.append("amount", "2000");
+    payload.append("academic_year", "1st year");
+    
+    try {
+      await axios.post(`${API_URL}/fees/upload-proof`, payload, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true
+      });
+      alert("Payment proof submitted successfully! Our team will verify it.");
+      navigate("/portal/login");
+    } catch (err) {
+      alert("Failed to upload proof. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const [showPayment, setShowPayment] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -93,46 +133,81 @@ export default function StudentRegister() {
         <div className="max-w-2xl w-full bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100 animate-fadeIn">
           <div className="bg-blue p-10 text-white text-center">
              <div className="h-20 w-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-xl border border-white/30">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <Check size={40} strokeWidth={3} />
              </div>
              <h2 className="text-3xl font-lora font-bold">Registration Successful!</h2>
-             <p className="text-sky/80 font-medium mt-2">SRI SAI AGRICULTURAL COLLEGE</p>
+             <p className="text-sky/80 font-medium mt-2 uppercase tracking-widest text-[10px]">Complete your payment to secure your seat</p>
           </div>
 
           <div className="p-10 space-y-8">
-             <div className="bg-orange/5 border-2 border-dashed border-orange/20 p-6 rounded-3xl text-center">
-                <h3 className="text-orange font-black text-xs uppercase tracking-[0.2em] mb-2">Application Registration Fee</h3>
-                <p className="text-2xl font-black text-ink">₹ 2,000.00</p>
-                <p className="text-[10px] font-bold text-muted mt-2 uppercase tracking-tighter">* Secure your seat by completing the registration payment</p>
+             <div className="bg-[#1a6b3c]/5 border-2 border-dashed border-[#1a6b3c]/20 p-8 rounded-[2.5rem] text-center">
+                <h3 className="text-[#1a6b3c] font-black text-xs uppercase tracking-[0.2em] mb-2">Registration Fee Due</h3>
+                <p className="text-4xl font-black text-ink">₹ 2,000.00</p>
+                <p className="text-[10px] font-black text-muted mt-3 uppercase tracking-widest opacity-60">Application & Processing Fee</p>
              </div>
 
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                <div className="space-y-4 text-center md:text-left">
-                   <h4 className="font-black text-ink text-sm uppercase tracking-widest">Scan to Pay</h4>
-                   <div className="aspect-square bg-gray-50 border-2 border-gray-100 rounded-3xl flex items-center justify-center p-4">
-                      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=srisaiagri@upi&pn=SriSaiAgri&am=2000&cu=INR" alt="QR Code" className="w-full h-full" />
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="space-y-4 text-center md:text-left flex flex-col items-center md:items-start">
+                   <h4 className="font-black text-ink text-xs uppercase tracking-widest ml-1">Scan UPI QR</h4>
+                   <div className="aspect-square w-full max-w-[180px] bg-white border-2 border-gray-100 rounded-[2rem] flex items-center justify-center p-3 shadow-inner">
+                      <img 
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('upi://pay?pa=43564790508@sbi&pn=SRI SAI INSTITUTE&am=2000&cu=INR')}`} 
+                        alt="QR Code" 
+                        className="w-full h-full" 
+                      />
                    </div>
-                   <p className="text-[10px] font-black text-muted uppercase">UPI ID: srisaiagri@upi</p>
+                   <p className="text-[9px] font-black text-muted uppercase tracking-tighter">UPI ID: 43564790508@sbi</p>
                 </div>
-                <div className="space-y-6">
-                   <h4 className="font-black text-ink text-sm uppercase tracking-widest">Bank Details</h4>
-                   <div className="space-y-4">
-                      <BankDetail label="Account Name" value="Sri Sai Agri Institute" />
-                      <BankDetail label="Account Number" value="92301004568XXXX" />
-                      <BankDetail label="IFSC Code" value="UTIB000XXXX" />
-                      <BankDetail label="Bank Name" value="AXIS BANK" />
+                <div className="space-y-5">
+                   <h4 className="font-black text-ink text-xs uppercase tracking-widest ml-1">Bank Transfer</h4>
+                   <div className="space-y-3 bg-gray-50 p-6 rounded-[2rem] border border-gray-100">
+                      <BankDetail label="Account Name" value="SRI SAI INSTITUTE OF AGRICULTURE" />
+                      <BankDetail label="Account Number" value="43564790508" />
+                      <BankDetail label="IFSC Code" value="SBIN0012822" />
+                      <BankDetail label="Bank Name" value="STATE BANK OF INDIA" />
                    </div>
                 </div>
              </div>
 
-             <div className="pt-8 border-t border-gray-100 flex flex-col gap-4">
+             <div className="space-y-4">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Upload Payment Screenshot (PNG only, Max 100KB)</label>
+                <div className="relative group">
+                   <input 
+                      type="file" 
+                      accept=".png" 
+                      onChange={handleFileChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                   />
+                   <div className={`p-8 border-2 border-dashed rounded-[2rem] text-center transition-all ${screenshot ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-gray-50 group-hover:border-blue'}`}>
+                      {screenshot ? (
+                        <div className="flex items-center justify-center gap-3 text-green-600">
+                           <Check size={24} strokeWidth={3} />
+                           <span className="text-sm font-black uppercase tracking-widest">Screenshot Attached!</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 text-gray-400">
+                           <Plus size={32} />
+                           <span className="text-[11px] font-black uppercase tracking-widest">Click to Upload PNG Screenshot</span>
+                        </div>
+                      )}
+                   </div>
+                </div>
+             </div>
+
+             <div className="pt-6 flex flex-col gap-4">
+                <button 
+                  disabled={!screenshot || uploading}
+                  onClick={handlePaymentSubmit}
+                  className="w-full bg-blue text-white py-5 rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-blue/20 hover:bg-ink transition-all active:scale-[0.98] disabled:opacity-50"
+                >
+                   {uploading ? "Processing..." : "Confirm & Submit Registration"}
+                </button>
                 <button 
                   onClick={() => navigate("/portal/login")}
-                  className="w-full bg-blue text-white py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-blue/20 hover:scale-[1.02] transition-all"
+                  className="text-center text-[10px] font-black text-muted uppercase tracking-widest hover:text-blue transition-colors"
                 >
-                   Go to Login Portal
+                   I've already paid, go to login
                 </button>
-                <p className="text-center text-[11px] font-bold text-muted">Please keep a screenshot of your payment for verification</p>
              </div>
           </div>
         </div>
@@ -448,9 +523,13 @@ export default function StudentRegister() {
 
 function BankDetail({ label, value }) {
   return (
-    <div className="flex flex-col border-b border-gray-50 pb-2">
+    <div className="flex flex-col border-b border-gray-100/50 pb-2">
        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{label}</span>
-       <span className="text-sm font-bold text-ink">{value}</span>
+       <span className="text-[11px] font-bold text-ink leading-tight">{value}</span>
     </div>
   );
 }
+
+function Check(props) { return <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>; }
+function Plus(props) { return <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>; }
+function X(props) { return <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>; }
