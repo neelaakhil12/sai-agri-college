@@ -1463,7 +1463,7 @@ export default function AdminDashboard() {
                                     (item.type === 'video' || (typeof (item.image || item.photo) === 'string' && (item.image || item.photo).toLowerCase().endsWith('.mp4'))) ? (
                                       <div className="h-full w-full flex items-center justify-center bg-sky/30 text-blue">
                                         <div className="p-2 bg-white rounded-full shadow-sm">
-                                          <Play size={16} fill="currentColor" />
+                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                                         </div>
                                       </div>
                                     ) : (
