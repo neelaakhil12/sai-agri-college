@@ -20,8 +20,7 @@ import {
   MessageSquare,
   X,
   ChevronDown,
-  Filter,
-  Play
+  Filter
 } from 'lucide-react';
 
 const API_URL = '/api';

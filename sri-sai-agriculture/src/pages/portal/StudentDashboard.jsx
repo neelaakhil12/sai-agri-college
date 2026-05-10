@@ -7,7 +7,6 @@ const API_URL = "/api";
 export default function StudentDashboard() {
   const [student, setStudent] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
