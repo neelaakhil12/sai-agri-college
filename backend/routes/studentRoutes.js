@@ -142,9 +142,17 @@ router.put("/admin/update/:id", authenticate, upload.single("photo"), async (req
       updates.password = await bcrypt.hash(updates.password, 10);
     }
 
-    // Handle empty date strings for MySQL
-    if (updates.dob === "") {
-      updates.dob = null;
+    // Handle date formatting for MySQL
+    if (updates.dob) {
+      if (updates.dob === "") {
+        updates.dob = null;
+      } else if (typeof updates.dob === 'string' && updates.dob.includes('-')) {
+        const parts = updates.dob.split('-');
+        if (parts.length === 3 && parts[2].length === 4) {
+          // Convert DD-MM-YYYY to YYYY-MM-DD
+          updates.dob = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+      }
     }
     
     let updateQuery = "UPDATE students SET ";
