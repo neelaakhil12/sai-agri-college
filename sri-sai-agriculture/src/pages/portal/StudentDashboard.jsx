@@ -19,29 +19,8 @@ export default function StudentDashboard() {
         const res = await axios.get(`${API_URL}/students/profile`, { withCredentials: true });
         setStudent(res.data);
       } catch (err) {
-        // Fallback to Mock Data for Demo/Development
-        setStudent({
-          id: "DEMO-2026-001",
-          student_name: "Sri Sai Student",
-          father_name: "G. Satyanarayana",
-          mother_name: "G. Lakshmi",
-          dob: "2005-06-15",
-          gender: "Male",
-          mobile1: "9100061091",
-          email_personal: "student@srisai.edu",
-          branch: "Vijayawada Main",
-          course_applied: "Ag. B.Sc.",
-          medium: "English",
-          door_no: "4-12",
-          village: "Poranki",
-          mandal: "Penamaluru",
-          district: "Krishna",
-          pin: "521137",
-          student_fees: [
-            { academic_year: "1st Year", due_amount: 125000, hostel_due_amount: 50000, last_payment_date: null },
-            { academic_year: "2nd Year", due_amount: 150000, hostel_due_amount: 0, last_payment_date: null }
-          ]
-        });
+        console.error("Fetch failed", err);
+        // Do not set mock data here anymore
       }
     };
     fetchProfile();
