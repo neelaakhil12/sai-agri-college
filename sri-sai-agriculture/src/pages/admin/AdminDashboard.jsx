@@ -833,12 +833,14 @@ export default function AdminDashboard() {
                         { label: 'GENDER', key: 'gender', type: 'select', options: ['Male', 'Female', 'Other'] },
                         { label: 'MOBILE 1', key: 'mobile1' },
                         { label: 'MOBILE 2', key: 'mobile2' },
+                        { label: 'NATIONALITY', key: 'nationality' },
                         { label: 'MEDIUM', key: 'medium', placeholder: 'English Medium' },
                         { label: 'DOOR NO', key: 'door_no' },
                         { label: 'VILLAGE', key: 'village' },
                         { label: 'MANDAL', key: 'mandal' },
                         { label: 'DISTRICT', key: 'district' },
                         { label: 'PINCODE', key: 'pin' },
+                        { label: 'NATIONALITY', key: 'nationality' },
                       ].map(field => (
                         <div key={field.key} className="space-y-2">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{field.label}</label>
@@ -1103,6 +1105,7 @@ export default function AdminDashboard() {
                        { label: 'MANDAL', key: 'mandal' },
                        { label: 'DISTRICT', key: 'district' },
                        { label: 'PINCODE', key: 'pin' },
+                       { label: 'NATIONALITY', key: 'nationality' },
                      ].map(field => (
                        <div key={field.key} className="space-y-1">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{field.label}</label>
