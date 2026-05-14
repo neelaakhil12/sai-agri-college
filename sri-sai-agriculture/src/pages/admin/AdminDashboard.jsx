@@ -68,7 +68,7 @@ export default function AdminDashboard() {
     return `/${cleanPath}`;
   };
 
-  const formatDobForInput = (dob) => {
+  const parseDateForInput = (dob) => {
     if (!dob) return '';
     let dateObj = new Date(dob);
     if (isNaN(dateObj.getTime()) && typeof dob === 'string' && dob.includes('-')) {
@@ -319,7 +319,7 @@ export default function AdminDashboard() {
     
     // Format Date of Birth for HTML date input (YYYY-MM-DD)
     if (activeTab === 'students' && mapped.dob) {
-      mapped.dob = formatDobForInput(mapped.dob);
+      mapped.dob = parseDateForInput(mapped.dob);
     }
 
     if (activeTab === 'testimonials' || activeTab === 'ranks') {
@@ -1477,7 +1477,7 @@ export default function AdminDashboard() {
                                setFormData({
                                  ...student,
                                  current_year: student.year || student.current_year,
-                                 dob: formatDobForInput(student.dob)
+                                 dob: parseDateForInput(student.dob)
                                });
                                setViewMode('student-manage'); 
                              }}
