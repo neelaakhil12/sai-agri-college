@@ -207,7 +207,92 @@ export default function StudentDashboard() {
                   </div>
                </div>
 
-               {/* Detailed Table */}
+               {/* Original Fee Status Table */}
+               <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
+                  <div className="p-6 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                     <h3 className="font-black text-sm uppercase tracking-wider text-ink">Fee Status</h3>
+                     <span className="px-3 py-1 bg-green-100 text-green-600 text-[10px] font-black rounded-full uppercase">Live Status</span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                       <thead>
+                          <tr className="border-b border-gray-100">
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Academic Year</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">College (Total / Paid / Due)</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Hostel (Total / Paid / Due)</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Last Update</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Action</th>
+                          </tr>
+                       </thead>
+                       <tbody className="divide-y divide-gray-50">
+                          {student.student_fees?.map((fee, idx) => {
+                            const totalCalculated = Number(fee.total_fee || 0) + Number(fee.practical_fee || 0) + Number(fee.hostel_fee || 0);
+                            const balance = totalCalculated - Number(fee.paid_amount || 0);
+                            return (
+                              <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                                 <td className="px-8 py-6">
+                                    <span className="font-black text-ink text-sm uppercase">{fee.academic_year}</span>
+                                 </td>
+                                 <td className="px-8 py-6 text-center">
+                                    {parseFloat(fee.total_fee) === 0 ? (
+                                      <span className="text-[10px] font-bold text-gray-300 uppercase italic">Not Updated</span>
+                                    ) : (
+                                      <div className="flex flex-col items-center gap-0.5">
+                                         <span className="text-[10px] font-bold text-gray-400">₹{fee.total_fee || '0'} total</span>
+                                         <span className="text-sm font-black text-blue">₹{fee.paid_amount || '0'} paid</span>
+                                      </div>
+                                    )}
+                                 </td>
+                                 <td className="px-8 py-6 text-center">
+                                    {parseFloat(fee.hostel_fee) === 0 ? (
+                                      <span className="text-[10px] font-bold text-gray-300 uppercase italic">Not Updated</span>
+                                    ) : (
+                                      <div className="flex flex-col items-center gap-0.5">
+                                         <span className="text-[10px] font-bold text-gray-400">₹{fee.hostel_fee || '0'} total</span>
+                                         <span className="text-sm font-black text-orange">₹{fee.hostel_fee || '0'}</span>
+                                      </div>
+                                    )}
+                                 </td>
+                                 <td className="px-8 py-6">
+                                    {totalCalculated === 0 ? (
+                                      <span className="px-3 py-1 bg-gray-50 text-gray-400 text-[9px] font-black uppercase rounded-lg border border-gray-100">Waiting for Admin</span>
+                                    ) : balance <= 0 ? (
+                                      <span className="px-3 py-1 bg-green-100 text-green-600 text-[9px] font-black uppercase rounded-lg border border-green-200">Fully Paid</span>
+                                    ) : (
+                                      <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-black uppercase rounded-lg border border-orange-100">Pending</span>
+                                    )}
+                                 </td>
+                                 <td className="px-8 py-6">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                       {fee.last_payment_date ? new Date(fee.last_payment_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No Record'}
+                                    </span>
+                                 </td>
+                                 <td className="px-8 py-6">
+                                    {balance > 0 ? (
+                                      <button 
+                                         onClick={() => openPayModal('Academic Fee', balance, fee.academic_year)}
+                                         className="px-5 py-2 bg-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ink transition-all shadow-lg shadow-blue/20"
+                                      >
+                                         Pay Now
+                                      </button>
+                                    ) : totalCalculated > 0 ? (
+                                      <div className="flex items-center justify-center">
+                                         <span className="px-5 py-2 bg-[#10b981] text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-200/50 flex items-center gap-2 border border-green-600/20">
+                                            <Check size={12} strokeWidth={4} /> Fully Paid
+                                         </span>
+                                      </div>
+                                    ) : null}
+                                 </td>
+                              </tr>
+                            );
+                          })}
+                       </tbody>
+                    </table>
+                  </div>
+               </div>
+
+               {/* Detailed Fee Breakdown Box */}
                <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
                   <div className="p-6 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
                      <h3 className="font-black text-sm uppercase tracking-wider text-ink">Detailed Fee Breakdown</h3>
@@ -231,7 +316,6 @@ export default function StudentDashboard() {
                           {student.student_fees?.map((fee, idx) => {
                              const totalCalculated = Number(fee.total_fee || 0) + Number(fee.practical_fee || 0) + Number(fee.hostel_fee || 0);
                              const balance = totalCalculated - Number(fee.paid_amount || 0);
-                             
                              return (
                                <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
                                   <td className="px-6 py-6">
@@ -246,9 +330,11 @@ export default function StudentDashboard() {
                                   <td className="px-6 py-6 text-center">
                                      {balance <= 0 && totalCalculated > 0 ? (
                                        <span className="px-3 py-1 bg-green-100 text-green-600 text-[9px] font-black uppercase rounded-lg border border-green-200">Completed</span>
+                                     ) : totalCalculated === 0 ? (
+                                       <span className="px-3 py-1 bg-gray-50 text-gray-400 text-[9px] font-black uppercase rounded-lg border border-gray-100">N/A</span>
                                      ) : (
                                        <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-black uppercase rounded-lg border border-orange-100">
-                                         {balance > 0 ? `₹${balance} Pending` : (totalCalculated > 0 ? 'Fully Paid' : 'N/A')}
+                                         ₹{balance} Pending
                                        </span>
                                      )}
                                   </td>
