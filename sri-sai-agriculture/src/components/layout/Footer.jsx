@@ -15,6 +15,7 @@ const quickLinks = [
   { label: "Results",            href: "/results" },
   { label: "Hostel",             href: "/hostel" },
   { label: "Admission Enquiry",  href: "/#contact" },
+  { label: "Staff Login",        href: "/staff/login" },
 ];
 
 export default function Footer() {
@@ -88,6 +89,8 @@ export default function Footer() {
         </p>
         <p className="text-[0.72rem] md:text-[0.74rem] text-ink/30">
            Designed by <a href="https://www.codtechitsolutions.com/" target="_blank" rel="noopener noreferrer" className="text-blue/80 no-underline hover:text-blue font-semibold transition-colors duration-200">CODTECH IT Solutions</a>
+           <span className="mx-2">|</span>
+           <Link to="/staff/login" className="hover:text-blue transition-colors">Staff Login</Link>
         </p>
       </div>
     </footer>

@@ -211,82 +211,50 @@ export default function StudentDashboard() {
                <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
                   <div className="p-6 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
                      <h3 className="font-black text-sm uppercase tracking-wider text-ink">Detailed Fee Breakdown</h3>
-                     <span className="px-3 py-1 bg-green-100 text-green-600 text-[10px] font-black rounded-full uppercase">Live Status</span>
+                     <span className="px-3 py-1 bg-green-100 text-green-600 text-[10px] font-black rounded-full uppercase">Official Record</span>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                        <thead>
-                          <tr className="border-b border-gray-100">
-                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Academic Year</th>
-                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">College (Total / Paid / Due)</th>
-                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Hostel (Total / Paid / Due)</th>
-                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
-                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Last Update</th>
-                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Action</th>
+                          <tr className="bg-ink text-white">
+                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Academic Year</th>
+                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Total Fee</th>
+                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Committed Fee</th>
+                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Admission Fee</th>
+                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Practical Fee</th>
+                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Hostel Fee</th>
+                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Paid Amount</th>
+                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Status</th>
                           </tr>
                        </thead>
                        <tbody className="divide-y divide-gray-50">
-                          {student.student_fees?.map((fee, idx) => (
-                            <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
-                               <td className="px-8 py-6">
-                                  <span className="font-black text-ink text-sm uppercase">{fee.academic_year}</span>
-                               </td>
-                               <td className="px-8 py-6 text-center">
-                                  {parseFloat(fee.total_fee) === 0 ? (
-                                    <span className="text-[10px] font-bold text-gray-300 uppercase italic">Not Updated</span>
-                                  ) : (
-                                    <div className="flex flex-col items-center gap-0.5">
-                                       <span className="text-[10px] font-bold text-gray-400">₹{fee.total_fee || '0'} / ₹{fee.fee_paid || '0'}</span>
-                                       <span className="text-sm font-black text-blue">₹{fee.due_amount || '0'}</span>
-                                    </div>
-                                  )}
-                               </td>
-                               <td className="px-8 py-6 text-center">
-                                  {parseFloat(fee.hostel_total_fee) === 0 ? (
-                                    <span className="text-[10px] font-bold text-gray-300 uppercase italic">Not Updated</span>
-                                  ) : (
-                                    <div className="flex flex-col items-center gap-0.5">
-                                       <span className="text-[10px] font-bold text-gray-400">₹{fee.hostel_total_fee || '0'} / ₹{fee.hostel_fee_paid || '0'}</span>
-                                       <span className="text-sm font-black text-orange">₹{fee.hostel_due_amount || '0'}</span>
-                                    </div>
-                                  )}
-                               </td>
-                               <td className="px-8 py-6">
-                                  {(parseFloat(fee.total_fee) === 0 && parseFloat(fee.hostel_total_fee) === 0) ? (
-                                    <span className="px-3 py-1 bg-gray-50 text-gray-400 text-[9px] font-black uppercase rounded-lg border border-gray-100">Waiting for Admin</span>
-                                  ) : (
-                                    (parseFloat(fee.due_amount) === 0 && parseFloat(fee.hostel_due_amount) === 0) ? (
-                                      <span className="px-3 py-1 bg-green-100 text-green-600 text-[9px] font-black uppercase rounded-lg border border-green-200">Fully Paid</span>
-                                    ) : (
-                                      <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-black uppercase rounded-lg border border-orange-100">Pending</span>
-                                    )
-                                  )}
-                               </td>
-                               <td className="px-8 py-6">
-                                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                     {fee.last_payment_date ? new Date(fee.last_payment_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No Record'}
-                                  </span>
-                               </td>
-                               <td className="px-8 py-6">
-                                  {(parseFloat(fee.due_amount) > 0 || parseFloat(fee.hostel_due_amount) > 0) ? (
-                                    <button 
-                                       onClick={() => openPayModal('Academic Fee', fee.due_amount, fee.academic_year)}
-                                       className="px-5 py-2 bg-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ink transition-all shadow-lg shadow-blue/20"
-                                    >
-                                       Pay Now
-                                    </button>
-                                  ) : (
-                                    (parseFloat(fee.total_fee) > 0 || parseFloat(fee.hostel_total_fee) > 0) && (
-                                      <div className="flex items-center justify-center">
-                                         <span className="px-5 py-2 bg-[#10b981] text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-200/50 flex items-center gap-2 border border-green-600/20">
-                                            <Check size={12} strokeWidth={4} /> Fully Paid
-                                         </span>
-                                      </div>
-                                    )
-                                  )}
-                               </td>
-                            </tr>
-                          ))}
+                          {student.student_fees?.map((fee, idx) => {
+                             const totalCalculated = Number(fee.total_fee || 0) + Number(fee.practical_fee || 0) + Number(fee.hostel_fee || 0);
+                             const balance = totalCalculated - Number(fee.paid_amount || 0);
+                             
+                             return (
+                               <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                                  <td className="px-6 py-6">
+                                     <span className="font-black text-ink text-sm uppercase">{fee.academic_year}</span>
+                                  </td>
+                                  <td className="px-6 py-6 text-center font-bold text-sm text-ink">₹{fee.total_fee || '0'}</td>
+                                  <td className="px-6 py-6 text-center font-bold text-sm text-blue">₹{fee.committed_fee || '0'}</td>
+                                  <td className="px-6 py-6 text-center font-bold text-sm text-ink">₹{fee.admission_fee || '0'}</td>
+                                  <td className="px-6 py-6 text-center font-bold text-sm text-ink">₹{fee.practical_fee || '0'}</td>
+                                  <td className="px-6 py-6 text-center font-bold text-sm text-orange">₹{fee.hostel_fee || '0'}</td>
+                                  <td className="px-6 py-6 text-center font-black text-sm text-green-600">₹{fee.paid_amount || '0'}</td>
+                                  <td className="px-6 py-6 text-center">
+                                     {balance <= 0 && totalCalculated > 0 ? (
+                                       <span className="px-3 py-1 bg-green-100 text-green-600 text-[9px] font-black uppercase rounded-lg border border-green-200">Completed</span>
+                                     ) : (
+                                       <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-black uppercase rounded-lg border border-orange-100">
+                                         {balance > 0 ? `₹${balance} Pending` : (totalCalculated > 0 ? 'Fully Paid' : 'N/A')}
+                                       </span>
+                                     )}
+                                  </td>
+                               </tr>
+                             );
+                          })}
                        </tbody>
                     </table>
                   </div>
@@ -377,12 +345,13 @@ export default function StudentDashboard() {
                              f.academic_year.toLowerCase().trim() === year.toLowerCase().trim()
                           );
                           
-                          // Calculate amount based on type
-                          let amount = 0;
-                          if (payData.type.includes('Hostel')) {
-                             amount = parseFloat(fee?.hostel_due_amount || 0);
-                          } else if (payData.type.includes('Academic') || payData.type.includes('Examination')) {
-                             amount = payData.type.includes('Examination') ? 1500 : parseFloat(fee?.due_amount || 0);
+                          // Calculate amount based on balance
+                          const totalCalculated = Number(fee?.total_fee || 0) + Number(fee?.practical_fee || 0) + Number(fee?.hostel_fee || 0);
+                          const balance = totalCalculated - Number(fee?.paid_amount || 0);
+                          let amount = balance > 0 ? balance : 0;
+                          
+                          if (payData.type.includes('Examination')) {
+                             amount = 1500;
                           }
                           
                           setPayData({ ...payData, year, amount });
@@ -395,10 +364,6 @@ export default function StudentDashboard() {
                        <option value="3rd year">3rd Year</option>
                        <option value="4th year">4th Year</option>
                     </select>
-                    {/* DEBUG PANEL - DELETE AFTER FIX */}
-                    <div className="mt-2 p-2 bg-black text-[8px] text-green-400 font-mono rounded overflow-auto max-h-20">
-                       RAW DATA: {JSON.stringify(student.student_fees?.map(f => f.academic_year))}
-                    </div>
                  </div>
 
                  {/* Amount Alert */}

@@ -59,6 +59,7 @@ export default function AdminDashboard() {
   const [showStudentFilters, setShowStudentFilters] = useState(false);
   const [filterAcademicYear, setFilterAcademicYear] = useState('all');
   const [filterYearLevel, setFilterYearLevel] = useState('all');
+  const [staffList, setStaffList] = useState([]);
 
   const getImageUrl = (path) => {
     if (!path) return '';
@@ -67,8 +68,20 @@ export default function AdminDashboard() {
     return `/${cleanPath}`;
   };
 
+  const formatDobForInput = (dob) => {
+    if (!dob) return '';
+    try {
+      const date = new Date(dob);
+      if (isNaN(date.getTime())) return '';
+      return date.toISOString().split('T')[0];
+    } catch (e) {
+      return '';
+    }
+  };
+
   const tabs = [
     { id: 'students', label: 'Student Accounts', icon: Users },
+    { id: 'staff', label: 'Staff & Attendance', icon: Users },
     { id: 'hero', label: 'Hero Slider Management', icon: LayoutDashboard },
     { id: 'faculty', label: 'Faculty Management', icon: Users },
     { id: 'courses', label: 'Course Management', icon: BookOpen },
@@ -122,6 +135,38 @@ export default function AdminDashboard() {
     } catch (err) { console.error(err); }
   };
 
+  const saveSetting = async (key, value) => {
+    try {
+      await axios.post(`${API_URL}/admin/settings`, { key, value }, { withCredentials: true });
+      fetchSettings();
+      alert('Setting updated successfully!');
+    } catch (err) { alert('Failed to update setting'); }
+  };
+
+  const saveFields = async (fields) => {
+    try {
+      await axios.post(`${API_URL}/admin/registration-fields`, { fields }, { withCredentials: true });
+      fetchRegFields();
+      alert('Registration fields updated!');
+    } catch (err) { alert('Failed to update fields'); }
+  };
+
+  const deleteField = async (id) => {
+    if (window.confirm('Delete this field?')) {
+      try {
+        await axios.delete(`${API_URL}/admin/registration-fields/${id}`, { withCredentials: true });
+        fetchRegFields();
+      } catch (err) { alert('Failed to delete field'); }
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin && activeTab === 'settings') {
+      fetchSettings();
+      fetchRegFields();
+    }
+  }, [isAdmin, activeTab]);
+
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
@@ -139,6 +184,8 @@ export default function AdminDashboard() {
 
       if (activeTab === "students") {
         fetchStudents();
+      } else if (activeTab === "staff") {
+        fetchStaff();
       } else {
         fetchData();
       }
@@ -237,13 +284,17 @@ export default function AdminDashboard() {
         url = `${API_URL}/students/register`;
       }
 
-      await axios({
+      const res = await axios({
         method,
         url,
         data: payload,
         headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true
       });
+
+      if (activeTab === 'students' && !editingId && res.data.studentId) {
+        await axios.put(`${API_URL}/student-fees/admin/update/${res.data.studentId}`, { fees: studentFees }, { withCredentials: true });
+      }
 
       setFormData({});
       setFile(null);
@@ -465,16 +516,24 @@ export default function AdminDashboard() {
             </div>
             
             <div className="flex gap-3">
-              {activeTab !== 'enquiries' && (
+              {activeTab !== 'enquiries' && activeTab !== 'staff' && (
                 <button 
                   onClick={() => {
-                    if (viewMode === 'form') {
+                    if (viewMode === 'form' || viewMode === 'student-manage') {
                       setViewMode('list');
                       setEditingId(null);
                       setFormData({});
                       setFile(null);
                     } else {
                       setViewMode('form');
+                      if (activeTab === 'students') {
+                        setStudentFees([
+                          { academic_year: '1st year', total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0 },
+                          { academic_year: '2nd year', total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0 },
+                          { academic_year: '3rd year', total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0 },
+                          { academic_year: '4th year', total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0 },
+                        ]);
+                      }
                     }
                   }}
                   className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-95 ${viewMode === 'form' ? 'bg-white text-red-500 border border-red-100' : 'bg-blue text-white hover:bg-ink'}`}
@@ -893,6 +952,61 @@ export default function AdminDashboard() {
                           <option value="4th Year">4th Year</option>
                         </select>
                       </div>
+
+                      <div className="col-span-full mt-10">
+                        <div className="flex items-center gap-4 mb-6">
+                          <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500">
+                             <RefreshCw size={20} />
+                          </div>
+                          <div>
+                             <h4 className="font-bold text-ink uppercase tracking-tight">Fee Breakdown</h4>
+                             <p className="text-[10px] text-muted uppercase font-black tracking-widest">Specify yearly fee structure</p>
+                          </div>
+                        </div>
+                        <div className="overflow-x-auto border border-gray-100 rounded-2xl">
+                          <table className="w-full border-collapse bg-white">
+                            <thead className="bg-ink text-white">
+                              <tr>
+                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Academic Year</th>
+                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Total Fee</th>
+                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Committed Fee</th>
+                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Admission Fee</th>
+                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Practical Fee</th>
+                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Hostel</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                              {['1st year', '2nd year', '3rd year', '4th year'].map((year) => {
+                                const fee = studentFees.find(f => f.academic_year.toLowerCase() === year.toLowerCase()) || {
+                                  academic_year: year, total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0
+                                };
+                                const updateFee = (updates) => {
+                                  const newFees = [...studentFees];
+                                  const index = newFees.findIndex(f => f.academic_year.toLowerCase() === year.toLowerCase());
+                                  if (index >= 0) newFees[index] = { ...newFees[index], ...updates };
+                                  else newFees.push({ ...fee, ...updates });
+                                  setStudentFees(newFees);
+                                };
+                                return (
+                                  <tr key={year}>
+                                    <td className="p-4 font-black text-ink text-xs uppercase">{year}</td>
+                                    {['total_fee', 'committed_fee', 'admission_fee', 'practical_fee', 'hostel_fee'].map(key => (
+                                      <td key={key} className="p-2">
+                                        <input 
+                                          type="number" 
+                                          className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none transition-all font-bold text-ink text-xs"
+                                          value={fee[key] || 0}
+                                          onChange={(e) => updateFee({ [key]: e.target.value })}
+                                        />
+                                      </td>
+                                    ))}
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -1125,122 +1239,95 @@ export default function AdminDashboard() {
                            <RefreshCw size={24} />
                         </div>
                         <div>
-                           <h3 className="text-xl font-black text-ink">FEE ALLOCATION & PAYMENTS</h3>
-                           <p className="text-[10px] text-muted uppercase font-black tracking-widest">Academic & Hostel Yearly Breakdown</p>
+                           <h3 className="text-xl font-black text-ink">FEE ALLOCATION & BREAKDOWN</h3>
+                           <p className="text-[10px] text-muted uppercase font-black tracking-widest">Yearly Student Fee Details</p>
                         </div>
                       </div>
 
-                      <div className="space-y-6">
-                        {['1st year', '2nd year', '3rd year', '4th year'].map((year) => {
-                          const fee = studentFees.find(f => f.academic_year.toLowerCase() === year.toLowerCase()) || {
-                            academic_year: year,
-                            total_fee: 0,
-                            fee_paid: 0,
-                            due_amount: 0,
-                            hostel_total_fee: 0,
-                            hostel_fee_paid: 0,
-                            hostel_due_amount: 0,
-                            status: 'Pending'
-                          };
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse border border-gray-100 rounded-2xl overflow-hidden bg-white shadow-sm">
+                          <thead className="bg-ink text-white">
+                            <tr>
+                              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Academic Year</th>
+                              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Total Fee</th>
+                              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Committed Fee</th>
+                              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Admission Fee</th>
+                              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Practical Fee</th>
+                              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Hostel</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-50">
+                            {['1st year', '2nd year', '3rd year', '4th year'].map((year) => {
+                              const fee = studentFees.find(f => f.academic_year.toLowerCase() === year.toLowerCase()) || {
+                                academic_year: year,
+                                total_fee: 0,
+                                committed_fee: 0,
+                                admission_fee: 0,
+                                practical_fee: 0,
+                                hostel_fee: 0,
+                                paid_amount: 0,
+                                payment_status: 'Pending'
+                              };
 
-                          const updateFee = (updates) => {
-                            const newFees = [...studentFees];
-                            const index = newFees.findIndex(f => f.academic_year.toLowerCase() === year.toLowerCase());
-                            if (index >= 0) {
-                              newFees[index] = { ...newFees[index], ...updates };
-                            } else {
-                              newFees.push({ ...fee, ...updates });
-                            }
-                            setStudentFees(newFees);
-                          };
+                              const updateFee = (updates) => {
+                                const newFees = [...studentFees];
+                                const index = newFees.findIndex(f => f.academic_year.toLowerCase() === year.toLowerCase());
+                                if (index >= 0) {
+                                  newFees[index] = { ...newFees[index], ...updates };
+                                } else {
+                                  newFees.push({ ...fee, ...updates });
+                                }
+                                setStudentFees(newFees);
+                              };
 
-                          return (
-                            <div key={year} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
-                              <div className="flex items-center justify-between mb-6">
-                                <span className="px-4 py-1.5 bg-ink text-white text-[10px] font-black uppercase tracking-widest rounded-full">{year}</span>
-                               <div className="flex items-center gap-4">
-                                  <label className="flex items-center gap-2 cursor-pointer group/check">
-                                    <div className="relative">
-                                      <input 
-                                        type="checkbox" 
-                                        className="peer sr-only"
-                                        checked={fee.status === 'Completed'}
-                                        onChange={(e) => updateFee({ status: e.target.checked ? 'Completed' : 'Pending' })}
-                                      />
-                                      <div className="w-5 h-5 border-2 border-gray-200 rounded-lg peer-checked:bg-[#15803d] peer-checked:border-[#15803d] transition-all flex items-center justify-center">
-                                        <div className="w-1.5 h-3 border-r-2 border-b-2 border-white rotate-45 mb-1 scale-0 peer-checked:scale-100 transition-transform"></div>
-                                      </div>
-                                    </div>
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ${fee.status === 'Completed' ? 'text-green-600' : 'text-gray-400'}`}>
-                                      {fee.status === 'Completed' ? 'PAID' : 'MARK AS PAID'}
-                                    </span>
-                                  </label>
-                                  <div className="h-6 w-[1px] bg-gray-100 mx-2"></div>
-                                  <div className="text-right">
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Balance</p>
-                                    <p className="text-sm font-black text-blue">₹{(Number(fee.total_fee || 0) + Number(fee.hostel_total_fee || 0)) - (Number(fee.fee_paid || 0) + Number(fee.hostel_fee_paid || 0))}</p>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                                {/* Academic Fee */}
-                                <div className="space-y-4">
-                                  <h4 className="text-xs font-black text-ink border-l-4 border-blue pl-3 uppercase tracking-wider">Academic Fees</h4>
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Total Academic Fee</label>
-                                      <input 
-                                        type="number" 
-                                        placeholder="0.00"
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none transition-all font-bold text-ink text-sm"
-                                        value={fee.total_fee || 0}
-                                        onChange={(e) => updateFee({ total_fee: e.target.value, due_amount: e.target.value - (fee.fee_paid || 0) })}
-                                      />
-                                    </div>
-                                    <div className="space-y-1">
-                                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Academic Fee Paid</label>
-                                      <input 
-                                        type="number" 
-                                        placeholder="0.00"
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none transition-all font-bold text-ink text-sm"
-                                        value={fee.fee_paid || 0}
-                                        onChange={(e) => updateFee({ fee_paid: e.target.value, due_amount: (fee.total_fee || 0) - e.target.value })}
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Hostel Fee */}
-                                <div className="space-y-4">
-                                  <h4 className="text-xs font-black text-ink border-l-4 border-amber-500 pl-3 uppercase tracking-wider">Hostel Fees</h4>
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Total Hostel Fee</label>
-                                      <input 
-                                        type="number" 
-                                        placeholder="0.00"
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:border-amber-500 outline-none transition-all font-bold text-ink text-sm"
-                                        value={fee.hostel_total_fee || 0}
-                                        onChange={(e) => updateFee({ hostel_total_fee: e.target.value, hostel_due_amount: e.target.value - (fee.hostel_fee_paid || 0) })}
-                                      />
-                                    </div>
-                                    <div className="space-y-1">
-                                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Hostel Fee Paid</label>
-                                      <input 
-                                        type="number" 
-                                        placeholder="0.00"
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:border-amber-500 outline-none transition-all font-bold text-ink text-sm"
-                                        value={fee.hostel_fee_paid || 0}
-                                        onChange={(e) => updateFee({ hostel_fee_paid: e.target.value, hostel_due_amount: (fee.hostel_total_fee || 0) - e.target.value })}
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
+                              return (
+                                <tr key={year} className="hover:bg-gray-50/50 transition-colors">
+                                  <td className="p-4 font-black text-ink text-xs uppercase tracking-wider">{year}</td>
+                                  <td className="p-2">
+                                    <input 
+                                      type="number" 
+                                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none transition-all font-bold text-ink text-xs"
+                                      value={fee.total_fee || 0}
+                                      onChange={(e) => updateFee({ total_fee: e.target.value })}
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <input 
+                                      type="number" 
+                                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none transition-all font-bold text-ink text-xs"
+                                      value={fee.committed_fee || 0}
+                                      onChange={(e) => updateFee({ committed_fee: e.target.value })}
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <input 
+                                      type="number" 
+                                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none transition-all font-bold text-ink text-xs"
+                                      value={fee.admission_fee || 0}
+                                      onChange={(e) => updateFee({ admission_fee: e.target.value })}
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <input 
+                                      type="number" 
+                                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none transition-all font-bold text-ink text-xs"
+                                      value={fee.practical_fee || 0}
+                                      onChange={(e) => updateFee({ practical_fee: e.target.value })}
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <input 
+                                      type="number" 
+                                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none transition-all font-bold text-ink text-xs"
+                                      value={fee.hostel_fee || 0}
+                                      onChange={(e) => updateFee({ hostel_fee: e.target.value })}
+                                    />
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
                       </div>
                    </div>
 
@@ -1375,9 +1462,13 @@ export default function AdminDashboard() {
 
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {students
+                    .filter(student => 
+                      student.student_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                      student.roll_no?.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
                     .filter(student => studentFilter === 'all' || student.course_applied === studentFilter)
                     .filter(student => filterAcademicYear === 'all' || !filterAcademicYear || (student.academic_enrolled_year && student.academic_enrolled_year.includes(filterAcademicYear)))
-                    .filter(student => filterYearLevel === 'all' || student.year === filterYearLevel)
+                    .filter(student => filterYearLevel === 'all' || (student.year || student.current_year) === filterYearLevel)
                     .map(student => (
                      <div key={student.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
                        <div className="flex items-center gap-4 mb-4">
@@ -1394,6 +1485,7 @@ export default function AdminDashboard() {
                                setSelectedStudent(student); 
                                setFormData({
                                  ...student,
+                                 current_year: student.year || student.current_year,
                                  dob: formatDobForInput(student.dob)
                                });
                                setViewMode('student-manage'); 
@@ -1424,6 +1516,34 @@ export default function AdminDashboard() {
                   ))}
                </div>
             </div>
+          ) : activeTab === 'staff' ? (
+            <StaffManagementView
+              staffList={staffList}
+              onRefresh={fetchStaff}
+              onCreate={async (staffData) => {
+                try {
+                  await axios.post(`${API_URL}/staff/admin/create`, staffData, { withCredentials: true });
+                  fetchStaff();
+                  alert('Staff account created successfully!');
+                } catch (err) { alert(err.response?.data?.message || 'Create failed'); }
+              }}
+              onDelete={async (id) => {
+                if (window.confirm('Delete this staff member? This cannot be undone.')) {
+                  try {
+                    await axios.delete(`${API_URL}/staff/admin/${id}`, { withCredentials: true });
+                    fetchStaff();
+                  } catch (err) { alert('Delete failed'); }
+                }
+              }}
+            />
+          ) : activeTab === 'settings' ? (
+            <SettingsView
+              settings={siteSettings}
+              fields={regFields}
+              onSaveSetting={saveSetting}
+              onSaveFields={saveFields}
+              onDeleteField={deleteField}
+            />
           ) : viewMode === 'list' && activeTab === 'hero' ? (
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1553,143 +1673,234 @@ export default function AdminDashboard() {
                     )}
                   </tbody>
                 </table>
-               </div>
-                     <SidebarLink active={activeTab === 'settings'} icon="Settings" label="Settings" onClick={() => setActiveTab('settings')} />
-          <SidebarLink active={activeTab === 'staff'} icon="UserCheck" label="Staff" onClick={() => setActiveTab('staff')} />
-        </nav>
-      </aside>
-
-      <main className="flex-grow flex flex-col h-screen overflow-y-auto">
-        <header className="bg-white px-8 py-5 flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
-           <div className="flex flex-col">
-              <h1 className="text-xl font-black text-ink uppercase tracking-tight">{activeTab}</h1>
-              <p className="text-[10px] text-muted font-bold tracking-widest -mt-0.5 uppercase">Institution Command Center</p>
-           </div>
-        </header>
-
-        <div className="p-0">
-          {activeTab === 'overview' ? (
-             <Overview stats={stats} />
-          ) : activeTab === 'students' ? (
-             <StudentList students={students} />
-          ) : activeTab === 'fees' ? (
-             <FeeManagement students={students} fees={fees} onVerify={handleVerify} />
-          ) : activeTab === 'settings' ? (
-             <SettingsView 
-               settings={siteSettings} 
-               fields={regFields} 
-               onSaveSetting={async (key, value) => {
-                 try {
-                   await axios.post(`${API_URL}/admin/settings`, { key, value }, { withCredentials: true });
-                   fetchSettings();
-                 } catch (err) { alert("Failed"); }
-               }}
-               onSaveFields={async (fields) => {
-                 try {
-                   await axios.post(`${API_URL}/admin/registration-fields`, { fields }, { withCredentials: true });
-                   fetchRegFields();
-                 } catch (err) { alert("Failed"); }
-               }}
-               onDeleteField={async (id) => {
-                 try {
-                   await axios.delete(`${API_URL}/admin/registration-fields/${id}`, { withCredentials: true });
-                   fetchRegFields();
-                 } catch (err) { alert("Failed"); }
-               }}
-             />
-          ) : activeTab === 'staff' ? (
-             <StaffManagementView 
-               staff={staffList} 
-               onRefresh={fetchStaff}
-               onCreate={async (data) => {
-                 try {
-                   await axios.post(`${API_URL}/staff/admin/create`, data, { withCredentials: true });
-                   fetchStaff();
-                 } catch (err) { alert("Create failed"); }
-               }}
-               onDelete={async (id) => {
-                 if (window.confirm("Delete staff?")) {
-                   try {
-                     await axios.delete(`${API_URL}/staff/admin/${id}`, { withCredentials: true });
-                     fetchStaff();
-                   } catch (err) { alert("Delete failed"); }
-                 }
-               }}
-             />
+              </div>
+            </div>
           ) : null}
         </div>
       </main>
     </div>
   );
-}
 
-function StaffManagementView({ staff, onRefresh, onCreate, onDelete }) {
+
+function StaffManagementView({ staffList, onRefresh, onCreate, onDelete }) {
+  const [view, setView] = useState('accounts');
   const [showAdd, setShowAdd] = useState(false);
-  const [newStaff, setNewStaff] = useState({ name: '', email: '', password: '', department: '' });
+  const [saving, setSaving] = useState(false);
+  const [attDate, setAttDate] = useState(new Date().toISOString().split('T')[0]);
+  const [attData, setAttData] = useState([]);
+  const [attLoading, setAttLoading] = useState(false);
+  const [newStaff, setNewStaff] = useState({ employee_id: '', name: '', email: '', password: '', department: '', role: '' });
+
+  const STATUS_OPTIONS = ['Present', 'Absent', 'Leave', 'Half Day'];
+  const STATUS_COLORS = {
+    Present:    'bg-green-100 text-green-700 border-green-200',
+    Absent:     'bg-red-100 text-red-700 border-red-200',
+    Leave:      'bg-amber-100 text-amber-700 border-amber-200',
+    'Half Day': 'bg-sky text-blue border-blue/20',
+  };
+
+  useEffect(() => {
+    if (view === 'attendance') fetchAttendance();
+  }, [view, attDate]);
+
+  const fetchAttendance = async () => {
+    setAttLoading(true);
+    try {
+      const res = await fetch('/api/staff/admin/attendance?date=' + attDate, { credentials: 'include' });
+      const json = await res.json();
+      setAttData(json.map(s => ({ ...s, status: s.status || 'Present', check_in: s.check_in || '', check_out: s.check_out || '' })));
+    } catch (e) { console.error(e); }
+    setAttLoading(false);
+  };
+
+  const updateAtt = (staffId, field, value) =>
+    setAttData(prev => prev.map(s => s.id === staffId ? { ...s, [field]: value } : s));
+
+  const saveAttendance = async () => {
+    setSaving(true);
+    try {
+      await fetch('/api/staff/admin/attendance/bulk', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: attDate, records: attData.map(s => ({ staff_id: s.id, status: s.status, check_in: s.check_in, check_out: s.check_out })) })
+      });
+      alert('Attendance saved for ' + attDate);
+    } catch (e) { alert('Save failed'); }
+    setSaving(false);
+  };
+
+  const handleCreate = async () => {
+    if (!newStaff.name || !newStaff.email || !newStaff.password) { alert('Name, email and password are required'); return; }
+    await onCreate(newStaff);
+    setNewStaff({ employee_id: '', name: '', email: '', password: '', department: '', role: '' });
+    setShowAdd(false);
+  };
 
   return (
-    <div className="p-8 animate-fadeIn space-y-10">
-       <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-2xl font-black text-ink uppercase tracking-tight">Staff Management</h3>
-            <p className="text-[10px] text-muted font-bold tracking-widest mt-1 uppercase">Manage faculty access and credentials</p>
-          </div>
-          <button 
-            onClick={() => setShowAdd(true)}
-            className="px-6 py-3 bg-blue text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue/20 hover:bg-ink transition-all flex items-center gap-2"
-          >
-             <Plus size={16} /> Add Staff Member
-          </button>
-       </div>
+    <div className="animate-fadeIn">
+      <div className="flex gap-2 px-8 pt-8">
+        {[['accounts', 'Staff Accounts'], ['attendance', 'Mark Attendance']].map(([id, label]) => (
+          <button key={id} onClick={() => setView(id)}
+            className={"px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all " + (view === id ? 'bg-blue text-white shadow-lg shadow-blue/20' : 'bg-white text-muted border border-gray-100 hover:border-blue/30')}
+          >{label}</button>
+        ))}
+      </div>
 
-       {showAdd && (
-          <div className="bg-white p-8 rounded-[2.5rem] border border-blue/20 shadow-2xl shadow-blue/5 space-y-6">
-             <div className="flex items-center justify-between">
-                <h4 className="font-black text-ink text-sm uppercase tracking-widest">New Staff Account</h4>
-                <button onClick={() => setShowAdd(false)} className="text-muted hover:text-red-500"><X size={20} /></button>
-             </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <input placeholder="Full Name" value={newStaff.name} onChange={e => setNewStaff({...newStaff, name: e.target.value})} className="px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-blue" />
-                <input placeholder="Email Address" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} className="px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-blue" />
-                <input placeholder="Password" type="password" value={newStaff.password} onChange={e => setNewStaff({...newStaff, password: e.target.value})} className="px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-blue" />
-                <input placeholder="Department" value={newStaff.department} onChange={e => setNewStaff({...newStaff, department: e.target.value})} className="px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-blue" />
-             </div>
-             <button 
-               onClick={() => { onCreate(newStaff); setShowAdd(false); setNewStaff({name:'', email:'', password:'', department:''}); }}
-               className="w-full bg-[#15803d] text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest"
-             >
-                Create Staff Account
-             </button>
+      {view === 'accounts' && (
+        <div className="p-8 space-y-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-black text-ink">Staff Accounts</h3>
+              <p className="text-[10px] text-muted font-bold tracking-widest mt-1 uppercase">Total: {(staffList || []).length} members</p>
+            </div>
+            <button onClick={() => setShowAdd(v => !v)} className="px-6 py-3 bg-blue text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue/20 hover:bg-ink transition-all flex items-center gap-2">
+              <Plus size={16} /> {showAdd ? 'Cancel' : 'Add Staff'}
+            </button>
           </div>
-       )}
 
-       <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full">
-             <thead>
-                <tr className="bg-gray-50">
-                   <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Name</th>
-                   <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Email</th>
-                   <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Department</th>
-                   <th className="px-8 py-5 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">Action</th>
-                </tr>
-             </thead>
-             <tbody className="divide-y divide-gray-50">
-                {staff.map(member => (
-                   <tr key={member.id}>
-                      <td className="px-8 py-6 font-bold text-ink">{member.name}</td>
-                      <td className="px-8 py-6 text-muted font-medium">{member.email}</td>
-                      <td className="px-8 py-6 uppercase text-[10px] font-black tracking-widest text-blue/70">{member.department}</td>
-                      <td className="px-8 py-6 text-right">
-                         <button onClick={() => onDelete(member.id)} className="p-2 text-red-400 hover:text-red-600 transition-colors"><Trash2 size={18} /></button>
-                      </td>
-                   </tr>
+          {showAdd && (
+            <div className="bg-white p-8 rounded-3xl border border-blue/20 shadow-xl space-y-6">
+              <h4 className="font-black text-ink text-sm uppercase tracking-widest border-b border-gray-100 pb-4">New Staff Account</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { key: 'employee_id', placeholder: 'Employee ID (e.g. EMP001)' },
+                  { key: 'name',        placeholder: 'Full Name *' },
+                  { key: 'email',       placeholder: 'Email Address *' },
+                  { key: 'password',    placeholder: 'Password *', type: 'password' },
+                  { key: 'department',  placeholder: 'Department (e.g. Python Trainer)' },
+                  { key: 'role',        placeholder: 'Role (e.g. Trainer / HR)' },
+                ].map(f => (
+                  <input key={f.key} type={f.type || 'text'} placeholder={f.placeholder}
+                    value={newStaff[f.key]}
+                    onChange={e => setNewStaff({ ...newStaff, [f.key]: e.target.value })}
+                    className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue font-medium text-ink text-sm"
+                  />
                 ))}
-             </tbody>
-          </table>
-       </div>
+              </div>
+              <button onClick={handleCreate} className="w-full bg-[#15803d] text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#166534] transition-all shadow-lg shadow-green-500/20">
+                Create Staff Account
+              </button>
+            </div>
+          )}
+
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50">
+                  {['Emp ID', 'Name', 'Department', 'Role', 'Email', 'Action'].map(h => (
+                    <th key={h} className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-widest last:text-right">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {!(staffList || []).length ? (
+                  <tr><td colSpan={6} className="px-6 py-20 text-center text-gray-300 font-bold text-xs uppercase tracking-widest">No staff yet. Add one above.</td></tr>
+                ) : (staffList || []).map(m => (
+                  <tr key={m.id} className="hover:bg-sky/30 transition-colors">
+                    <td className="px-6 py-4"><span className="px-3 py-1 bg-blue/10 text-blue rounded-lg text-[10px] font-black uppercase">{m.employee_id || '-'}</span></td>
+                    <td className="px-6 py-4 font-bold text-ink">{m.name}</td>
+                    <td className="px-6 py-4 text-[10px] font-black text-muted uppercase tracking-widest">{m.department || '-'}</td>
+                    <td className="px-6 py-4 text-[10px] font-black text-muted uppercase tracking-widest">{m.role || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-muted">{m.email}</td>
+                    <td className="px-6 py-4 text-right">
+                      <button onClick={() => onDelete(m.id)} className="p-2 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all"><Trash2 size={16} /></button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {view === 'attendance' && (
+        <div className="p-8 space-y-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-xl font-black text-ink">Mark Staff Attendance</h3>
+              <p className="text-[10px] text-muted font-bold tracking-widest mt-1 uppercase">Select date, set status for each member, then save</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 bg-white border border-gray-200 px-5 py-3 rounded-xl shadow-sm">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Date</span>
+                <input type="date" value={attDate} onChange={e => setAttDate(e.target.value)} className="bg-transparent outline-none font-black text-blue text-sm" />
+              </div>
+              <button onClick={saveAttendance} disabled={saving || attData.length === 0}
+                className="px-6 py-3 bg-[#15803d] text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-green-500/20 hover:bg-[#166534] transition-all disabled:opacity-50">
+                {saving ? 'Saving...' : 'Save Attendance'}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(STATUS_COLORS).map(([s, cls]) => (
+              <span key={s} className={"px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border " + cls}>{s}</span>
+            ))}
+          </div>
+
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            {attLoading ? (
+              <div className="py-24 text-center text-blue font-black text-sm animate-pulse uppercase tracking-widest">Loading...</div>
+            ) : attData.length === 0 ? (
+              <div className="py-24 text-center text-gray-300 font-bold text-xs uppercase tracking-widest">No staff found. Add staff first in the Accounts tab.</div>
+            ) : (
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50">
+                    {['Staff Member', 'Dept / Role', 'Status', 'Check In', 'Check Out'].map(h => (
+                      <th key={h} className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-widest">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {attData.map(s => (
+                    <tr key={s.id} className="hover:bg-sky/20 transition-colors">
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-xl bg-blue/10 flex items-center justify-center text-blue font-black">{(s.name || '?')[0]}</div>
+                          <div>
+                            <p className="font-bold text-ink text-sm">{s.name}</p>
+                            <p className="text-[9px] text-blue font-black uppercase tracking-widest">{s.employee_id || 'No ID'}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5">
+                        <p className="text-[10px] font-black text-muted uppercase tracking-widest">{s.department || '-'}</p>
+                        <p className="text-[9px] text-gray-300 uppercase tracking-widest">{s.role || ''}</p>
+                      </td>
+                      <td className="px-6 py-5">
+                        <select value={s.status} onChange={e => updateAtt(s.id, 'status', e.target.value)}
+                          className={"px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border outline-none cursor-pointer " + (STATUS_COLORS[s.status] || '')}>
+                          {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                      </td>
+                      <td className="px-6 py-5">
+                        <input type="time" value={s.check_in} onChange={e => updateAtt(s.id, 'check_in', e.target.value)}
+                          className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue" />
+                      </td>
+                      <td className="px-6 py-5">
+                        <input type="time" value={s.check_out} onChange={e => updateAtt(s.id, 'check_out', e.target.value)}
+                          className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue" />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {attData.length > 0 && (
+            <button onClick={saveAttendance} disabled={saving}
+              className="w-full py-5 bg-[#15803d] text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-green-500/20 hover:bg-[#166534] transition-all active:scale-[0.98] disabled:opacity-50">
+              {saving ? 'Saving...' : 'Save Attendance for All Staff'}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
+
 
 function SettingsView({ settings, fields, onSaveSetting, onSaveFields, onDeleteField }) {
   const [fee, setFee] = useState(settings.registration_fee || '2000');

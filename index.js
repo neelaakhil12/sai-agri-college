@@ -119,11 +119,34 @@ try {
       await pool.query(`
         CREATE TABLE IF NOT EXISTS staff (
           id INT AUTO_INCREMENT PRIMARY KEY,
+          employee_id VARCHAR(50),
           name VARCHAR(255),
           email VARCHAR(255) UNIQUE NOT NULL,
           password VARCHAR(255) NOT NULL,
           department VARCHAR(100),
+          role VARCHAR(100),
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      // Add missing columns to staff table if they don't exist
+      try {
+        await pool.query(`ALTER TABLE staff ADD COLUMN IF NOT EXISTS employee_id VARCHAR(50)`);
+        await pool.query(`ALTER TABLE staff ADD COLUMN IF NOT EXISTS role VARCHAR(100)`);
+      } catch(e) { /* columns may already exist */ }
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS staff_attendance (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          staff_id INT NOT NULL,
+          date DATE NOT NULL,
+          status ENUM('Present', 'Absent', 'Leave', 'Half Day') DEFAULT 'Present',
+          check_in VARCHAR(20),
+          check_out VARCHAR(20),
+          marked_by_admin TINYINT(1) DEFAULT 1,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          UNIQUE KEY unique_staff_date (staff_id, date),
+          FOREIGN KEY (staff_id) REFERENCES staff(id) ON DELETE CASCADE
         )
       `);
 
