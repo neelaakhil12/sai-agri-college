@@ -1224,6 +1224,80 @@ export default function AdminDashboard() {
                        </button>
                     </div>
 
+                    {/* Simple Fee Entry - Old Format */}
+                    <div className="mt-16 p-10 bg-blue/5 rounded-[3rem] border border-blue/10">
+                       <div className="flex items-center gap-4 mb-8">
+                         <div className="w-12 h-12 bg-blue/10 rounded-2xl flex items-center justify-center text-blue">
+                            <RefreshCw size={24} />
+                         </div>
+                         <div>
+                            <h3 className="text-xl font-black text-ink">YEAR-WISE FEE ENTRY</h3>
+                            <p className="text-[10px] text-muted uppercase font-black tracking-widest">Quick entry for college fee, hostel fee &amp; paid status per year</p>
+                         </div>
+                       </div>
+                       <div className="grid grid-cols-1 gap-6">
+                         {['1st year', '2nd year', '3rd year', '4th year'].map((year) => {
+                           const fee = studentFees.find(f => f.academic_year.toLowerCase() === year.toLowerCase()) || {
+                             academic_year: year, total_fee: 0, hostel_fee: 0, paid_amount: 0, payment_status: 'Pending'
+                           };
+                           const updateFee = (updates) => {
+                             const newFees = [...studentFees];
+                             const index = newFees.findIndex(f => f.academic_year.toLowerCase() === year.toLowerCase());
+                             if (index >= 0) newFees[index] = { ...newFees[index], ...updates };
+                             else newFees.push({ ...fee, ...updates });
+                             setStudentFees(newFees);
+                           };
+                           const isPaid = Number(fee.paid_amount) >= (Number(fee.total_fee) + Number(fee.hostel_fee));
+                           return (
+                             <div key={year} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                               <div className="flex flex-wrap items-center gap-4">
+                                 <div className="w-24 shrink-0">
+                                   <span className="font-black text-ink text-xs uppercase tracking-widest bg-ink/5 px-3 py-2 rounded-xl block text-center">{year}</span>
+                                 </div>
+                                 <div className="flex flex-col gap-1 flex-1 min-w-[120px]">
+                                   <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">College Fee (₹)</label>
+                                   <input
+                                     type="number"
+                                     className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none font-bold text-ink text-sm"
+                                     value={fee.total_fee || 0}
+                                     onChange={(e) => updateFee({ total_fee: e.target.value })}
+                                   />
+                                 </div>
+                                 <div className="flex flex-col gap-1 flex-1 min-w-[120px]">
+                                   <label className="text-[9px] font-black text-orange uppercase tracking-widest">Hostel Fee (₹)</label>
+                                   <input
+                                     type="number"
+                                     className="px-3 py-2 bg-orange/5 border border-orange/20 rounded-xl focus:border-orange outline-none font-bold text-ink text-sm"
+                                     value={fee.hostel_fee || 0}
+                                     onChange={(e) => updateFee({ hostel_fee: e.target.value })}
+                                   />
+                                 </div>
+                                 <div className="flex flex-col gap-1 flex-1 min-w-[120px]">
+                                   <label className="text-[9px] font-black text-green-600 uppercase tracking-widest">Paid Amount (₹)</label>
+                                   <input
+                                     type="number"
+                                     className="px-3 py-2 bg-green-50 border border-green-100 rounded-xl focus:border-green-500 outline-none font-bold text-ink text-sm"
+                                     value={fee.paid_amount || 0}
+                                     onChange={(e) => updateFee({ paid_amount: e.target.value })}
+                                   />
+                                 </div>
+                                 <div className="flex flex-col items-center gap-2 shrink-0">
+                                   <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Fully Paid</label>
+                                   <div
+                                     onClick={() => updateFee({ paid_amount: isPaid ? 0 : (Number(fee.total_fee || 0) + Number(fee.hostel_fee || 0)), payment_status: isPaid ? 'Pending' : 'Paid' })}
+                                     className={`w-12 h-12 rounded-xl flex items-center justify-center cursor-pointer border-2 transition-all font-black text-lg select-none ${isPaid ? 'bg-green-100 border-green-400 text-green-600' : 'bg-gray-50 border-gray-200 text-gray-300 hover:border-green-300'}`}
+                                   >
+                                     {isPaid ? '✓' : '○'}
+                                   </div>
+                                 </div>
+                               </div>
+                             </div>
+                           );
+                         })}
+                       </div>
+                    </div>
+
+                    {/* Detailed Fee Allocation & Breakdown Table */}
                    <div className="mt-16 p-10 bg-gray-50/50 rounded-[3rem] border border-gray-100">
                       <div className="flex items-center gap-4 mb-10">
                         <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500">
