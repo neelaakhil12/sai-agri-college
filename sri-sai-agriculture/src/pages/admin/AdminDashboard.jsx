@@ -1671,6 +1671,7 @@ export default function AdminDashboard() {
       </main>
     </div>
   );
+}
 
 
 function StaffManagementView({ staffList, onRefresh, onCreate, onDelete }) {
