@@ -70,13 +70,16 @@ export default function AdminDashboard() {
 
   const formatDobForInput = (dob) => {
     if (!dob) return '';
-    try {
-      const date = new Date(dob);
-      if (isNaN(date.getTime())) return '';
-      return date.toISOString().split('T')[0];
-    } catch (e) {
-      return '';
+    let dateObj = new Date(dob);
+    if (isNaN(dateObj.getTime()) && typeof dob === 'string' && dob.includes('-')) {
+      const parts = dob.split('-');
+      if (parts.length === 3) {
+        if (parts[0].length === 4) dateObj = new Date(dob); // YYYY-MM-DD
+        else if (parts[2].length === 4) dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`); // DD-MM-YYYY
+      }
     }
+    if (!isNaN(dateObj.getTime())) return dateObj.toISOString().split('T')[0];
+    return '';
   };
 
   const tabs = [
@@ -308,19 +311,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const formatDobForInput = (dob) => {
-    if (!dob) return '';
-    let dateObj = new Date(dob);
-    if (isNaN(dateObj.getTime()) && typeof dob === 'string' && dob.includes('-')) {
-      const parts = dob.split('-');
-      if (parts.length === 3) {
-        if (parts[0].length === 4) dateObj = new Date(dob); // YYYY-MM-DD
-        else if (parts[2].length === 4) dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`); // DD-MM-YYYY
-      }
-    }
-    if (!isNaN(dateObj.getTime())) return dateObj.toISOString().split('T')[0];
-    return '';
-  };
+
 
   const handleEdit = (item) => {
     setEditingId(item.id || item._id);
