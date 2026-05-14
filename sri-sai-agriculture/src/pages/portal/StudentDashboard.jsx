@@ -366,7 +366,7 @@ export default function StudentDashboard() {
                   </div>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <InfoSection title="Personal Details">
                      <InfoField 
                         label="Date of Birth" 
@@ -393,6 +393,68 @@ export default function StudentDashboard() {
                      </p>
                   </InfoSection>
                </div>
+
+               {/* Fee Allocation & Breakdown in Profile */}
+               {student.student_fees && student.student_fees.length > 0 && (
+                 <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
+                    <div className="p-6 border-b border-gray-100 bg-amber-50 flex items-center justify-between">
+                       <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500">
+                             <Wallet size={20} />
+                          </div>
+                          <div>
+                             <h3 className="font-black text-sm uppercase tracking-wider text-ink">Fee Allocation &amp; Breakdown</h3>
+                             <p className="text-[10px] text-muted font-bold uppercase tracking-widest">Yearly negotiated fee structure</p>
+                          </div>
+                       </div>
+                       <span className="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-black rounded-full uppercase border border-amber-200">Committed Record</span>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                         <thead>
+                            <tr className="bg-ink text-white">
+                               <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Academic Year</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Total Fee</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Committed Fee</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Admission Fee</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Practical Fee</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Hostel Fee</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Paid</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Status</th>
+                            </tr>
+                         </thead>
+                         <tbody className="divide-y divide-gray-50">
+                            {student.student_fees.map((fee, idx) => {
+                               const totalCalculated = Number(fee.total_fee || 0) + Number(fee.practical_fee || 0) + Number(fee.hostel_fee || 0);
+                               const balance = totalCalculated - Number(fee.paid_amount || 0);
+                               return (
+                                 <tr key={idx} className="hover:bg-amber-50/30 transition-colors">
+                                    <td className="px-6 py-5">
+                                       <span className="font-black text-ink text-xs uppercase tracking-wider">{fee.academic_year}</span>
+                                    </td>
+                                    <td className="px-6 py-5 text-center font-bold text-sm text-ink">₹{Number(fee.total_fee || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-5 text-center font-bold text-sm text-blue">₹{Number(fee.committed_fee || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-5 text-center font-bold text-sm text-ink">₹{Number(fee.admission_fee || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-5 text-center font-bold text-sm text-ink">₹{Number(fee.practical_fee || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-5 text-center font-bold text-sm text-orange">₹{Number(fee.hostel_fee || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-5 text-center font-black text-sm text-green-600">₹{Number(fee.paid_amount || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-5 text-center">
+                                       {totalCalculated === 0 ? (
+                                         <span className="px-3 py-1 bg-gray-50 text-gray-400 text-[9px] font-black uppercase rounded-lg border border-gray-100">Not Set</span>
+                                       ) : balance <= 0 ? (
+                                         <span className="px-3 py-1 bg-green-100 text-green-600 text-[9px] font-black uppercase rounded-lg border border-green-200">✓ Paid</span>
+                                       ) : (
+                                         <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-black uppercase rounded-lg border border-orange-100">₹{balance.toLocaleString()} Due</span>
+                                       )}
+                                    </td>
+                                 </tr>
+                               );
+                            })}
+                         </tbody>
+                      </table>
+                    </div>
+                 </div>
+               )}
             </div>
           )}
 
