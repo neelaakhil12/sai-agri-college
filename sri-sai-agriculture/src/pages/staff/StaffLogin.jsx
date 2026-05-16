@@ -14,9 +14,8 @@ export default function StaffLogin() {
     e.preventDefault();
     setLoading(true);
     try {
-      // The backend uses the email field for login, and we set email to be the lowercase string without spaces of the name
-      const formattedEmail = email.toLowerCase().replace(/\s+/g, '');
-      const res = await axios.post(`${API_URL}/staff/login`, { email: formattedEmail, password }, { withCredentials: true });
+      // Send the raw input to backend so it can check against both 'name' and 'email' columns
+      const res = await axios.post(`${API_URL}/staff/login`, { username: email.trim(), password }, { withCredentials: true });
       navigate("/staff/dashboard");
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");

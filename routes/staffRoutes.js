@@ -154,9 +154,10 @@ router.get("/admin/attendance/history/:staffId", adminAuth, async (req, res) => 
 
 // Staff Login
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { username, email, password } = req.body;
+  const identifier = username || email;
   try {
-    const [rows] = await pool.query("SELECT * FROM staff WHERE email = ?", [email]);
+    const [rows] = await pool.query("SELECT * FROM staff WHERE email = ? OR name = ?", [identifier, identifier]);
     if (rows.length === 0) return res.status(401).json({ message: "Invalid email or password" });
     const staff = rows[0];
     const isMatch = await bcrypt.compare(password, staff.password);
