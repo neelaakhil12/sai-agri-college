@@ -150,7 +150,7 @@ export default function StaffDashboard() {
                            </td>
                            <td className="px-10 py-6 text-center">
                               {attendance[student.id] ? (
-                                 <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${attendance[student.id] === 'Present' ? 'bg-green-100 text-green-600 border border-green-200' : 'bg-red-100 text-red-600 border border-red-200'}`}>
+                                 <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${attendance[student.id].toLowerCase() === 'present' ? 'bg-green-100 text-green-700 border border-green-300' : 'bg-red-100 text-red-700 border border-red-300'}`}>
                                     {attendance[student.id]}
                                  </span>
                               ) : (
@@ -161,15 +161,15 @@ export default function StaffDashboard() {
                               <div className="flex items-center justify-end gap-3">
                                  <button 
                                    onClick={() => markAttendance(student.id, 'Present')}
-                                   className={`p-3 rounded-xl transition-all ${attendance[student.id] === 'Present' ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' : 'bg-gray-50 text-gray-300 hover:bg-green-50 hover:text-green-500'}`}
+                                   className={`p-3 rounded-xl border transition-all ${attendance[student.id]?.toLowerCase() === 'present' ? 'bg-green-500 text-white border-green-500 shadow-lg shadow-green-500/30' : 'bg-white text-gray-400 border-gray-200 hover:bg-green-50 hover:text-green-600 hover:border-green-200 shadow-sm'}`}
                                  >
-                                    <CheckCircle2 size={20} />
+                                    <CheckCircle2 size={22} strokeWidth={2.5} />
                                  </button>
                                  <button 
                                    onClick={() => markAttendance(student.id, 'Absent')}
-                                   className={`p-3 rounded-xl transition-all ${attendance[student.id] === 'Absent' ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-gray-50 text-gray-300 hover:bg-red-50 hover:text-red-500'}`}
+                                   className={`p-3 rounded-xl border transition-all ${attendance[student.id]?.toLowerCase() === 'absent' ? 'bg-red-500 text-white border-red-500 shadow-lg shadow-red-500/30' : 'bg-white text-gray-400 border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-sm'}`}
                                  >
-                                    <XCircle size={20} />
+                                    <XCircle size={22} strokeWidth={2.5} />
                                  </button>
                               </div>
                            </td>
