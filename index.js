@@ -43,6 +43,7 @@ try {
   app.use("/api/admin", require("./routes/syncRoutes"));
   app.use("/api/student-fees", require("./routes/feeRoutes"));
   app.use("/api/staff", require("./routes/staffRoutes"));
+  app.use("/api/receptionist", require("./routes/receptionistRoutes"));
   console.log("✅ Routes initialized");
 
   // Serve static files

@@ -91,6 +91,8 @@ export default function Footer() {
            Designed by <a href="https://www.codtechitsolutions.com/" target="_blank" rel="noopener noreferrer" className="text-blue/80 no-underline hover:text-blue font-semibold transition-colors duration-200">CODTECH IT Solutions</a>
            <span className="mx-2">|</span>
            <Link to="/staff/login" className="hover:text-blue transition-colors">Staff Login</Link>
+           <span className="mx-2">|</span>
+           <Link to="/receptionist/dashboard" className="hover:text-blue transition-colors font-bold text-ink/50">Receptionist Admin Panel</Link>
         </p>
       </div>
     </footer>

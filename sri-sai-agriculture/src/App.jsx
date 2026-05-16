@@ -23,13 +23,14 @@ import StudentDashboard from "./pages/portal/StudentDashboard";
 import ResetPassword    from "./pages/portal/ResetPassword";
 import StaffLogin       from "./pages/staff/StaffLogin";
 import StaffDashboard   from "./pages/staff/StaffDashboard";
+import ReceptionistDashboard from "./pages/receptionist/ReceptionistDashboard";
 
 export default function App() {
   const location = useLocation();
   useScrollReveal([location.pathname]);
 
   const isAdminPanel = location.pathname.startsWith('/admin');
-  const isPortal = location.pathname.startsWith('/portal') || location.pathname.startsWith('/staff');
+  const isPortal = location.pathname.startsWith('/portal') || location.pathname.startsWith('/staff') || location.pathname.startsWith('/receptionist');
 
   return (
     <div className="min-h-screen bg-cream font-sora text-[#374151]">
@@ -64,6 +65,10 @@ export default function App() {
           {/* Staff Portal Routes */}
           <Route path="/staff/login" element={<StaffLogin />} />
           <Route path="/staff/dashboard" element={<StaffDashboard />} />
+
+          {/* Receptionist Portal Route */}
+          <Route path="/receptionist" element={<Navigate to="/receptionist/dashboard" replace />} />
+          <Route path="/receptionist/dashboard" element={<ReceptionistDashboard />} />
         </Routes>
 
       </main>

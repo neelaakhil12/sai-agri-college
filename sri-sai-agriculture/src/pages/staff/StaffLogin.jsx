@@ -14,7 +14,9 @@ export default function StaffLogin() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post(`${API_URL}/staff/login`, { email, password }, { withCredentials: true });
+      // The backend uses the email field for login, and we set email to be the lowercase string without spaces of the name
+      const formattedEmail = email.toLowerCase().replace(/\s+/g, '');
+      const res = await axios.post(`${API_URL}/staff/login`, { email: formattedEmail, password }, { withCredentials: true });
       navigate("/staff/dashboard");
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
@@ -48,11 +50,11 @@ export default function StaffLogin() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Work Email</label>
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Employee Name</label>
             <input 
               required
-              type="email" 
-              placeholder="name@srisai.edu"
+              type="text" 
+              placeholder="e.g. Akhil Kumar"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-blue transition-all font-bold text-ink"
