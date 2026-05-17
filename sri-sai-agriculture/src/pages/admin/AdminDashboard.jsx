@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 import { 
   Users, 
   BookOpen, 
@@ -1502,10 +1504,6 @@ export default function AdminDashboard() {
                             setDownloadingPdf(true);
                             const res = await axios.get('/api/students/attendance-summary', { withCredentials: true });
                             const data = res.data;
-
-                            const { jsPDF } = require('jspdf');
-                            require('jspdf-autotable');
-
                             const doc = new jsPDF('p', 'pt', 'a4');
                             doc.setFillColor(29, 74, 58);
                             doc.rect(0, 0, 595.28, 80, 'F');
