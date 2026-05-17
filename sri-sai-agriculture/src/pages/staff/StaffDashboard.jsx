@@ -115,11 +115,11 @@ export default function StaffDashboard() {
                <h3 className="font-black text-ink text-sm uppercase tracking-widest">Enrollment List ({filteredStudents.length})</h3>
                <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                     <div className="h-3 w-3 bg-green-500 rounded-full"></div>
+                     <div className="h-3 w-3 bg-blue rounded-full"></div>
                      <span className="text-[10px] font-bold text-muted uppercase">Present</span>
                   </div>
                   <div className="flex items-center gap-2">
-                     <div className="h-3 w-3 bg-red-500 rounded-full"></div>
+                     <div className="h-3 w-3 bg-orange rounded-full"></div>
                      <span className="text-[10px] font-bold text-muted uppercase">Absent</span>
                   </div>
                </div>
@@ -150,7 +150,7 @@ export default function StaffDashboard() {
                            </td>
                            <td className="px-10 py-6 text-center">
                               {attendance[student.id] ? (
-                                 <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${attendance[student.id].toLowerCase() === 'present' ? 'bg-green-100 text-green-700 border border-green-300' : 'bg-red-100 text-red-700 border border-red-300'}`}>
+                                 <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${attendance[student.id].toLowerCase() === 'present' ? 'bg-sky2 text-blue border border-blue/20' : 'bg-red-50 text-orange border border-orange/20'}`}>
                                     {attendance[student.id]}
                                  </span>
                               ) : (
@@ -161,15 +161,25 @@ export default function StaffDashboard() {
                               <div className="flex items-center justify-end gap-3">
                                  <button 
                                    onClick={() => markAttendance(student.id, 'Present')}
-                                   className={`p-3 rounded-xl border transition-all ${attendance[student.id]?.toLowerCase() === 'present' ? 'bg-green-500 text-white border-green-500 shadow-lg shadow-green-500/30' : 'bg-white text-gray-400 border-gray-200 hover:bg-green-50 hover:text-green-600 hover:border-green-200 shadow-sm'}`}
+                                   className={`p-3 rounded-xl border transition-all ${
+                                     attendance[student.id]?.toLowerCase() === 'present' 
+                                       ? 'bg-blue text-white border-blue shadow-lg shadow-blue/30' 
+                                       : 'bg-sky text-blue border-sky2 hover:bg-blue hover:text-white hover:border-blue shadow-sm'
+                                   }`}
+                                   title="Mark Present"
                                  >
                                     <CheckCircle2 size={22} strokeWidth={2.5} />
                                  </button>
                                  <button 
                                    onClick={() => markAttendance(student.id, 'Absent')}
-                                   className={`p-3 rounded-xl border transition-all ${attendance[student.id]?.toLowerCase() === 'absent' ? 'bg-red-500 text-white border-red-500 shadow-lg shadow-red-500/30' : 'bg-white text-gray-400 border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-sm'}`}
+                                   className={`p-3 rounded-xl border transition-all ${
+                                     attendance[student.id]?.toLowerCase() === 'absent' 
+                                       ? 'bg-orange text-white border-orange shadow-lg shadow-orange/30' 
+                                       : 'bg-red-50 text-orange border-red-100 hover:bg-orange hover:text-white hover:border-orange shadow-sm'
+                                   }`}
+                                   title="Mark Absent"
                                  >
-                                    <XCircle size={22} strokeWidth={2.5} />
+                                    <CheckCircle2 size={22} strokeWidth={2.5} />
                                  </button>
                               </div>
                            </td>
