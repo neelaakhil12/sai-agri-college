@@ -501,7 +501,7 @@ export default function StudentDashboard() {
                   <InfoSection title="Contact Details">
                      <InfoField label="Mobile" value={student.mobile1} />
                      <InfoField label="Alternate" value={student.mobile2 || 'N/A'} />
-                     <InfoField label="Email" value={student.email_personal || student.email} />
+                     <InfoField label="Email" value={student.email} />
                   </InfoSection>
                   <InfoSection title="Address" full>
                      <p className="text-sm font-bold text-ink leading-relaxed">

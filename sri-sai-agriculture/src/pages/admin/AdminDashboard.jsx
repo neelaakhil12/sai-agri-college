@@ -39,6 +39,7 @@ export default function AdminDashboard() {
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [studentFees, setStudentFees] = useState([]);
+  const [sendingReminder, setSendingReminder] = useState(false);
   const [viewMode, setViewMode] = useState('list');
   const [data, setData] = useState([]);
   const [refresh, setRefresh] = useState(0);
@@ -1399,7 +1400,7 @@ export default function AdminDashboard() {
                       </div>
                    </div>
 
-                   <div className="mt-12 flex gap-4">
+                   <div className="mt-12 flex flex-col md:flex-row gap-4">
                       <button 
                          onClick={async () => {
                             try {
@@ -1434,6 +1435,29 @@ export default function AdminDashboard() {
                          className="flex-grow bg-[#15803d] text-white py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-green-500/20 hover:bg-[#166534] transition-all active:scale-[0.98] disabled:opacity-50"
                       >
                          {loading ? 'Processing...' : 'Sync & Update Student Account'}
+                      </button>
+
+                      {/* Send Fee Reminder Email to ALL Students */}
+                      <button
+                        onClick={async () => {
+                          if (!window.confirm('This will send a fee payment reminder email to ALL enrolled students. Continue?')) return;
+                          try {
+                            setSendingReminder(true);
+                            const res = await axios.post('/api/students/send-fee-reminder', {}, { withCredentials: true });
+                            alert(`✅ Fee reminders sent!\n\n📧 Delivered: ${res.data.sent} students\n❌ Failed: ${res.data.failed} students\n👥 Total: ${res.data.total} students`);
+                          } catch (err) {
+                            alert('Failed to send reminders: ' + (err.response?.data?.message || err.message));
+                          } finally {
+                            setSendingReminder(false);
+                          }
+                        }}
+                        disabled={sendingReminder}
+                        className="flex items-center justify-center gap-2 px-8 py-5 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-sm uppercase tracking-[0.15em] shadow-xl shadow-amber-500/20 transition-all active:scale-[0.98] disabled:opacity-50 whitespace-nowrap"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        {sendingReminder ? 'Sending Emails...' : 'Send Fee Reminder to All'}
                       </button>
                   </div>
                </div>
