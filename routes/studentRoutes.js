@@ -126,6 +126,7 @@ router.get("/profile", async (req, res) => {
     attRows.forEach(row => {
       totalDays += row.count;
       if (row.status === 'Present') presentDays += row.count;
+    });
     const attendancePercentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : "0.00";
 
     const [attendanceRecords] = await pool.query(
