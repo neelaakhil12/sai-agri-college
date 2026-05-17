@@ -472,7 +472,7 @@ export default function StudentDashboard() {
                   </div>
                   <div className="flex-grow text-center md:text-left">
                      <h2 className="text-4xl font-black text-ink mb-1">{student.student_name}</h2>
-                     <p className="text-blue font-bold tracking-widest uppercase text-xs mb-6">Student ID: {String(student.id).toUpperCase()}</p>
+                     <p className="text-blue font-bold tracking-widest uppercase text-xs mb-6">Roll No: {student.roll_no || String(student.id).toUpperCase()}</p>
                      
                      <div className="flex flex-wrap justify-center md:justify-start gap-4">
                         <ProfileTag label="Course" value={student.course_applied} color="blue" />
