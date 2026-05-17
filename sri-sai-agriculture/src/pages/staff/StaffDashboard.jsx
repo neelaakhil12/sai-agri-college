@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { jsPDF } from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { LogOut, CheckCircle2, XCircle, Clock, Search, Filter, Calendar } from "lucide-react";
@@ -117,7 +117,7 @@ export default function StaffDashboard() {
         `${student.percentage}%`
       ]);
 
-      doc.autoTable({
+      autoTable(doc, {
         head: tableHeaders,
         body: tableRows,
         startY: 165,

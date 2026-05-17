@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { jsPDF } from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import axios from 'axios';
 import { 
   Users, 
@@ -186,7 +186,7 @@ export default function ReceptionistDashboard() {
         `${staff.percentage}%`
       ]);
 
-      doc.autoTable({
+      autoTable(doc, {
         head: tableHeaders,
         body: tableRows,
         startY: 165,
