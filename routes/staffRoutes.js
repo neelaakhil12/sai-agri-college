@@ -199,4 +199,99 @@ router.get("/attendance/:date", staffAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ message: "Fetch failed" }); }
 });
 
+// Get overall attendance summary for all students (staff portal)
+router.get("/students-summary", staffAuth, async (req, res) => {
+  try {
+    const [students] = await pool.query(
+      "SELECT id, student_name, roll_no FROM students ORDER BY student_name ASC"
+    );
+
+    const [counts] = await pool.query(
+      "SELECT student_id, status, COUNT(*) as count FROM attendance GROUP BY student_id, status"
+    );
+
+    const countsMap = {};
+    counts.forEach(c => {
+      if (!countsMap[c.student_id]) {
+        countsMap[c.student_id] = { Present: 0, Absent: 0 };
+      }
+      countsMap[c.student_id][c.status] = c.count;
+    });
+
+    const summary = students.map(student => {
+      const studentCounts = countsMap[student.id] || { Present: 0, Absent: 0 };
+      const present = Number(studentCounts.Present || 0);
+      const absent = Number(studentCounts.Absent || 0);
+      const total = present + absent;
+      const percentage = total > 0 ? ((present / total) * 100).toFixed(2) : "0.00";
+
+      return {
+        id: student.id,
+        student_name: student.student_name,
+        roll_no: student.roll_no,
+        total_days: total,
+        present_days: present,
+        absent_days: absent,
+        percentage: percentage
+      };
+    });
+
+    res.json(summary);
+  } catch (err) {
+    console.error("Failed to fetch students attendance summary:", err.message);
+    res.status(500).json({ message: "Failed to fetch student attendance summary" });
+  }
+});
+
+// Get overall attendance summary for all staff members (receptionist/admin portal)
+router.get("/staff-summary", adminAuth, async (req, res) => {
+  try {
+    const [staffList] = await pool.query(
+      "SELECT id, name, employee_id, department FROM staff ORDER BY name ASC"
+    );
+
+    const [counts] = await pool.query(
+      "SELECT staff_id, status, COUNT(*) as count FROM staff_attendance GROUP BY staff_id, status"
+    );
+
+    const countsMap = {};
+    counts.forEach(c => {
+      if (!countsMap[c.staff_id]) {
+        countsMap[c.staff_id] = { Present: 0, Absent: 0, Leave: 0, 'Half Day': 0 };
+      }
+      countsMap[c.staff_id][c.status] = c.count;
+    });
+
+    const summary = staffList.map(staff => {
+      const stats = countsMap[staff.id] || { Present: 0, Absent: 0, Leave: 0, 'Half Day': 0 };
+      const present = Number(stats.Present || 0);
+      const absent = Number(stats.Absent || 0);
+      const leave = Number(stats.Leave || 0);
+      const halfDay = Number(stats['Half Day'] || 0);
+      
+      const total = present + absent + leave + halfDay;
+      const effectivePresent = present + (halfDay * 0.5);
+      const percentage = total > 0 ? ((effectivePresent / total) * 100).toFixed(2) : "0.00";
+
+      return {
+        id: staff.id,
+        name: staff.name,
+        employee_id: staff.employee_id,
+        department: staff.department,
+        total_days: total,
+        present_days: present,
+        absent_days: absent,
+        leave_days: leave,
+        half_days: halfDay,
+        percentage: percentage
+      };
+    });
+
+    res.json(summary);
+  } catch (err) {
+    console.error("Failed to fetch staff attendance summary:", err.message);
+    res.status(500).json({ message: "Failed to fetch staff attendance summary" });
+  }
+});
+
 module.exports = router;
