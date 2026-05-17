@@ -11,7 +11,37 @@ export default function StudentDashboard() {
   const [payData, setPayData] = useState({ type: '', amount: 0, year: '' });
   const [screenshot, setScreenshot] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [selectedFeeType, setSelectedFeeType] = useState("Academic Fee");
   const navigate = useNavigate();
+
+  const getFeeStats = (fee, type) => {
+    let allocated = 0;
+    if (type === 'Academic Fee') allocated = Number(fee.total_fee || 0);
+    else if (type === 'Practical Fee') allocated = Number(fee.practical_fee || 0);
+    else if (type === 'Hostel Fee') allocated = Number(fee.hostel_fee || 0);
+    else if (type === 'Examination Fee') allocated = 1500;
+
+    const matchedProofs = (student?.payment_proofs || []).filter(p => 
+      p.fee_type === type && 
+      p.academic_year.toLowerCase().trim() === fee.academic_year.toLowerCase().trim()
+    );
+    
+    const approvedPaid = matchedProofs
+      .filter(p => p.status.toLowerCase() === 'approved')
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+    const pendingPaid = matchedProofs
+      .filter(p => p.status.toLowerCase() === 'pending')
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+    let paid = approvedPaid;
+    if (paid === 0 && type === 'Academic Fee') {
+      paid = Number(fee.paid_amount || 0);
+    }
+
+    const balance = Math.max(0, allocated - paid);
+    return { allocated, paid, pendingPaid, balance };
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -183,34 +213,51 @@ export default function StudentDashboard() {
                      <Wallet size={40} strokeWidth={2.5} />
                   </div>
                   <h2 className="text-2xl font-black text-ink mb-2">Sri Sai Fee Portal</h2>
-                  <p className="text-muted font-medium mb-8">Select the type of Fee to Continue</p>
+                  <p className="text-muted font-medium mb-8">Select a Fee Category to View Details & Upload Payment Screenshots</p>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                      <PaymentOption 
                         icon="Book" 
-                        title="Pay Academic Fees" 
+                        title="Academic Fees" 
                         detail="College Tuition Fees" 
-                        onClick={() => openPayModal('Academic Fee', 0, '')}
+                        active={selectedFeeType === 'Academic Fee'}
+                        onClick={() => setSelectedFeeType('Academic Fee')}
+                     />
+                     <PaymentOption 
+                        icon="FlaskConical" 
+                        title="Practical Fees" 
+                        detail="Laboratory & Lab Charges" 
+                        active={selectedFeeType === 'Practical Fee'}
+                        onClick={() => setSelectedFeeType('Practical Fee')}
                      />
                      <PaymentOption 
                         icon="Home" 
-                        title="Pay Hostel Fees" 
+                        title="Hostel Fees" 
                         detail="Hostel & Mess Charges" 
-                        onClick={() => openPayModal('Hostel Fee', 0, '')}
+                        active={selectedFeeType === 'Hostel Fee'}
+                        onClick={() => setSelectedFeeType('Hostel Fee')}
                      />
                      <PaymentOption 
                         icon="FileText" 
-                        title="Pay Examination Fees" 
+                        title="Examination Fees" 
                         detail="Regular & Supplementary" 
-                        onClick={() => openPayModal('Examination Fee', 1500, 'Semester Exam')}
+                        active={selectedFeeType === 'Examination Fee'}
+                        onClick={() => setSelectedFeeType('Examination Fee')}
                      />
                   </div>
                </div>
 
-               {/* Original Fee Status Table */}
+               {/* Dynamic Fee Summary / Year breakdown */}
                <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
                   <div className="p-6 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-                     <h3 className="font-black text-sm uppercase tracking-wider text-ink">Fee Status</h3>
+                     <div className="flex items-center gap-3">
+                        <span className="font-black text-sm uppercase tracking-wider text-ink">
+                           {selectedFeeType} Structure
+                        </span>
+                        <span className="px-3 py-1 bg-blue/10 text-blue text-[10px] font-black rounded-full uppercase tracking-wider">
+                           Active Category
+                        </span>
+                     </div>
                      <span className="px-3 py-1 bg-green-100 text-green-600 text-[10px] font-black rounded-full uppercase">Live Status</span>
                   </div>
                   <div className="overflow-x-auto">
@@ -218,124 +265,72 @@ export default function StudentDashboard() {
                        <thead>
                           <tr className="border-b border-gray-100">
                              <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Academic Year</th>
-                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">College (Total / Paid / Due)</th>
-                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Hostel (Total / Paid / Due)</th>
-                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
-                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Last Update</th>
-                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Action</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Allocated Amount</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Paid Amount</th>
+                             {selectedFeeType === 'Academic Fee' && (
+                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Legacy Paid Pool</th>
+                             )}
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Pending Status</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Action</th>
                           </tr>
                        </thead>
                        <tbody className="divide-y divide-gray-50">
                           {student.student_fees?.map((fee, idx) => {
-                            const totalCalculated = Number(fee.total_fee || 0) + Number(fee.practical_fee || 0) + Number(fee.hostel_fee || 0);
-                            const balance = totalCalculated - Number(fee.paid_amount || 0);
-                            return (
-                              <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
-                                 <td className="px-8 py-6">
-                                    <span className="font-black text-ink text-sm uppercase">{fee.academic_year}</span>
-                                 </td>
-                                 <td className="px-8 py-6 text-center">
-                                    {parseFloat(fee.total_fee) === 0 ? (
-                                      <span className="text-[10px] font-bold text-gray-300 uppercase italic">Not Updated</span>
-                                    ) : (
-                                      <div className="flex flex-col items-center gap-0.5">
-                                         <span className="text-[10px] font-bold text-gray-400">₹{fee.total_fee || '0'} total</span>
-                                         <span className="text-sm font-black text-blue">₹{fee.paid_amount || '0'} paid</span>
-                                      </div>
-                                    )}
-                                 </td>
-                                 <td className="px-8 py-6 text-center">
-                                    {parseFloat(fee.hostel_fee) === 0 ? (
-                                      <span className="text-[10px] font-bold text-gray-300 uppercase italic">Not Updated</span>
-                                    ) : (
-                                      <div className="flex flex-col items-center gap-0.5">
-                                         <span className="text-[10px] font-bold text-gray-400">₹{fee.hostel_fee || '0'} total</span>
-                                         <span className="text-sm font-black text-orange">₹{fee.hostel_fee || '0'}</span>
-                                      </div>
-                                    )}
-                                 </td>
-                                 <td className="px-8 py-6">
-                                    {totalCalculated === 0 ? (
-                                      <span className="px-3 py-1 bg-gray-50 text-gray-400 text-[9px] font-black uppercase rounded-lg border border-gray-100">Waiting for Admin</span>
-                                    ) : balance <= 0 ? (
-                                      <span className="px-3 py-1 bg-green-100 text-green-600 text-[9px] font-black uppercase rounded-lg border border-green-200">Fully Paid</span>
-                                    ) : (
-                                      <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-black uppercase rounded-lg border border-orange-100">Pending</span>
-                                    )}
-                                 </td>
-                                 <td className="px-8 py-6">
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                       {fee.last_payment_date ? new Date(fee.last_payment_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No Record'}
-                                    </span>
-                                 </td>
-                                 <td className="px-8 py-6">
-                                    {balance > 0 ? (
-                                      <button 
-                                         onClick={() => openPayModal('Academic Fee', balance, fee.academic_year)}
-                                         className="px-5 py-2 bg-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ink transition-all shadow-lg shadow-blue/20"
-                                      >
-                                         Pay Now
-                                      </button>
-                                    ) : totalCalculated > 0 ? (
-                                      <div className="flex items-center justify-center">
-                                         <span className="px-5 py-2 bg-[#10b981] text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-200/50 flex items-center gap-2 border border-green-600/20">
-                                            <Check size={12} strokeWidth={4} /> Fully Paid
-                                         </span>
-                                      </div>
-                                    ) : null}
-                                 </td>
-                              </tr>
-                            );
-                          })}
-                       </tbody>
-                    </table>
-                  </div>
-               </div>
-
-               {/* Detailed Fee Breakdown Box */}
-               <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
-                  <div className="p-6 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-                     <h3 className="font-black text-sm uppercase tracking-wider text-ink">Detailed Fee Breakdown</h3>
-                     <span className="px-3 py-1 bg-green-100 text-green-600 text-[10px] font-black rounded-full uppercase">Official Record</span>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                       <thead>
-                          <tr className="bg-ink text-white">
-                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Academic Year</th>
-                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Total Fee</th>
-                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Committed Fee</th>
-                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Admission Fee</th>
-                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Practical Fee</th>
-                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Hostel Fee</th>
-                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Paid Amount</th>
-                             <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Status</th>
-                          </tr>
-                       </thead>
-                       <tbody className="divide-y divide-gray-50">
-                          {student.student_fees?.map((fee, idx) => {
-                             const totalCalculated = Number(fee.total_fee || 0) + Number(fee.practical_fee || 0) + Number(fee.hostel_fee || 0);
-                             const balance = totalCalculated - Number(fee.paid_amount || 0);
+                             const { allocated, paid, pendingPaid, balance } = getFeeStats(fee, selectedFeeType);
+                             
                              return (
                                <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
-                                  <td className="px-6 py-6">
+                                  <td className="px-8 py-6">
                                      <span className="font-black text-ink text-sm uppercase">{fee.academic_year}</span>
                                   </td>
-                                  <td className="px-6 py-6 text-center font-bold text-sm text-ink">₹{fee.total_fee || '0'}</td>
-                                  <td className="px-6 py-6 text-center font-bold text-sm text-blue">₹{fee.committed_fee || '0'}</td>
-                                  <td className="px-6 py-6 text-center font-bold text-sm text-ink">₹{fee.admission_fee || '0'}</td>
-                                  <td className="px-6 py-6 text-center font-bold text-sm text-ink">₹{fee.practical_fee || '0'}</td>
-                                  <td className="px-6 py-6 text-center font-bold text-sm text-orange">₹{fee.hostel_fee || '0'}</td>
-                                  <td className="px-6 py-6 text-center font-black text-sm text-green-600">₹{fee.paid_amount || '0'}</td>
-                                  <td className="px-6 py-6 text-center">
-                                     {balance <= 0 && totalCalculated > 0 ? (
-                                       <span className="px-3 py-1 bg-green-100 text-green-600 text-[9px] font-black uppercase rounded-lg border border-green-200">Completed</span>
-                                     ) : totalCalculated === 0 ? (
-                                       <span className="px-3 py-1 bg-gray-50 text-gray-400 text-[9px] font-black uppercase rounded-lg border border-gray-100">N/A</span>
+                                  <td className="px-8 py-6 text-center">
+                                     {allocated === 0 ? (
+                                       <span className="text-[10px] font-bold text-gray-300 uppercase italic">Not Allocated</span>
                                      ) : (
-                                       <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-black uppercase rounded-lg border border-orange-100">
-                                         ₹{balance} Pending
-                                       </span>
+                                       <span className="text-sm font-black text-ink">₹{allocated.toLocaleString()}</span>
+                                     )}
+                                  </td>
+                                  <td className="px-8 py-6 text-center">
+                                     <div className="flex flex-col items-center">
+                                        <span className="text-sm font-black text-green-600">₹{paid.toLocaleString()}</span>
+                                        {pendingPaid > 0 && (
+                                          <span className="text-[9px] font-bold text-yellow-500 mt-0.5">₹{pendingPaid.toLocaleString()} pending verification</span>
+                                        )}
+                                     </div>
+                                  </td>
+                                  {selectedFeeType === 'Academic Fee' && (
+                                     <td className="px-8 py-6 text-center">
+                                        <span className="text-xs font-bold text-gray-400">₹{Number(fee.paid_amount || 0).toLocaleString()}</span>
+                                     </td>
+                                  )}
+                                  <td className="px-8 py-6 text-center">
+                                     {allocated === 0 ? (
+                                       <span className="px-3 py-1 bg-gray-50 text-gray-400 text-[9px] font-black uppercase rounded-lg border border-gray-100">Waiting for Admin</span>
+                                     ) : balance <= 0 ? (
+                                       <span className="px-3 py-1 bg-green-100 text-green-600 text-[9px] font-black uppercase rounded-lg border border-green-200">Fully Paid</span>
+                                     ) : (
+                                       <div className="flex flex-col items-center">
+                                          <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-black uppercase rounded-lg border border-orange-100">Pending</span>
+                                          <span className="text-[9px] font-bold text-orange-500 mt-1">₹{balance.toLocaleString()} due</span>
+                                       </div>
+                                     )}
+                                  </td>
+                                  <td className="px-8 py-6 text-center">
+                                     {balance > 0 && allocated > 0 ? (
+                                       <button 
+                                          onClick={() => openPayModal(selectedFeeType, balance, fee.academic_year)}
+                                          className="px-5 py-2 bg-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ink transition-all shadow-lg shadow-blue/20"
+                                       >
+                                          Pay Now
+                                       </button>
+                                     ) : allocated > 0 ? (
+                                       <div className="flex items-center justify-center">
+                                          <span className="px-5 py-2 bg-[#10b981] text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-200/50 flex items-center gap-2 border border-green-600/20">
+                                             <Check size={12} strokeWidth={4} /> Fully Paid
+                                          </span>
+                                       </div>
+                                     ) : (
+                                       <span className="text-[10px] font-bold text-gray-300 uppercase italic">N/A</span>
                                      )}
                                   </td>
                                </tr>
@@ -343,6 +338,95 @@ export default function StudentDashboard() {
                           })}
                        </tbody>
                     </table>
+                  </div>
+               </div>
+
+               {/* Detailed Dynamic Fee Breakdown / History List */}
+               <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
+                  <div className="p-6 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                     <h3 className="font-black text-sm uppercase tracking-wider text-ink">
+                        {selectedFeeType} Payment History
+                     </h3>
+                     <span className="px-3 py-1 bg-blue/10 text-blue text-[10px] font-black rounded-full uppercase tracking-wider">
+                        Submission Log
+                     </span>
+                  </div>
+                  
+                  <div className="p-8">
+                     {(() => {
+                        const feeHistory = (student.payment_proofs || []).filter(p => p.fee_type === selectedFeeType);
+                        
+                        if (feeHistory.length === 0) {
+                           return (
+                              <div className="text-center py-12 bg-gray-50/50 rounded-2xl border border-dashed border-gray-100 max-w-lg mx-auto">
+                                 <div className="h-14 w-14 bg-sky rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue">
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                 </div>
+                                 <h4 className="font-black text-sm text-ink mb-1">No payment history found</h4>
+                                 <p className="text-xs text-muted max-w-xs mx-auto">
+                                    You haven't submitted any payment screenshots for {selectedFeeType} yet. If you pay outstanding dues, submit the PNG receipt to get approval.
+                                 </p>
+                              </div>
+                           );
+                        }
+
+                        return (
+                           <div className="space-y-4">
+                              {feeHistory.map((history, hIdx) => {
+                                 const uploadDate = new Date(history.created_at).toLocaleDateString('en-IN', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                 });
+
+                                 let statusColor = "bg-yellow-50 text-yellow-600 border border-yellow-200";
+                                 if (history.status.toLowerCase() === 'approved') {
+                                    statusColor = "bg-green-50 text-green-600 border border-green-200";
+                                 } else if (history.status.toLowerCase() === 'rejected') {
+                                    statusColor = "bg-red-50 text-red-600 border border-red-200";
+                                 }
+
+                                 return (
+                                    <div key={hIdx} className="p-6 bg-white border border-gray-100 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:border-blue/30 hover:shadow-lg hover:shadow-blue/5 transition-all">
+                                       <div className="flex items-center gap-4">
+                                          <div className="h-12 w-12 bg-sky rounded-2xl flex items-center justify-center text-blue shadow-inner font-bold">
+                                             ₹
+                                          </div>
+                                          <div>
+                                             <div className="flex items-center gap-2">
+                                                <h4 className="font-black text-lg text-ink">₹{Number(history.amount || 0).toLocaleString()}</h4>
+                                                <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${statusColor}`}>
+                                                   {history.status}
+                                                </span>
+                                             </div>
+                                             <p className="text-[10px] text-muted font-bold uppercase tracking-wider mt-0.5">
+                                                Academic Year: {history.academic_year} | Submitted: {uploadDate}
+                                             </p>
+                                          </div>
+                                       </div>
+                                       
+                                       <div className="flex items-center gap-3 w-full md:w-auto">
+                                          {history.screenshot && (
+                                             <a 
+                                                href={`/${history.screenshot}`} 
+                                                target="_blank" 
+                                                rel="noreferrer"
+                                                className="px-5 py-2.5 bg-sky hover:bg-blue hover:text-white text-blue border border-sky rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-center flex-grow md:flex-grow-0"
+                                             >
+                                                View Screenshot
+                                             </a>
+                                          )}
+                                       </div>
+                                    </div>
+                                 );
+                              })}
+                           </div>
+                        );
+                     })()}
                   </div>
                </div>
             </div>
@@ -493,16 +577,13 @@ export default function StudentDashboard() {
                              f.academic_year.toLowerCase().trim() === year.toLowerCase().trim()
                           );
                           
-                          // Calculate amount based on balance
-                          const totalCalculated = Number(fee?.total_fee || 0) + Number(fee?.practical_fee || 0) + Number(fee?.hostel_fee || 0);
-                          const balance = totalCalculated - Number(fee?.paid_amount || 0);
-                          let amount = balance > 0 ? balance : 0;
-                          
-                          if (payData.type.includes('Examination')) {
-                             amount = 1500;
-                          }
-                          
-                          setPayData({ ...payData, year, amount });
+                          let amount = 0;
+                           if (fee) {
+                              const { balance } = getFeeStats(fee, payData.type);
+                              amount = balance;
+                           }
+                           
+                           setPayData({ ...payData, year, amount });
                        }}
                        className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl font-bold text-ink focus:outline-none focus:ring-2 focus:ring-blue/20 transition-all"
                     >
@@ -663,15 +744,24 @@ function ToolCard({ icon, title, onClick }) {
   );
 }
 
-function PaymentOption({ icon, title, detail, onClick }) {
+function PaymentOption({ icon, title, detail, active, onClick }) {
   const Icon = require('lucide-react')[icon];
   return (
-    <div onClick={onClick} className="p-8 border border-gray-100 rounded-3xl hover:border-blue hover:bg-sky/20 transition-all cursor-pointer group text-center flex flex-col items-center">
-       <div className="h-14 w-14 bg-gray-50 text-gray-400 group-hover:bg-blue group-hover:text-white rounded-2xl flex items-center justify-center mb-4 transition-colors">
+    <div 
+      onClick={onClick} 
+      className={`p-8 border rounded-3xl transition-all cursor-pointer group text-center flex flex-col items-center ${
+        active 
+          ? 'border-blue bg-sky/30 shadow-lg shadow-blue/5 scale-[1.02]' 
+          : 'border-gray-100 bg-white hover:border-blue hover:bg-sky/10'
+      }`}
+    >
+       <div className={`h-14 w-14 rounded-2xl flex items-center justify-center mb-4 transition-colors ${
+         active ? 'bg-blue text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-blue group-hover:text-white'
+       }`}>
           <Icon size={24} />
        </div>
-       <h4 className="font-bold text-ink mb-1">{title}</h4>
-       <p className="text-[10px] text-muted font-medium">{detail}</p>
+       <h4 className={`font-black text-sm mb-1 ${active ? 'text-blue' : 'text-ink'}`}>{title}</h4>
+       <p className="text-[10px] text-muted font-bold uppercase tracking-widest opacity-60">{detail}</p>
     </div>
   );
 }

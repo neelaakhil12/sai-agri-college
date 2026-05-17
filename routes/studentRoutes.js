@@ -129,9 +129,12 @@ router.get("/profile", async (req, res) => {
     });
     const attendancePercentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : "0.00";
 
+    const [proofs] = await pool.query("SELECT id, fee_type, amount, academic_year, screenshot, status, created_at FROM payment_proofs WHERE student_id = ? ORDER BY created_at DESC", [student.id]);
+
     student.qualifications = qualifications;
     student.student_fees = fees;
     student.attendance_percentage = attendancePercentage;
+    student.payment_proofs = proofs;
 
     res.json(student);
   } catch (err) {
