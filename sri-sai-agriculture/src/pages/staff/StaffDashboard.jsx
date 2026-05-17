@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { LogOut, CheckCircle2, XCircle, Clock, Search, Filter, Calendar } from "lucide-react";
@@ -54,8 +56,7 @@ export default function StaffDashboard() {
       const res = await axios.get(`${API_URL}/staff/students-summary`, { withCredentials: true });
       const data = res.data;
 
-      const { jsPDF } = require("jspdf");
-      require("jspdf-autotable");
+
 
       const doc = new jsPDF("p", "pt", "a4");
 

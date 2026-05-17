@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 import axios from 'axios';
 import { 
   Users, 
@@ -120,8 +122,7 @@ export default function ReceptionistDashboard() {
       const res = await axios.get(`${API_URL}/staff/staff-summary`, { withCredentials: true });
       const data = res.data;
 
-      const { jsPDF } = require("jspdf");
-      require("jspdf-autotable");
+
 
       const doc = new jsPDF("p", "pt", "a4");
 
