@@ -492,7 +492,7 @@ export default function StudentDashboard() {
                         })() : 'Not Provided'} 
                      />
                      <InfoField label="Gender" value={student.gender || 'Not Provided'} />
-                     <InfoField label="Nationality" value={student.nationality || 'Indian'} />
+                     <InfoField label="Nationality" value={(student.nationality === 'null' || !student.nationality) ? 'Indian' : student.nationality} />
                   </InfoSection>
                   <InfoSection title="Parent Details">
                      <InfoField label="Father's Name" value={student.father_name} />
@@ -501,7 +501,7 @@ export default function StudentDashboard() {
                   <InfoSection title="Contact Details">
                      <InfoField label="Mobile" value={student.mobile1} />
                      <InfoField label="Alternate" value={student.mobile2 || 'N/A'} />
-                     <InfoField label="Email" value={student.email_personal} />
+                     <InfoField label="Email" value={student.email_personal || student.email} />
                   </InfoSection>
                   <InfoSection title="Address" full>
                      <p className="text-sm font-bold text-ink leading-relaxed">
