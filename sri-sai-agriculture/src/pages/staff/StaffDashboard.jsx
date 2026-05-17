@@ -179,7 +179,7 @@ export default function StaffDashboard() {
                                    }`}
                                    title="Mark Absent"
                                  >
-                                    <CheckCircle2 size={22} strokeWidth={2.5} />
+                                    <XCircle size={22} strokeWidth={2.5} />
                                  </button>
                               </div>
                            </td>
