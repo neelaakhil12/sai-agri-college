@@ -130,7 +130,7 @@ router.get("/profile", async (req, res) => {
     const attendancePercentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : "0.00";
 
     const [attendanceRecords] = await pool.query(
-      "SELECT id, date, status, remarks FROM attendance WHERE student_id = ? ORDER BY date DESC",
+      "SELECT id, date, status FROM attendance WHERE student_id = ? ORDER BY date DESC",
       [student.id]
     );
 
