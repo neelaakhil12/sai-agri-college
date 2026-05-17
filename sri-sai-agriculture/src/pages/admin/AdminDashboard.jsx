@@ -1759,7 +1759,7 @@ function StaffManagementView({ staffList, onRefresh, onCreate, onDelete }) {
   const [attDate, setAttDate] = useState(new Date().toISOString().split('T')[0]);
   const [attData, setAttData] = useState([]);
   const [attLoading, setAttLoading] = useState(false);
-  const [newStaff, setNewStaff] = useState({ employee_id: '', name: '', email: '', password: '', department: '', role: '' });
+  const [newStaff, setNewStaff] = useState({ employee_id: '', name: '', email: '', password: '', department: '' });
 
   const STATUS_OPTIONS = ['Present', 'Absent', 'Leave', 'Half Day'];
   const STATUS_COLORS = {
@@ -1802,7 +1802,7 @@ function StaffManagementView({ staffList, onRefresh, onCreate, onDelete }) {
   const handleCreate = async () => {
     if (!newStaff.name || !newStaff.password) { alert('Name and password are required'); return; }
     await onCreate(newStaff);
-    setNewStaff({ name: '', password: '', department: '', role: '' });
+    setNewStaff({ name: '', password: '', department: '' });
     setShowAdd(false);
   };
 
@@ -1828,7 +1828,6 @@ function StaffManagementView({ staffList, onRefresh, onCreate, onDelete }) {
                   { key: 'name',        placeholder: 'Employee Name *' },
                   { key: 'password',    placeholder: 'Password *', type: 'password' },
                   { key: 'department',  placeholder: 'Department (e.g. Python Trainer)' },
-                  { key: 'role',        placeholder: 'Role (e.g. Trainer / HR)' },
                 ].map(f => (
                   <input key={f.key} type={f.type || 'text'} placeholder={f.placeholder}
                     value={newStaff[f.key] || ''}
@@ -1847,19 +1846,18 @@ function StaffManagementView({ staffList, onRefresh, onCreate, onDelete }) {
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50">
-                  {['Employee Name', 'Department', 'Role', 'Action'].map(h => (
+                  {['Employee Name', 'Department', 'Action'].map(h => (
                     <th key={h} className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-widest last:text-right">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {!(staffList || []).length ? (
-                  <tr><td colSpan={4} className="px-6 py-20 text-center text-gray-300 font-bold text-xs uppercase tracking-widest">No staff yet. Add one above.</td></tr>
+                  <tr><td colSpan={3} className="px-6 py-20 text-center text-gray-300 font-bold text-xs uppercase tracking-widest">No staff yet. Add one above.</td></tr>
                 ) : (staffList || []).map(m => (
                   <tr key={m.id} className="hover:bg-sky/30 transition-colors">
                     <td className="px-6 py-4 font-bold text-ink">{m.name}</td>
                     <td className="px-6 py-4 text-[10px] font-black text-muted uppercase tracking-widest">{m.department || '-'}</td>
-                    <td className="px-6 py-4 text-[10px] font-black text-muted uppercase tracking-widest">{m.role || '-'}</td>
                     <td className="px-6 py-4 text-right">
                       <button onClick={() => onDelete(m.id)} className="p-2 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all"><Trash2 size={16} /></button>
                     </td>
