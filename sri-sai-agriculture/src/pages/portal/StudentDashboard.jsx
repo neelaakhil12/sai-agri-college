@@ -266,11 +266,11 @@ export default function StudentDashboard() {
                           <tr className="border-b border-gray-100">
                              <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Academic Year</th>
                              <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Allocated Amount</th>
-                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Paid Amount</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Paid (Receipts)</th>
                              {selectedFeeType === 'Academic Fee' && (
-                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Legacy Paid Pool</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Paid Amount</th>
                              )}
-                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Pending Status</th>
+                             <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
                              <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Action</th>
                           </tr>
                        </thead>
@@ -503,14 +503,10 @@ export default function StudentDashboard() {
                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Admission Fee</th>
                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Practical Fee</th>
                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Hostel Fee</th>
-                               <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Paid</th>
-                               <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Status</th>
                             </tr>
                          </thead>
                          <tbody className="divide-y divide-gray-50">
                             {student.student_fees.map((fee, idx) => {
-                               const totalCalculated = Number(fee.total_fee || 0) + Number(fee.practical_fee || 0) + Number(fee.hostel_fee || 0);
-                               const balance = totalCalculated - Number(fee.paid_amount || 0);
                                return (
                                  <tr key={idx} className="hover:bg-amber-50/30 transition-colors">
                                     <td className="px-6 py-5">
@@ -521,16 +517,6 @@ export default function StudentDashboard() {
                                     <td className="px-6 py-5 text-center font-bold text-sm text-ink">₹{Number(fee.admission_fee || 0).toLocaleString()}</td>
                                     <td className="px-6 py-5 text-center font-bold text-sm text-ink">₹{Number(fee.practical_fee || 0).toLocaleString()}</td>
                                     <td className="px-6 py-5 text-center font-bold text-sm text-orange">₹{Number(fee.hostel_fee || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-5 text-center font-black text-sm text-green-600">₹{Number(fee.paid_amount || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-5 text-center">
-                                       {totalCalculated === 0 ? (
-                                         <span className="px-3 py-1 bg-gray-50 text-gray-400 text-[9px] font-black uppercase rounded-lg border border-gray-100">Not Set</span>
-                                       ) : balance <= 0 ? (
-                                         <span className="px-3 py-1 bg-green-100 text-green-600 text-[9px] font-black uppercase rounded-lg border border-green-200">✓ Paid</span>
-                                       ) : (
-                                         <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-black uppercase rounded-lg border border-orange-100">₹{balance.toLocaleString()} Due</span>
-                                       )}
-                                    </td>
                                  </tr>
                                );
                             })}
