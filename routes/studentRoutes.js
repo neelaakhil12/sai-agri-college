@@ -353,8 +353,8 @@ router.post("/send-fee-reminder", authenticate, async (req, res) => {
     let failed = 0;
 
     for (const student of students) {
-      const recipientEmail = student.email_personal || student.email;
-      if (!recipientEmail) { failed++; continue; }
+      const recipientEmail = student.email;
+      if (!recipientEmail || recipientEmail === "null") { failed++; continue; }
 
       const studentFees = feesByStudent[student.id] || [];
 
