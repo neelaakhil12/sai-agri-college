@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { 
   Users, 
   BookOpen, 
@@ -1532,7 +1532,7 @@ export default function AdminDashboard() {
                             doc.setFont('helvetica', 'normal');
                             doc.text(`${data.length} Students`, 135, 132);
 
-                            doc.autoTable({
+                            autoTable(doc, {
                               head: [['#', 'Student Name', 'Roll No', 'Course', 'Branch', 'Working Days', 'Present', 'Absent', 'Attendance %']],
                               body: data.map((s, i) => [i+1, s.student_name.toUpperCase(), s.roll_no||'N/A', s.course_applied||'N/A', s.branch||'N/A', s.total_days, s.present_days, s.absent_days, `${s.percentage}%`]),
                               startY: 165,
