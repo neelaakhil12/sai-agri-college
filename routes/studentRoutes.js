@@ -126,8 +126,12 @@ router.get("/profile", async (req, res) => {
     attRows.forEach(row => {
       totalDays += row.count;
       if (row.status === 'Present') presentDays += row.count;
-    });
     const attendancePercentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : "0.00";
+
+    const [attendanceRecords] = await pool.query(
+      "SELECT id, date, status, remarks FROM attendance WHERE student_id = ? ORDER BY date DESC",
+      [student.id]
+    );
 
     const [proofs] = await pool.query("SELECT id, fee_type, amount, academic_year, screenshot, status, created_at FROM payment_proofs WHERE student_id = ? ORDER BY created_at DESC", [student.id]);
 
@@ -135,6 +139,7 @@ router.get("/profile", async (req, res) => {
     student.student_fees = fees;
     student.attendance_percentage = attendancePercentage;
     student.payment_proofs = proofs;
+    student.attendance_records = attendanceRecords;
 
     res.json(student);
   } catch (err) {

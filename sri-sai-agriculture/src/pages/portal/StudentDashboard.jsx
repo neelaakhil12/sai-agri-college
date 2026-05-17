@@ -12,6 +12,7 @@ export default function StudentDashboard() {
   const [screenshot, setScreenshot] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [selectedFeeType, setSelectedFeeType] = useState("Academic Fee");
+  const [showAttendanceModal, setShowAttendanceModal] = useState(false);
   const navigate = useNavigate();
 
   const getFeeStats = (fee, type) => {
@@ -191,17 +192,12 @@ export default function StudentDashboard() {
               <section>
                  <h3 className="text-[12px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Essentials</h3>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <PortalCard color="green" icon="BarChart3" title="Attendance" subtitle={`${student.attendance_percentage || "0.00"}%`} detail="Live Faculty Record" />
+                    <PortalCard color="green" icon="BarChart3" title="Attendance" subtitle={`${student.attendance_percentage || "0.00"}%`} detail="Click to View Attendance Records" onClick={() => setShowAttendanceModal(true)} />
                     <PortalCard color="pink" icon="Wallet" title="Fee Payments" subtitle="View Details" detail="Check Dues & Payments" onClick={() => setActiveTab('fees')} />
                  </div>
               </section>
 
-              <section>
-                 <h3 className="text-[12px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Tools</h3>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <ToolCard icon="MessageSquare" title="Feedbacks" />
-                 </div>
-              </section>
+              
 
             </div>
           )}
@@ -671,6 +667,119 @@ export default function StudentDashboard() {
            </div>
         </div>
       )}
+
+      {/* --- Attendance History Modal --- */}
+      {showAttendanceModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-md bg-ink/40 animate-fadeIn">
+           <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden flex flex-col animate-slideUp">
+              {/* Modal Header */}
+              <div className="p-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
+                 <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 bg-green-500/10 rounded-xl flex items-center justify-center text-green-600">
+                       <BarChart3 size={20} />
+                    </div>
+                    <div>
+                       <h3 className="font-black text-ink leading-tight">Attendance Logs</h3>
+                       <p className="text-[10px] text-muted font-black uppercase tracking-widest">Roll No: {student.roll_no}</p>
+                    </div>
+                 </div>
+                 <button 
+                    onClick={() => setShowAttendanceModal(false)} 
+                    className="p-2 hover:bg-red-50 text-red-400 rounded-xl transition-all"
+                 >
+                    <X size={20} />
+                 </button>
+              </div>
+
+              {/* Attendance Statistics Grid */}
+              <div className="px-8 pt-6 grid grid-cols-3 gap-4">
+                 <div className="bg-gray-50 p-4 rounded-2xl text-center">
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Days</p>
+                    <h4 className="text-xl font-black text-ink">
+                       {student.attendance_records?.length || 0}
+                    </h4>
+                 </div>
+                 <div className="bg-green-50 p-4 rounded-2xl text-center border border-green-100">
+                    <p className="text-[9px] font-black text-green-600 uppercase tracking-widest mb-1">Present</p>
+                    <h4 className="text-xl font-black text-green-600">
+                       {student.attendance_records?.filter(r => r.status === 'Present').length || 0}
+                    </h4>
+                 </div>
+                 <div className="bg-red-50 p-4 rounded-2xl text-center border border-red-100">
+                    <p className="text-[9px] font-black text-red-600 uppercase tracking-widest mb-1">Absent</p>
+                    <h4 className="text-xl font-black text-red-600">
+                       {student.attendance_records?.filter(r => r.status === 'Absent').length || 0}
+                    </h4>
+                 </div>
+              </div>
+
+              {/* Scrollable Timeline List */}
+              <div className="p-8 space-y-4 overflow-y-auto max-h-[50vh]">
+                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Daily Log Timeline</label>
+                 
+                 {!student.attendance_records || student.attendance_records.length === 0 ? (
+                    <div className="text-center py-10 text-gray-400">
+                       <p className="text-sm font-bold">No attendance records found.</p>
+                       <p className="text-[10px] uppercase tracking-widest mt-1">Live record will sync once marked by faculty.</p>
+                    </div>
+                 ) : (
+                    <div className="space-y-3">
+                       {student.attendance_records.map((record, index) => {
+                          const dateObj = new Date(record.date);
+                          const formattedDate = dateObj.toLocaleDateString('en-IN', {
+                             weekday: 'long', 
+                             day: 'numeric', 
+                             month: 'short', 
+                             year: 'numeric'
+                          });
+                          
+                          const isPresent = record.status === 'Present';
+                          
+                          return (
+                             <div 
+                                key={index} 
+                                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
+                                   isPresent 
+                                   ? 'bg-green-50/30 border-green-100 hover:bg-green-50/50' 
+                                   : 'bg-red-50/30 border-red-100 hover:bg-red-50/50'
+                                }`}
+                             >
+                                <div className="flex flex-col">
+                                   <span className="text-xs font-bold text-ink">{formattedDate}</span>
+                                   {record.remarks && (
+                                      <span className="text-[10px] text-muted font-medium mt-0.5">Note: {record.remarks}</span>
+                                   )}
+                                </div>
+                                <div>
+                                   {isPresent ? (
+                                      <span className="px-3 py-1.5 bg-green-100 text-green-700 text-[10px] font-black uppercase rounded-xl border border-green-200 flex items-center gap-1.5 shadow-sm shadow-green-100">
+                                         <Check size={12} strokeWidth={3} /> Present
+                                      </span>
+                                   ) : (
+                                      <span className="px-3 py-1.5 bg-red-500 text-white text-[10px] font-black uppercase rounded-xl border border-red-600 flex items-center gap-1.5 shadow-lg shadow-red-500/20">
+                                         <X size={12} strokeWidth={3} /> Absent
+                                      </span>
+                                   )}
+                                </div>
+                             </div>
+                          );
+                       })}
+                    </div>
+                 )}
+              </div>
+
+              {/* Close Footer Action */}
+              <div className="p-8 bg-gray-50 border-t border-gray-100">
+                 <button 
+                    onClick={() => setShowAttendanceModal(false)}
+                    className="w-full bg-ink text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all hover:bg-gray-800 active:scale-[0.98]"
+                 >
+                    Close Log View
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -826,3 +935,4 @@ function Wallet(props) { return <svg {...props} width="24" height="24" viewBox="
 function X(props) { return <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>; }
 function Plus(props) { return <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>; }
 function Check(props) { return <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>; }
+function BarChart3(props) { return <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>; }
