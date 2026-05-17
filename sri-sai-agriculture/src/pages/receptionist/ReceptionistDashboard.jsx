@@ -122,7 +122,7 @@ export default function ReceptionistDashboard() {
       await axios.post(`${API_URL}/staff/admin/create`, dataToSubmit, { withCredentials: true });
       fetchStaff();
       alert('Staff account created successfully!');
-      setNewStaff({ name: '', password: '' });
+      setNewStaff({ name: '', password: '', department: '', role: '' });
       setShowAdd(false);
     } catch (err) { alert(err.response?.data?.message || 'Create failed'); }
   };
@@ -273,7 +273,7 @@ export default function ReceptionistDashboard() {
                   <table className="w-full">
                     <thead>
                       <tr className="bg-gray-50">
-                        {['Staff Member', 'Dept / Role', 'Status', 'Check In', 'Check Out'].map(h => (
+                        {['Staff Member', 'Dept / Role', 'Status'].map(h => (
                           <th key={h} className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-widest">{h}</th>
                         ))}
                       </tr>
@@ -299,14 +299,6 @@ export default function ReceptionistDashboard() {
                               className={"px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border outline-none cursor-pointer " + (STATUS_COLORS[s.status] || '')}>
                               {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                             </select>
-                          </td>
-                          <td className="px-6 py-5">
-                            <input type="time" value={s.check_in} onChange={e => updateAtt(s.id, 'check_in', e.target.value)}
-                              className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue" />
-                          </td>
-                          <td className="px-6 py-5">
-                            <input type="time" value={s.check_out} onChange={e => updateAtt(s.id, 'check_out', e.target.value)}
-                              className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue" />
                           </td>
                         </tr>
                       ))}
@@ -343,6 +335,8 @@ export default function ReceptionistDashboard() {
                     {[
                       { key: 'name',        placeholder: 'Employee Name *' },
                       { key: 'password',    placeholder: 'Password *', type: 'password' },
+                      { key: 'department',  placeholder: 'Department (e.g. Python Trainer)' },
+                      { key: 'role',        placeholder: 'Role (e.g. Trainer / HR)' },
                     ].map(f => (
                       <input key={f.key} type={f.type || 'text'} placeholder={f.placeholder}
                         value={newStaff[f.key] || ''}
@@ -361,17 +355,19 @@ export default function ReceptionistDashboard() {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-gray-50">
-                      {['Employee Name', 'Action'].map(h => (
+                      {['Employee Name', 'Department', 'Role', 'Action'].map(h => (
                         <th key={h} className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-widest last:text-right">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {!(staffList || []).length ? (
-                      <tr><td colSpan={2} className="px-6 py-20 text-center text-gray-300 font-bold text-xs uppercase tracking-widest">No staff yet. Add one above.</td></tr>
+                      <tr><td colSpan={4} className="px-6 py-20 text-center text-gray-300 font-bold text-xs uppercase tracking-widest">No staff yet. Add one above.</td></tr>
                     ) : (staffList || []).map(m => (
                       <tr key={m.id} className="hover:bg-sky/30 transition-colors">
                         <td className="px-6 py-4 font-bold text-ink">{m.name}</td>
+                        <td className="px-6 py-4 text-[10px] font-black text-muted uppercase tracking-widest">{m.department || '-'}</td>
+                        <td className="px-6 py-4 text-[10px] font-black text-muted uppercase tracking-widest">{m.role || '-'}</td>
                         <td className="px-6 py-4 text-right">
                           <button onClick={() => handleDeleteStaff(m.id)} className="p-2 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all"><Trash2 size={16} /></button>
                         </td>
