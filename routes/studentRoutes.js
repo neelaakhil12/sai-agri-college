@@ -530,4 +530,47 @@ router.post("/send-fee-reminder", authenticate, async (req, res) => {
   }
 });
 
+// ─── ADMIN: GET STUDENT ATTENDANCE SUMMARY (for PDF download) ───────────────
+router.get("/attendance-summary", authenticate, async (req, res) => {
+  try {
+    const [students] = await pool.query(
+      "SELECT id, student_name, roll_no, course_applied, branch FROM students ORDER BY student_name ASC"
+    );
+
+    const [counts] = await pool.query(
+      "SELECT student_id, status, COUNT(*) as count FROM attendance GROUP BY student_id, status"
+    );
+
+    const countsMap = {};
+    counts.forEach(c => {
+      if (!countsMap[c.student_id]) countsMap[c.student_id] = { Present: 0, Absent: 0 };
+      countsMap[c.student_id][c.status] = c.count;
+    });
+
+    const summary = students.map(s => {
+      const stats = countsMap[s.id] || { Present: 0, Absent: 0 };
+      const present = Number(stats.Present || 0);
+      const absent = Number(stats.Absent || 0);
+      const total = present + absent;
+      const percentage = total > 0 ? ((present / total) * 100).toFixed(2) : "0.00";
+      return {
+        id: s.id,
+        student_name: s.student_name,
+        roll_no: s.roll_no,
+        course_applied: s.course_applied,
+        branch: s.branch,
+        total_days: total,
+        present_days: present,
+        absent_days: absent,
+        percentage
+      };
+    });
+
+    res.json(summary);
+  } catch (err) {
+    console.error("Attendance summary error:", err.message);
+    res.status(500).json({ message: "Failed to fetch attendance summary" });
+  }
+});
+
 module.exports = router;
