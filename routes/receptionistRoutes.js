@@ -2,10 +2,13 @@ const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 
-// Receptionist Login (Hardcoded for simplicity)
+// Receptionist Login
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
-  if (username === "receptionist" && password === "receptionist123") {
+  const expectedUsername = (process.env.RECEPTIONIST_USERNAME || "srisai2026").trim();
+  const expectedPassword = (process.env.RECEPTIONIST_PASSWORD || "srisai@2026").trim();
+
+  if (username === expectedUsername && password === expectedPassword) {
     const secret = process.env.JWT_SECRET || "srisai_secret_key_123";
     // We sign as adminId to allow accessing staffRoutes which require adminAuth
     // Or we can just reuse the admin token approach
