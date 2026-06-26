@@ -400,7 +400,16 @@ export default function AdminDashboard() {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true
       });
-      alert(res.data.message || "Import completed successfully!");
+      
+      const { message, importedCount, skippedCount, skippedStudents } = res.data;
+      let alertMsg = message || `Successfully imported ${importedCount} students.`;
+      if (skippedCount > 0) {
+        alertMsg += `\n\nSkipped ${skippedCount} student(s):`;
+        skippedStudents.forEach((s) => {
+          alertMsg += `\n• ${s.name || "Unknown"}${s.email ? " (" + s.email + ")" : ""}: ${s.reason}`;
+        });
+      }
+      alert(alertMsg);
       setRefresh(prev => prev + 1);
     } catch (err) {
       console.error(err);

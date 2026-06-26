@@ -613,32 +613,42 @@ router.post("/admin/import", authenticate, excelUpload.single("file"), async (re
         normalizedRow[normalizeKey(k)] = row[k];
       });
 
-      const email = normalizedRow.email || normalizedRow.email_id || "";
-      const student_name = normalizedRow.student_name || normalizedRow.name || "";
-      const roll_no = normalizedRow.roll_no || normalizedRow.rollno || "";
-      const branch = normalizedRow.branch || "";
-      const course_applied = normalizedRow.course_applied || normalizedRow.course || "";
-      const academic_enrolled_year = normalizedRow.academic_enrolled_year || normalizedRow.enrolled_year || normalizedRow.academic_year || "";
-      const mobile1 = normalizedRow.mobile1 || normalizedRow.mobile || normalizedRow.phone || "";
-      const father_name = normalizedRow.father_name || "";
-      const mother_name = normalizedRow.mother_name || "";
-      const inter_type = normalizedRow.inter_type || "";
-      const dob = normalizedRow.dob ? new Date(normalizedRow.dob) : null;
-      const gender = normalizedRow.gender || "";
-      const admission_type = normalizedRow.admission_type || "";
-      const medium = normalizedRow.medium || "";
-      const nationality = normalizedRow.nationality || "";
-      const religion = normalizedRow.religion || "";
-      const door_no = normalizedRow.door_no || "";
-      const village = normalizedRow.village || "";
-      const mandal = normalizedRow.mandal || "";
-      const pin = normalizedRow.pin || normalizedRow.pincode || "";
-      const district = normalizedRow.district || "";
-      const mobile2 = normalizedRow.mobile2 || "";
-      const residence_phone = normalizedRow.residence_phone || "";
-      const email_personal = normalizedRow.email_personal || "";
-      const reference = normalizedRow.reference || "";
-      const current_year = normalizedRow.current_year || "1st year";
+      const getVal = (keys) => {
+        for (const key of keys) {
+          if (normalizedRow[key] !== undefined && normalizedRow[key] !== null) {
+            return normalizedRow[key].toString().trim();
+          }
+        }
+        return "";
+      };
+
+      const email = getVal(["email", "email_id", "emailid", "email_address", "emailaddress"]);
+      const student_name = getVal(["student_name", "name", "fullname", "studentname", "full_name"]);
+      const roll_no = getVal(["roll_no", "rollno", "roll_number", "rollnumber"]);
+      const branch = getVal(["branch", "branch_name", "specialization"]);
+      const course_applied = getVal(["course_applied", "course", "courseapplied", "course_name"]);
+      const academic_enrolled_year = getVal(["academic_enrolled_year", "enrolled_year", "academic_year", "enrolledyear", "batch", "academicyear"]);
+      const mobile1 = getVal(["mobile1", "mobile", "phone", "phonenumber", "phone_number", "mobile_number", "mobilenumber", "contact", "contact_number", "contactnumber"]);
+      const father_name = getVal(["father_name", "fathername", "fathers_name", "father"]);
+      const mother_name = getVal(["mother_name", "mothername", "mothers_name", "mother"]);
+      const inter_type = getVal(["inter_type", "intertype", "intermediate", "intermediate_type"]);
+      const dobVal = getVal(["dob", "date_of_birth", "dateofbirth", "birthdate"]);
+      const dob = dobVal ? new Date(dobVal) : null;
+      const gender = getVal(["gender", "sex"]);
+      const admission_type = getVal(["admission_type", "admissiontype"]);
+      const medium = getVal(["medium", "medium_of_instruction"]);
+      const nationality = getVal(["nationality"]);
+      const religion = getVal(["religion"]);
+      const door_no = getVal(["door_no", "doorno", "house_no", "houseno", "address"]);
+      const village = getVal(["village", "town", "village_town"]);
+      const mandal = getVal(["mandal", "tehsil", "sub_district"]);
+      const pin = getVal(["pin", "pincode", "zip", "zipcode", "postal_code"]);
+      const district = getVal(["district"]);
+      const mobile2 = getVal(["mobile2", "alternate_mobile", "alternative_mobile", "alt_mobile", "mobile_2"]);
+      const residence_phone = getVal(["residence_phone", "residence", "landline", "home_phone"]);
+      const email_personal = getVal(["email_personal", "personal_email", "personalemail"]);
+      const reference = getVal(["reference", "referred_by"]);
+      const current_year = getVal(["current_year", "currentyear", "year", "year_level"]) || "1st year";
 
       if (!email || !student_name) {
         skippedCount++;
