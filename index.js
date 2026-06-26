@@ -136,6 +136,18 @@ try {
         await pool.query(`ALTER TABLE staff ADD COLUMN IF NOT EXISTS role VARCHAR(100)`);
       } catch(e) { /* columns may already exist */ }
 
+      // Excel Imports Migration
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS excel_imports (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          filename VARCHAR(255) NOT NULL,
+          uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      try {
+        await pool.query(`ALTER TABLE students ADD COLUMN IF NOT EXISTS excel_import_id INT DEFAULT NULL`);
+      } catch(e) { /* column may already exist */ }
+
       await pool.query(`
         CREATE TABLE IF NOT EXISTS staff_attendance (
           id INT AUTO_INCREMENT PRIMARY KEY,

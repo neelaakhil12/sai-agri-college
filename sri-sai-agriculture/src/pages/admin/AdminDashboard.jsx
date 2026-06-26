@@ -23,7 +23,8 @@ import {
   Settings,
   X,
   ChevronDown,
-  Filter
+  Filter,
+  FileSpreadsheet
 } from 'lucide-react';
 
 const API_URL = '/api';
@@ -40,6 +41,7 @@ export default function AdminDashboard() {
   const [siteSettings, setSiteSettings] = useState({});
   const [regFields, setRegFields] = useState([]);
   const [students, setStudents] = useState([]);
+  const [excelImports, setExcelImports] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [studentFees, setStudentFees] = useState([]);
   const [sendingReminder, setSendingReminder] = useState(false);
@@ -110,6 +112,7 @@ export default function AdminDashboard() {
 
   const tabs = [
     { id: 'students', label: 'Student Accounts', icon: Users },
+    { id: 'imports', label: 'Excel Imports', icon: FileSpreadsheet },
     { id: 'staff', label: 'Staff Accounts', icon: Users },
     { id: 'hero', label: 'Hero Slider Management', icon: LayoutDashboard },
     { id: 'faculty', label: 'Faculty Management', icon: Users },
@@ -200,6 +203,15 @@ export default function AdminDashboard() {
     checkAuth();
   }, [checkAuth]);
 
+  const fetchExcelImports = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API_URL}/students/admin/imports`, { withCredentials: true });
+      setExcelImports(res.data);
+    } catch (err) {
+      console.error("Fetch excel imports failed");
+    }
+  }, []);
+
   useEffect(() => {
     if (isAdmin) {
       const fetchStudents = async () => {
@@ -213,13 +225,15 @@ export default function AdminDashboard() {
 
       if (activeTab === "students") {
         fetchStudents();
+      } else if (activeTab === "imports") {
+        fetchExcelImports();
       } else if (activeTab === "staff") {
         fetchStaff();
       } else {
         fetchData();
       }
     }
-  }, [isAdmin, activeTab, fetchData, refresh]);
+  }, [isAdmin, activeTab, fetchData, refresh, fetchExcelImports]);
 
   useEffect(() => {
     const fetchFees = async () => {
@@ -1790,6 +1804,99 @@ export default function AdminDashboard() {
                     </div>
                   ))}
                </div>
+            </div>
+          ) : activeTab === 'imports' ? (
+            <div className="p-8">
+               <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10">
+                  <div>
+                    <h3 className="text-xl font-black text-ink uppercase tracking-tight">Excel Student Rosters</h3>
+                    <p className="text-[10px] text-muted font-bold tracking-widest mt-1">UPLOADED SHEETS: {excelImports.length}</p>
+                  </div>
+               </div>
+
+               {excelImports.length === 0 ? (
+                 <div className="text-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm max-w-lg mx-auto">
+                   <div className="h-16 w-16 bg-sky rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue">
+                     <FileSpreadsheet size={32} />
+                   </div>
+                   <h4 className="font-black text-base text-ink mb-2">No Excel Sheets Uploaded</h4>
+                   <p className="text-xs text-muted max-w-xs mx-auto">
+                     Student accounts uploaded via Excel or CSV sheets will be listed here. You can view sheet details or permanently delete them.
+                   </p>
+                 </div>
+               ) : (
+                 <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
+                   <div className="overflow-x-auto">
+                     <table className="w-full text-left border-collapse bg-white">
+                       <thead className="bg-gray-50 border-b border-gray-100">
+                         <tr>
+                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Excel File Name</th>
+                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Date Uploaded</th>
+                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Students Imported</th>
+                           <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Actions</th>
+                         </tr>
+                       </thead>
+                       <tbody className="divide-y divide-gray-50">
+                         {excelImports.map((imp) => {
+                           const uploadDate = new Date(imp.uploaded_at).toLocaleDateString('en-IN', {
+                             day: '2-digit',
+                             month: 'short',
+                             year: 'numeric',
+                             hour: '2-digit',
+                             minute: '2-digit'
+                           });
+
+                           return (
+                             <tr key={imp.id} className="hover:bg-gray-50/30 transition-colors">
+                               <td className="px-8 py-6">
+                                 <span className="font-bold text-ink text-sm flex items-center gap-2">
+                                   <FileSpreadsheet size={16} className="text-[#16a34a]" />
+                                   {imp.filename}
+                                 </span>
+                               </td>
+                               <td className="px-8 py-6 text-center text-xs font-medium text-muted">
+                                 {uploadDate}
+                               </td>
+                               <td className="px-8 py-6 text-center">
+                                 <span className="inline-block px-3 py-1 bg-green-50 text-green-700 text-xs font-black rounded-full border border-green-200">
+                                   {imp.student_count} Student(s)
+                                 </span>
+                               </td>
+                               <td className="px-8 py-6 text-center">
+                                 <button 
+                                   onClick={async () => {
+                                     const confirmVal = window.prompt(
+                                       `⚠️ WARNING: Deleting this sheet will PERMANENTLY remove all ${imp.student_count} student account(s) imported from "${imp.filename}" along with their fee records, grades, and payment logs.\n\nTo confirm, type "DELETE" in the box below:`
+                                     );
+                                     if (confirmVal === "DELETE") {
+                                       try {
+                                         setLoading(true);
+                                         await axios.delete(`/api/students/admin/imports/${imp.id}`, { withCredentials: true });
+                                         alert("Excel sheet and associated student data deleted successfully!");
+                                         fetchExcelImports();
+                                       } catch (err) {
+                                         alert("Failed to delete sheet: " + (err.response?.data?.message || err.message));
+                                       } finally {
+                                         setLoading(false);
+                                       }
+                                     } else if (confirmVal !== null) {
+                                       alert("Incorrect confirmation text. Deletion canceled.");
+                                     }
+                                   }}
+                                   disabled={loading}
+                                   className="px-4 py-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-100 text-xs font-black uppercase tracking-wider"
+                                 >
+                                   Delete Sheet
+                                 </button>
+                               </td>
+                             </tr>
+                           );
+                         })}
+                       </tbody>
+                     </table>
+                   </div>
+                 </div>
+               )}
             </div>
           ) : activeTab === 'staff' ? (
             <StaffManagementView

@@ -221,11 +221,13 @@ router.put("/admin/update/:id", authenticate, upload.single("photo"), async (req
 router.delete("/admin/delete/:id", authenticate, async (req, res) => {
   const { id } = req.params;
   try {
-    // 1. Delete associated fees
+    // 1. Delete associated payment proofs
+    await pool.query("DELETE FROM payment_proofs WHERE student_id = ?", [id]);
+    // 2. Delete associated fees
     await pool.query("DELETE FROM student_fees WHERE student_id = ?", [id]);
-    // 2. Delete associated qualifications
+    // 3. Delete associated qualifications
     await pool.query("DELETE FROM qualifications WHERE student_id = ?", [id]);
-    // 3. Delete student
+    // 4. Delete student
     await pool.query("DELETE FROM students WHERE id = ?", [id]);
     
     res.json({ message: "Student deleted successfully" });
@@ -607,6 +609,12 @@ router.post("/admin/import", authenticate, excelUpload.single("file"), async (re
 
     await connection.beginTransaction();
 
+    const [importResult] = await connection.query(
+      "INSERT INTO excel_imports (filename) VALUES (?)",
+      [req.file.originalname]
+    );
+    const excelImportId = importResult.insertId;
+
     for (const row of rawRows) {
       const normalizedRow = {};
       Object.keys(row).forEach(k => {
@@ -746,15 +754,15 @@ router.post("/admin/import", authenticate, excelUpload.single("file"), async (re
           course_applied, medium, nationality, religion,
           door_no, village, mandal, pin, district,
           mobile1, mobile2, residence_phone, email_personal, reference,
-          roll_no, current_year, academic_enrolled_year
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          roll_no, current_year, academic_enrolled_year, excel_import_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           email, hashedPassword, student_name, father_name, mother_name,
           branch, inter_type, dob, gender, admission_type,
           course_applied, medium, nationality, religion,
           door_no, village, mandal, pin, district,
           mobile1, mobile2, residence_phone, email_personal, reference,
-          roll_no, current_year, academic_enrolled_year
+          roll_no, current_year, academic_enrolled_year, excelImportId
         ]
       );
 
@@ -771,6 +779,16 @@ router.post("/admin/import", authenticate, excelUpload.single("file"), async (re
       importedCount++;
     }
 
+    if (importedCount === 0) {
+      await connection.rollback();
+      return res.json({
+        message: `Successfully imported 0 students.`,
+        importedCount,
+        skippedCount,
+        skippedStudents
+      });
+    }
+
     await connection.commit();
     res.json({
       message: `Successfully imported ${importedCount} students.`,
@@ -782,6 +800,57 @@ router.post("/admin/import", authenticate, excelUpload.single("file"), async (re
     await connection.rollback();
     console.error("Excel import failed:", err);
     res.status(500).json({ message: "Failed to parse and import Excel file: " + err.message });
+  } finally {
+    connection.release();
+  }
+});
+
+// GET: List all uploaded Excel imports with student counts
+router.get("/admin/imports", authenticate, async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT i.*, COUNT(s.id) as student_count 
+      FROM excel_imports i 
+      LEFT JOIN students s ON s.excel_import_id = i.id 
+      GROUP BY i.id 
+      ORDER BY i.uploaded_at DESC
+    `);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// DELETE: Delete Excel import and all associated student accounts permanently
+router.delete("/admin/imports/:id", authenticate, async (req, res) => {
+  const { id } = req.params;
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Get all student IDs associated with this import
+    const [students] = await connection.query("SELECT id FROM students WHERE excel_import_id = ?", [id]);
+    const studentIds = students.map(s => s.id);
+
+    if (studentIds.length > 0) {
+      // 1. Delete associated payment proofs
+      await connection.query("DELETE FROM payment_proofs WHERE student_id IN (?)", [studentIds]);
+      // 2. Delete associated student fees
+      await connection.query("DELETE FROM student_fees WHERE student_id IN (?)", [studentIds]);
+      // 3. Delete associated qualifications
+      await connection.query("DELETE FROM qualifications WHERE student_id IN (?)", [studentIds]);
+      // 4. Delete students themselves
+      await connection.query("DELETE FROM students WHERE excel_import_id = ?", [id]);
+    }
+
+    // 5. Delete the excel import record
+    await connection.query("DELETE FROM excel_imports WHERE id = ?", [id]);
+
+    await connection.commit();
+    res.json({ message: "Excel import and all associated student accounts deleted permanently." });
+  } catch (err) {
+    await connection.rollback();
+    res.status(500).json({ message: err.message });
   } finally {
     connection.release();
   }
