@@ -20,6 +20,7 @@ export default function StudentDashboard() {
     if (type === 'Academic Fee') allocated = Number(fee.total_fee || 0);
     else if (type === 'Practical Fee') allocated = Number(fee.practical_fee || 0);
     else if (type === 'Hostel Fee') allocated = Number(fee.hostel_fee || 0);
+    else if (type === 'Travelling Expenses') allocated = Number(fee.travelling_fee || 0);
     else if (type === 'Examination Fee') allocated = 1500;
 
     const matchedProofs = (student?.payment_proofs || []).filter(p => 
@@ -211,7 +212,7 @@ export default function StudentDashboard() {
                   <h2 className="text-2xl font-black text-ink mb-2">Sri Sai Fee Portal</h2>
                   <p className="text-muted font-medium mb-8">Select a Fee Category to View Details & Upload Payment Screenshots</p>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                      <PaymentOption 
                         icon="Book" 
                         title="Academic Fees" 
@@ -232,6 +233,13 @@ export default function StudentDashboard() {
                         detail="Hostel & Mess Charges" 
                         active={selectedFeeType === 'Hostel Fee'}
                         onClick={() => setSelectedFeeType('Hostel Fee')}
+                     />
+                     <PaymentOption 
+                        icon="Bus" 
+                        title="Travelling Expenses" 
+                        detail="Transport & Travel Fee" 
+                        active={selectedFeeType === 'Travelling Expenses'}
+                        onClick={() => setSelectedFeeType('Travelling Expenses')}
                      />
                      <PaymentOption 
                         icon="FileText" 
@@ -535,6 +543,7 @@ export default function StudentDashboard() {
                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Admission Fee</th>
                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Practical Fee</th>
                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Hostel Fee</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Travelling Expenses</th>
                             </tr>
                          </thead>
                          <tbody className="divide-y divide-gray-50">
@@ -549,6 +558,7 @@ export default function StudentDashboard() {
                                     <td className="px-6 py-5 text-center font-bold text-sm text-ink">₹{Number(fee.admission_fee || 0).toLocaleString()}</td>
                                     <td className="px-6 py-5 text-center font-bold text-sm text-ink">₹{Number(fee.practical_fee || 0).toLocaleString()}</td>
                                     <td className="px-6 py-5 text-center font-bold text-sm text-orange">₹{Number(fee.hostel_fee || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-5 text-center font-bold text-sm text-blue">₹{Number(fee.travelling_fee || 0).toLocaleString()}</td>
                                  </tr>
                                );
                             })}

@@ -523,10 +523,10 @@ export default function AdminDashboard() {
                       setViewMode('form');
                       if (activeTab === 'students') {
                         setStudentFees([
-                          { academic_year: '1st year', total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0 },
-                          { academic_year: '2nd year', total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0 },
-                          { academic_year: '3rd year', total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0 },
-                          { academic_year: '4th year', total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0 },
+                          { academic_year: '1st year', total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0, travelling_fee: 0 },
+                          { academic_year: '2nd year', total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0, travelling_fee: 0 },
+                          { academic_year: '3rd year', total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0, travelling_fee: 0 },
+                          { academic_year: '4th year', total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0, travelling_fee: 0 },
                         ]);
                       }
                     }
@@ -970,12 +970,13 @@ export default function AdminDashboard() {
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Admission Fee</th>
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Practical Fee</th>
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Hostel</th>
+                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Travelling Expenses</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
                               {['1st year', '2nd year', '3rd year', '4th year'].map((year) => {
                                 const fee = studentFees.find(f => f.academic_year.toLowerCase() === year.toLowerCase()) || {
-                                  academic_year: year, total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0
+                                  academic_year: year, total_fee: 0, committed_fee: 0, admission_fee: 0, practical_fee: 0, hostel_fee: 0, travelling_fee: 0
                                 };
                                 const updateFee = (updates) => {
                                   const newFees = [...studentFees];
@@ -987,7 +988,7 @@ export default function AdminDashboard() {
                                 return (
                                   <tr key={year}>
                                     <td className="p-4 font-black text-ink text-xs uppercase">{year}</td>
-                                    {['total_fee', 'committed_fee', 'admission_fee', 'practical_fee', 'hostel_fee'].map(key => (
+                                    {['total_fee', 'committed_fee', 'admission_fee', 'practical_fee', 'hostel_fee', 'travelling_fee'].map(key => (
                                       <td key={key} className="p-2">
                                         <input 
                                           type="number" 
@@ -1245,7 +1246,7 @@ export default function AdminDashboard() {
                        <div className="grid grid-cols-1 gap-6">
                          {['1st year', '2nd year', '3rd year', '4th year'].map((year) => {
                            const fee = studentFees.find(f => f.academic_year.toLowerCase() === year.toLowerCase()) || {
-                             academic_year: year, total_fee: 0, hostel_fee: 0, paid_amount: 0, payment_status: 'Pending'
+                             academic_year: year, total_fee: 0, hostel_fee: 0, travelling_fee: 0, paid_amount: 0, payment_status: 'Pending'
                            };
                            const updateFee = (updates) => {
                              const newFees = [...studentFees];
@@ -1254,7 +1255,7 @@ export default function AdminDashboard() {
                              else newFees.push({ ...fee, ...updates });
                              setStudentFees(newFees);
                            };
-                           const isPaid = Number(fee.paid_amount) >= (Number(fee.total_fee) + Number(fee.hostel_fee));
+                           const isPaid = Number(fee.paid_amount) >= (Number(fee.total_fee) + Number(fee.hostel_fee) + Number(fee.travelling_fee || 0));
                            return (
                              <div key={year} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                                <div className="flex flex-wrap items-center gap-4">
@@ -1280,6 +1281,15 @@ export default function AdminDashboard() {
                                    />
                                  </div>
                                  <div className="flex flex-col gap-1 flex-1 min-w-[120px]">
+                                   <label className="text-[9px] font-black text-blue uppercase tracking-widest">Travelling Expenses (₹)</label>
+                                   <input
+                                     type="number"
+                                     className="px-3 py-2 bg-blue/5 border border-blue/20 rounded-xl focus:border-blue outline-none font-bold text-ink text-sm"
+                                     value={fee.travelling_fee || 0}
+                                     onChange={(e) => updateFee({ travelling_fee: e.target.value })}
+                                   />
+                                 </div>
+                                 <div className="flex flex-col gap-1 flex-1 min-w-[120px]">
                                    <label className="text-[9px] font-black text-green-600 uppercase tracking-widest">Paid Amount (₹)</label>
                                    <input
                                      type="number"
@@ -1291,7 +1301,7 @@ export default function AdminDashboard() {
                                  <div className="flex flex-col items-center gap-2 shrink-0">
                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Fully Paid</label>
                                    <div
-                                     onClick={() => updateFee({ paid_amount: isPaid ? 0 : (Number(fee.total_fee || 0) + Number(fee.hostel_fee || 0)), payment_status: isPaid ? 'Pending' : 'Paid' })}
+                                     onClick={() => updateFee({ paid_amount: isPaid ? 0 : (Number(fee.total_fee || 0) + Number(fee.hostel_fee || 0) + Number(fee.travelling_fee || 0)), payment_status: isPaid ? 'Pending' : 'Paid' })}
                                      className={`w-12 h-12 rounded-xl flex items-center justify-center cursor-pointer border-2 transition-all font-black text-lg select-none ${isPaid ? 'bg-green-100 border-green-400 text-green-600' : 'bg-gray-50 border-gray-200 text-gray-300 hover:border-green-300'}`}
                                    >
                                      {isPaid ? '✓' : '○'}
@@ -1326,6 +1336,7 @@ export default function AdminDashboard() {
                               <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Admission Fee</th>
                               <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Practical Fee</th>
                               <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Hostel</th>
+                              <th className="p-4 text-[10px] font-black uppercase tracking-widest text-left">Travelling Expenses</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-50">
@@ -1337,6 +1348,7 @@ export default function AdminDashboard() {
                                 admission_fee: 0,
                                 practical_fee: 0,
                                 hostel_fee: 0,
+                                travelling_fee: 0,
                                 paid_amount: 0,
                                 payment_status: 'Pending'
                               };
@@ -1393,6 +1405,14 @@ export default function AdminDashboard() {
                                       className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none transition-all font-bold text-ink text-xs"
                                       value={fee.hostel_fee || 0}
                                       onChange={(e) => updateFee({ hostel_fee: e.target.value })}
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <input 
+                                      type="number" 
+                                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none transition-all font-bold text-ink text-xs"
+                                      value={fee.travelling_fee || 0}
+                                      onChange={(e) => updateFee({ travelling_fee: e.target.value })}
                                     />
                                   </td>
                                 </tr>

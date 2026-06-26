@@ -14,12 +14,12 @@ router.put("/admin/update/:studentId", authenticate, async (req, res) => {
       await pool.query(
         `UPDATE student_fees SET 
           total_fee = ?, committed_fee = ?, admission_fee = ?, 
-          practical_fee = ?, hostel_fee = ?, paid_amount = ?,
+          practical_fee = ?, hostel_fee = ?, travelling_fee = ?, paid_amount = ?,
           payment_status = ?
         WHERE student_id = ? AND academic_year = ?`,
         [
           fee.total_fee || 0, fee.committed_fee || 0, fee.admission_fee || 0,
-          fee.practical_fee || 0, fee.hostel_fee || 0, fee.paid_amount || 0,
+          fee.practical_fee || 0, fee.hostel_fee || 0, fee.travelling_fee || 0, fee.paid_amount || 0,
           fee.payment_status || 'Pending', studentId, fee.academic_year
         ]
       );
