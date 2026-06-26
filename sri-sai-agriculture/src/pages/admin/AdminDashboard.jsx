@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -29,6 +29,7 @@ import {
 const API_URL = '/api';
 
 export default function AdminDashboard() {
+  const excelInputRef = useRef(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -380,6 +381,36 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleExcelImport = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const confirmImport = window.confirm(`Are you sure you want to import students from "${file.name}"?`);
+    if (!confirmImport) {
+      e.target.value = "";
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      setLoading(true);
+      const res = await axios.post(`${API_URL}/students/admin/import`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true
+      });
+      alert(res.data.message || "Import completed successfully!");
+      setRefresh(prev => prev + 1);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to import Excel sheet.");
+    } finally {
+      setLoading(false);
+      e.target.value = "";
+    }
+  };
+
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] p-6 font-sora">
@@ -478,14 +509,25 @@ export default function AdminDashboard() {
                 <input placeholder="Search entries..." className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-blue/10 focus:border-blue focus:outline-none transition-all w-64" />
               </div>
               
-              <button 
-                onClick={handleSync}
-                disabled={loading}
-                className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-600 border border-amber-100 rounded-xl font-bold text-xs hover:bg-amber-100 transition-all active:scale-95 disabled:opacity-50"
-              >
-                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                <span className="hidden sm:inline">Import Defaults</span>
-              </button>
+              {activeTab === 'students' && (
+                <>
+                  <button 
+                    onClick={() => excelInputRef.current.click()}
+                    disabled={loading}
+                    className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-600 border border-amber-100 rounded-xl font-bold text-xs hover:bg-amber-100 transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                    <span className="hidden sm:inline">Import Students</span>
+                  </button>
+                  <input 
+                    type="file"
+                    ref={excelInputRef}
+                    onChange={handleExcelImport}
+                    accept=".xlsx, .xls, .csv"
+                    className="hidden"
+                  />
+                </>
+              )}
 
               <button className="relative w-10 h-10 flex items-center justify-center bg-gray-50 rounded-xl hover:bg-gray-100 transition-all">
                 <Bell size={18} className="text-muted" />

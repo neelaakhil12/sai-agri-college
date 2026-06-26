@@ -573,4 +573,136 @@ router.get("/attendance-summary", authenticate, async (req, res) => {
   }
 });
 
+// ─── ADMIN: IMPORT STUDENTS VIA EXCEL/CSV ───────────────────
+const XLSX = require("xlsx");
+const excelUpload = require("multer")({
+  storage: require("multer").memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }
+});
+
+router.post("/admin/import", authenticate, excelUpload.single("file"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
+  const connection = await pool.getConnection();
+  try {
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rawRows = XLSX.utils.sheet_to_json(sheet);
+
+    if (rawRows.length === 0) {
+      return res.status(400).json({ message: "Uploaded sheet is empty" });
+    }
+
+    const normalizeKey = (key) => {
+      return key
+        .toLowerCase()
+        .replace(/\s+/g, "_")
+        .replace(/[^a-z0-9_]/g, "");
+    };
+
+    let importedCount = 0;
+    let skippedCount = 0;
+    const skippedStudents = [];
+
+    await connection.beginTransaction();
+
+    for (const row of rawRows) {
+      const normalizedRow = {};
+      Object.keys(row).forEach(k => {
+        normalizedRow[normalizeKey(k)] = row[k];
+      });
+
+      const email = normalizedRow.email || normalizedRow.email_id || "";
+      const student_name = normalizedRow.student_name || normalizedRow.name || "";
+      const roll_no = normalizedRow.roll_no || normalizedRow.rollno || "";
+      const branch = normalizedRow.branch || "";
+      const course_applied = normalizedRow.course_applied || normalizedRow.course || "";
+      const academic_enrolled_year = normalizedRow.academic_enrolled_year || normalizedRow.enrolled_year || normalizedRow.academic_year || "";
+      const mobile1 = normalizedRow.mobile1 || normalizedRow.mobile || normalizedRow.phone || "";
+      const father_name = normalizedRow.father_name || "";
+      const mother_name = normalizedRow.mother_name || "";
+      const inter_type = normalizedRow.inter_type || "";
+      const dob = normalizedRow.dob ? new Date(normalizedRow.dob) : null;
+      const gender = normalizedRow.gender || "";
+      const admission_type = normalizedRow.admission_type || "";
+      const medium = normalizedRow.medium || "";
+      const nationality = normalizedRow.nationality || "";
+      const religion = normalizedRow.religion || "";
+      const door_no = normalizedRow.door_no || "";
+      const village = normalizedRow.village || "";
+      const mandal = normalizedRow.mandal || "";
+      const pin = normalizedRow.pin || normalizedRow.pincode || "";
+      const district = normalizedRow.district || "";
+      const mobile2 = normalizedRow.mobile2 || "";
+      const residence_phone = normalizedRow.residence_phone || "";
+      const email_personal = normalizedRow.email_personal || "";
+      const reference = normalizedRow.reference || "";
+      const current_year = normalizedRow.current_year || "1st year";
+
+      if (!email || !student_name) {
+        skippedCount++;
+        skippedStudents.push({ name: student_name || "Unknown", reason: "Missing Email or Student Name" });
+        continue;
+      }
+
+      // Check duplicate email
+      const [existing] = await connection.query("SELECT id FROM students WHERE email = ?", [email]);
+      if (existing.length > 0) {
+        skippedCount++;
+        skippedStudents.push({ name: student_name, email, reason: "Email already exists" });
+        continue;
+      }
+
+      const authCredential = roll_no || email || "SriSai@123";
+      const hashedPassword = await bcrypt.hash(authCredential.toString(), 10);
+
+      const [studentResult] = await connection.query(
+        `INSERT INTO students (
+          email, password, student_name, father_name, mother_name,
+          branch, inter_type, dob, gender, admission_type,
+          course_applied, medium, nationality, religion,
+          door_no, village, mandal, pin, district,
+          mobile1, mobile2, residence_phone, email_personal, reference,
+          roll_no, current_year, academic_enrolled_year
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          email, hashedPassword, student_name, father_name, mother_name,
+          branch, inter_type, dob, gender, admission_type,
+          course_applied, medium, nationality, religion,
+          door_no, village, mandal, pin, district,
+          mobile1, mobile2, residence_phone, email_personal, reference,
+          roll_no, current_year, academic_enrolled_year
+        ]
+      );
+
+      const studentId = studentResult.insertId;
+
+      const years = ["1st year", "2nd year", "3rd year", "4th year"];
+      for (const y of years) {
+        await connection.query(
+          "INSERT INTO student_fees (student_id, academic_year) VALUES (?, ?)",
+          [studentId, y]
+        );
+      }
+
+      importedCount++;
+    }
+
+    await connection.commit();
+    res.json({
+      message: `Successfully imported ${importedCount} students.`,
+      importedCount,
+      skippedCount,
+      skippedStudents
+    });
+  } catch (err) {
+    await connection.rollback();
+    console.error("Excel import failed:", err);
+    res.status(500).json({ message: "Failed to parse and import Excel file: " + err.message });
+  } finally {
+    connection.release();
+  }
+});
+
 module.exports = router;
