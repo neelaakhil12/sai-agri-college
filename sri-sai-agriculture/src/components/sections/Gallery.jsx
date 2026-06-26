@@ -73,7 +73,7 @@ export default function Gallery() {
         </Reveal>
 
         {/* Bento Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 grid-flow-row-dense gap-4 md:gap-6">
           {items.map((item, i) => {
             let spanClass = "col-span-1 row-span-1 h-[250px]";
             // Bento logic for first few items to keep it interesting
