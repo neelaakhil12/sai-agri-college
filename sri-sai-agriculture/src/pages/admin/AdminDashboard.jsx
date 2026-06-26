@@ -61,10 +61,31 @@ export default function AdminDashboard() {
   const [editingId, setEditingId] = useState(null);
   const [galleryFilter, setGalleryFilter] = useState('all');
   const [studentFilter, setStudentFilter] = useState('all');
+  const [studentBranchFilter, setStudentBranchFilter] = useState('all');
   const [showStudentFilters, setShowStudentFilters] = useState(false);
   const [filterAcademicYear, setFilterAcademicYear] = useState('all');
   const [filterYearLevel, setFilterYearLevel] = useState('all');
   const [staffList, setStaffList] = useState([]);
+
+  const calculateAcademicYear = (enrolledYearStr) => {
+    if (!enrolledYearStr) return '1st Year';
+    const match = enrolledYearStr.match(/\d{4}/);
+    if (!match) return '1st Year';
+    const startYear = parseInt(match[0], 10);
+    
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth(); // 0-indexed: 0 = Jan, 5 = June, 6 = July
+    
+    // Academic session starts in July (month index 6)
+    const activeAcademicStartYear = currentMonth >= 6 ? currentYear : currentYear - 1;
+    const diff = activeAcademicStartYear - startYear;
+    
+    if (diff <= 0) return '1st Year';
+    if (diff === 1) return '2nd Year';
+    if (diff === 2) return '3rd Year';
+    return '4th Year';
+  };
 
   const getImageUrl = (path) => {
     if (!path) return '';
@@ -985,21 +1006,7 @@ export default function AdminDashboard() {
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">ACADEMIC YEAR</label>
-                        <select 
-                          required 
-                          className="w-full px-5 py-4 bg-white border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue/5 focus:border-blue focus:outline-none transition-all appearance-none font-bold text-ink" 
-                          onChange={e => setFormData({...formData, current_year: e.target.value})} 
-                          value={formData.current_year || ''}
-                        >
-                          <option value="">Select Academic Year</option>
-                          <option value="1st Year">1st Year</option>
-                          <option value="2nd Year">2nd Year</option>
-                          <option value="3rd Year">3rd Year</option>
-                          <option value="4th Year">4th Year</option>
-                        </select>
-                      </div>
+
 
                       <div className="col-span-full mt-10">
                         <div className="flex items-center gap-4 mb-6">
@@ -1245,20 +1252,7 @@ export default function AdminDashboard() {
                           value={formData.academic_enrolled_year || ''} 
                         />
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">ACADEMIC YEAR</label>
-                        <select 
-                          className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:border-blue outline-none transition-all font-bold text-ink appearance-none" 
-                          onChange={e => setFormData({...formData, current_year: e.target.value})} 
-                          value={formData.current_year || ''}
-                        >
-                          <option value="">Select Academic Year</option>
-                          <option value="1st Year">1st Year</option>
-                          <option value="2nd Year">2nd Year</option>
-                          <option value="3rd Year">3rd Year</option>
-                          <option value="4th Year">4th Year</option>
-                        </select>
-                      </div>
+
                    </div>
 
                     <div className="mt-8 flex justify-end">
@@ -1682,13 +1676,34 @@ export default function AdminDashboard() {
                           <select 
                              className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:border-blue outline-none transition-all font-bold text-ink appearance-none"
                              value={studentFilter}
-                             onChange={(e) => setStudentFilter(e.target.value)}
+                             onChange={(e) => {
+                                setStudentFilter(e.target.value);
+                                setStudentBranchFilter('all');
+                             }}
                           >
                              <option value="all">ALL COURSES</option>
                              <option value="Ag. B.Sc.">AG. B.SC.</option>
                              <option value="Ag. M.Sc.">AG. M.SC.</option>
                           </select>
                        </div>
+                       {studentFilter === 'Ag. M.Sc.' && (
+                         <div className="space-y-3 animate-fadeIn">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select Specialization</label>
+                            <select 
+                               className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:border-blue outline-none transition-all font-bold text-ink appearance-none"
+                               value={studentBranchFilter}
+                               onChange={(e) => setStudentBranchFilter(e.target.value)}
+                            >
+                               <option value="all">ALL SPECIALIZATIONS</option>
+                               <option value="Msc soil science">Msc Soil Science</option>
+                               <option value="Msc horticulture">Msc Horticulture</option>
+                               <option value="Msc agronomy">Msc Agronomy</option>
+                               <option value="Msc plant breeding and genetics">Msc Plant Breeding and Genetics</option>
+                               <option value="Msc zoology">Msc Zoology</option>
+                               <option value="Msc chemistry">Msc Chemistry</option>
+                            </select>
+                         </div>
+                       )}
                        <div className="space-y-3">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select Academic Year</label>
                           <select 
@@ -1715,6 +1730,7 @@ export default function AdminDashboard() {
                        <button 
                           onClick={() => {
                              setStudentFilter('all');
+                             setStudentBranchFilter('all');
                              setFilterAcademicYear('all');
                              setFilterYearLevel('all');
                           }}
@@ -1733,8 +1749,9 @@ export default function AdminDashboard() {
                       student.roll_no?.toLowerCase().includes(searchQuery.toLowerCase())
                     )
                     .filter(student => studentFilter === 'all' || student.course_applied === studentFilter)
+                    .filter(student => studentBranchFilter === 'all' || student.branch === studentBranchFilter)
                     .filter(student => filterAcademicYear === 'all' || !filterAcademicYear || (student.academic_enrolled_year && student.academic_enrolled_year.includes(filterAcademicYear)))
-                    .filter(student => filterYearLevel === 'all' || (student.year || student.current_year) === filterYearLevel)
+                    .filter(student => filterYearLevel === 'all' || calculateAcademicYear(student.academic_enrolled_year) === filterYearLevel)
                     .map(student => (
                      <div key={student.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
                        <div className="flex items-center gap-4 mb-4">
