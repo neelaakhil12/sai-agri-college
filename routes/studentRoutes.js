@@ -613,46 +613,118 @@ router.post("/admin/import", authenticate, excelUpload.single("file"), async (re
         normalizedRow[normalizeKey(k)] = row[k];
       });
 
-      const getVal = (keys) => {
-        for (const key of keys) {
-          if (normalizedRow[key] !== undefined && normalizedRow[key] !== null) {
-            return normalizedRow[key].toString().trim();
+      const rowKeys = Object.keys(normalizedRow);
+
+      const findValue = (keys, exactList, substringList = [], excludeList = []) => {
+        for (const exact of exactList) {
+          const foundKey = keys.find(k => k === exact);
+          if (foundKey) return foundKey;
+        }
+        if (substringList.length > 0) {
+          for (const sub of substringList) {
+            const foundKey = keys.find(k => {
+              const hasSub = k.includes(sub);
+              const hasExclude = excludeList.some(ex => k.includes(ex));
+              return hasSub && !hasExclude;
+            });
+            if (foundKey) return foundKey;
           }
         }
-        return "";
+        return null;
       };
 
-      const email = getVal(["email", "email_id", "emailid", "email_address", "emailaddress"]);
-      const student_name = getVal(["student_name", "name", "fullname", "studentname", "full_name"]);
-      const roll_no = getVal(["roll_no", "rollno", "roll_number", "rollnumber"]);
-      const branch = getVal(["branch", "branch_name", "specialization"]);
-      const course_applied = getVal(["course_applied", "course", "courseapplied", "course_name"]);
-      const academic_enrolled_year = getVal(["academic_enrolled_year", "enrolled_year", "academic_year", "enrolledyear", "batch", "academicyear"]);
-      const mobile1 = getVal(["mobile1", "mobile", "phone", "phonenumber", "phone_number", "mobile_number", "mobilenumber", "contact", "contact_number", "contactnumber"]);
-      const father_name = getVal(["father_name", "fathername", "fathers_name", "father"]);
-      const mother_name = getVal(["mother_name", "mothername", "mothers_name", "mother"]);
-      const inter_type = getVal(["inter_type", "intertype", "intermediate", "intermediate_type"]);
-      const dobVal = getVal(["dob", "date_of_birth", "dateofbirth", "birthdate"]);
-      const dob = dobVal ? new Date(dobVal) : null;
-      const gender = getVal(["gender", "sex"]);
-      const admission_type = getVal(["admission_type", "admissiontype"]);
-      const medium = getVal(["medium", "medium_of_instruction"]);
-      const nationality = getVal(["nationality"]);
-      const religion = getVal(["religion"]);
-      const door_no = getVal(["door_no", "doorno", "house_no", "houseno", "address"]);
-      const village = getVal(["village", "town", "village_town"]);
-      const mandal = getVal(["mandal", "tehsil", "sub_district"]);
-      const pin = getVal(["pin", "pincode", "zip", "zipcode", "postal_code"]);
-      const district = getVal(["district"]);
-      const mobile2 = getVal(["mobile2", "alternate_mobile", "alternative_mobile", "alt_mobile", "mobile_2"]);
-      const residence_phone = getVal(["residence_phone", "residence", "landline", "home_phone"]);
-      const email_personal = getVal(["email_personal", "personal_email", "personalemail"]);
-      const reference = getVal(["reference", "referred_by"]);
-      const current_year = getVal(["current_year", "currentyear", "year", "year_level"]) || "1st year";
+      const emailKey = findValue(rowKeys, ["email", "email_id", "emailid", "email_address", "emailaddress"], ["email"], ["personal"]);
+      const email = emailKey ? normalizedRow[emailKey].toString().trim() : "";
 
-      if (!email || !student_name) {
+      const studentNameKey = findValue(rowKeys, ["student_name", "name", "fullname", "full_name", "studentname"], ["name"], ["father", "mother", "parent"]);
+      const student_name = studentNameKey ? normalizedRow[studentNameKey].toString().trim() : "";
+
+      const rollNoKey = findValue(rowKeys, ["roll_no", "rollno", "roll_number", "rollnumber"], ["roll", "reg"]);
+      const roll_no = rollNoKey ? normalizedRow[rollNoKey].toString().trim() : "";
+
+      const branchKey = findValue(rowKeys, ["branch", "branch_name", "specialization"], ["branch", "spec"]);
+      const branch = branchKey ? normalizedRow[branchKey].toString().trim() : "";
+
+      const courseKey = findValue(rowKeys, ["course_applied", "course", "courseapplied", "course_name"], ["course"]);
+      const course_applied = courseKey ? normalizedRow[courseKey].toString().trim() : "";
+
+      const enrolledYearKey = findValue(rowKeys, ["academic_enrolled_year", "enrolled_year", "academic_year", "enrolledyear", "batch", "academicyear"], ["enrolled", "batch", "academic"]);
+      const academic_enrolled_year = enrolledYearKey ? normalizedRow[enrolledYearKey].toString().trim() : "";
+
+      const mobileKey = findValue(rowKeys, ["mobile1", "mobile", "phone", "phonenumber", "phone_number", "mobile_number", "mobilenumber", "contact", "contact_number", "contactnumber"], ["mobile", "phone", "contact"], ["father", "mother", "parent", "residence", "alt", "2", "landline"]);
+      const mobile1 = mobileKey ? normalizedRow[mobileKey].toString().trim() : "";
+
+      const fatherKey = findValue(rowKeys, ["father_name", "fathername", "fathers_name", "father"], ["father"]);
+      const father_name = fatherKey ? normalizedRow[fatherKey].toString().trim() : "";
+
+      const motherKey = findValue(rowKeys, ["mother_name", "mothername", "mothers_name", "mother"], ["mother"]);
+      const mother_name = motherKey ? normalizedRow[motherKey].toString().trim() : "";
+
+      const interKey = findValue(rowKeys, ["inter_type", "intertype", "intermediate", "intermediate_type"], ["inter", "12th"]);
+      const inter_type = interKey ? normalizedRow[interKey].toString().trim() : "";
+
+      const dobKey = findValue(rowKeys, ["dob", "date_of_birth", "dateofbirth", "birthdate"], ["dob", "birth", "date_of_birth"]);
+      const dobVal = dobKey ? normalizedRow[dobKey] : "";
+      const dob = dobVal ? new Date(dobVal) : null;
+
+      const genderKey = findValue(rowKeys, ["gender", "sex"], ["gender", "sex"]);
+      const gender = genderKey ? normalizedRow[genderKey].toString().trim() : "";
+
+      const admKey = findValue(rowKeys, ["admission_type", "admissiontype"], ["admission"]);
+      const admission_type = admKey ? normalizedRow[admKey].toString().trim() : "";
+
+      const mediumKey = findValue(rowKeys, ["medium", "medium_of_instruction"], ["medium"]);
+      const medium = mediumKey ? normalizedRow[mediumKey].toString().trim() : "";
+
+      const nationalityKey = findValue(rowKeys, ["nationality"], ["national"]);
+      const nationality = nationalityKey ? normalizedRow[nationalityKey].toString().trim() : "";
+
+      const religionKey = findValue(rowKeys, ["religion"], ["relig"]);
+      const religion = religionKey ? normalizedRow[religionKey].toString().trim() : "";
+
+      const doorKey = findValue(rowKeys, ["door_no", "doorno", "house_no", "houseno", "address"], ["door", "house", "addr"]);
+      const door_no = doorKey ? normalizedRow[doorKey].toString().trim() : "";
+
+      const villageKey = findValue(rowKeys, ["village", "town", "village_town"], ["vill", "town"]);
+      const village = villageKey ? normalizedRow[villageKey].toString().trim() : "";
+
+      const mandalKey = findValue(rowKeys, ["mandal", "tehsil", "sub_district"], ["mandal", "tehsil"]);
+      const mandal = mandalKey ? normalizedRow[mandalKey].toString().trim() : "";
+
+      const pinKey = findValue(rowKeys, ["pin", "pincode", "zip", "zipcode", "postal_code"], ["pin", "zip", "postal"]);
+      const pin = pinKey ? normalizedRow[pinKey].toString().trim() : "";
+
+      const districtKey = findValue(rowKeys, ["district"], ["dist"]);
+      const district = districtKey ? normalizedRow[districtKey].toString().trim() : "";
+
+      const mobile2Key = findValue(rowKeys, ["mobile2", "alternate_mobile", "alternative_mobile", "alt_mobile", "mobile_2"], ["mobile2", "alt_mobile", "alt_phone", "alternate"]);
+      const mobile2 = mobile2Key ? normalizedRow[mobile2Key].toString().trim() : "";
+
+      const residenceKey = findValue(rowKeys, ["residence_phone", "residence", "landline", "home_phone"], ["residence", "land", "home"]);
+      const residence_phone = residenceKey ? normalizedRow[residenceKey].toString().trim() : "";
+
+      const personalEmailKey = findValue(rowKeys, ["email_personal", "personal_email", "personalemail"], ["personal_email", "email_personal", "personalemail"]);
+      const email_personal = personalEmailKey ? normalizedRow[personalEmailKey].toString().trim() : "";
+
+      const referenceKey = findValue(rowKeys, ["reference", "referred_by"], ["ref"]);
+      const reference = referenceKey ? normalizedRow[referenceKey].toString().trim() : "";
+
+      const currentYearKey = findValue(rowKeys, ["current_year", "currentyear", "year", "year_level"], ["current_year", "year_level"]);
+      const current_year = currentYearKey ? normalizedRow[currentYearKey].toString().trim() : "1st year";
+
+      if (!email && !student_name) {
         skippedCount++;
-        skippedStudents.push({ name: student_name || "Unknown", reason: "Missing Email or Student Name" });
+        skippedStudents.push({ name: "Row " + (rawRows.indexOf(row) + 2), reason: "Missing both Email and Student Name" });
+        continue;
+      }
+      if (!student_name) {
+        skippedCount++;
+        skippedStudents.push({ name: "Row " + (rawRows.indexOf(row) + 2), reason: "Missing Student Name" });
+        continue;
+      }
+      if (!email) {
+        skippedCount++;
+        skippedStudents.push({ name: student_name, reason: "Missing Email address" });
         continue;
       }
 
