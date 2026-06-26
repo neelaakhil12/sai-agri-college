@@ -1662,15 +1662,7 @@ export default function AdminDashboard() {
                {showStudentFilters && (
                  <div className="mb-10 bg-white rounded-3xl p-8 shadow-xl border border-gray-100 animate-fadeIn">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                       <div className="space-y-3">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Academic Enrolled Year</label>
-                          <input 
-                             placeholder="e.g. 2024-2025" 
-                             className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:border-blue outline-none transition-all font-bold text-ink"
-                             onChange={(e) => setFilterAcademicYear(e.target.value)}
-                             value={filterAcademicYear === 'all' ? '' : filterAcademicYear}
-                          />
-                       </div>
+                       {/* Academic Enrolled Year Input Removed */}
                        <div className="space-y-3">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select Course</label>
                           <select 
