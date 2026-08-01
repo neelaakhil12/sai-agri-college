@@ -75,6 +75,11 @@ try {
         console.log("✨ Admin account verified.");
       }
 
+      // Ensure admins table has columns for password reset
+      try { await pool.query("ALTER TABLE admins ADD COLUMN email VARCHAR(255)"); } catch(e) {}
+      try { await pool.query("ALTER TABLE admins ADD COLUMN reset_token VARCHAR(255)"); } catch(e) {}
+      try { await pool.query("ALTER TABLE admins ADD COLUMN reset_token_expiry DATETIME"); } catch(e) {}
+
       // Initialize Tables
       console.log("ℹ️ Initializing database tables...");
       await pool.query(`

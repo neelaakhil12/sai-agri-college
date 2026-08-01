@@ -37,6 +37,13 @@ export default function AdminDashboard() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Forgot password state
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotInput, setForgotInput] = useState('');
+  const [forgotSuccessMsg, setForgotSuccessMsg] = useState('');
+  const [forgotErrorMsg, setForgotErrorMsg] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+
   const [activeTab, setActiveTab] = useState("students");
   const [siteSettings, setSiteSettings] = useState({});
   const [regFields, setRegFields] = useState([]);
@@ -275,6 +282,22 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (!forgotInput) return;
+    setForgotLoading(true);
+    setForgotErrorMsg('');
+    setForgotSuccessMsg('');
+    try {
+      const res = await axios.post(`${API_URL}/admin/forgot-password`, { username: forgotInput, email: forgotInput });
+      setForgotSuccessMsg(res.data.message || 'Reset link created! Check your email or follow instructions.');
+    } catch (err) {
+      setForgotErrorMsg(err.response?.data?.message || 'Failed to submit request. Please try again.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this entry?')) return;
     try {
@@ -461,39 +484,95 @@ export default function AdminDashboard() {
         <div className="max-w-md w-full bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] p-10 border border-gray-100">
           <div className="text-center mb-8">
              <div className="w-16 h-16 bg-blue rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-blue/20">S</div>
-             <h2 className="text-2xl font-bold text-ink">Admin Portal</h2>
-             <p className="text-gray-400 text-sm mt-1">Please enter your credentials to continue</p>
+             <h2 className="text-2xl font-bold text-ink">Super Admin Panel</h2>
+             <p className="text-gray-400 text-sm mt-1">
+               {showForgotPassword ? 'Enter your username or email to reset password' : 'Please enter your credentials to continue'}
+             </p>
           </div>
-          {error && <div className="bg-red-50 text-red-500 p-4 rounded-xl mb-6 text-sm font-medium border border-red-100">{error}</div>}
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Username</label>
-              <input 
-                type="text" 
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue/20 focus:border-blue focus:outline-none transition-all" 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Password</label>
-              <input 
-                type="password" 
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue/20 focus:border-blue focus:outline-none transition-all" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <button 
-              type="submit" 
-              disabled={loading}
-              className="w-full bg-ink text-white py-4 rounded-xl font-bold hover:bg-blue transition-all shadow-lg active:scale-[0.98] disabled:opacity-50"
-            >
-              {loading ? 'Authenticating...' : 'Sign In'}
-            </button>
-          </form>
+
+          {showForgotPassword ? (
+            <form onSubmit={handleForgotPasswordSubmit} className="space-y-5">
+              {forgotSuccessMsg && (
+                <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm font-medium border border-green-100">
+                  {forgotSuccessMsg}
+                </div>
+              )}
+              {forgotErrorMsg && (
+                <div className="bg-red-50 text-red-500 p-4 rounded-xl text-sm font-medium border border-red-100">
+                  {forgotErrorMsg}
+                </div>
+              )}
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  Username or Email
+                </label>
+                <input 
+                  type="text" 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue/20 focus:border-blue focus:outline-none transition-all" 
+                  placeholder="admin or admin@example.com"
+                  value={forgotInput}
+                  onChange={(e) => setForgotInput(e.target.value)}
+                  required
+                />
+              </div>
+              <button 
+                type="submit" 
+                disabled={forgotLoading}
+                className="w-full bg-ink text-white py-4 rounded-xl font-bold hover:bg-blue transition-all shadow-lg active:scale-[0.98] disabled:opacity-50"
+              >
+                {forgotLoading ? 'Sending Reset Request...' : 'Send Password Reset Request'}
+              </button>
+              <div className="text-center pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => { setShowForgotPassword(false); setForgotSuccessMsg(''); setForgotErrorMsg(''); }}
+                  className="text-xs font-bold text-gray-500 hover:text-ink transition-colors"
+                >
+                  ← Back to Super Admin Sign In
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleLogin} className="space-y-5">
+              {error && <div className="bg-red-50 text-red-500 p-4 rounded-xl mb-6 text-sm font-medium border border-red-100">{error}</div>}
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Username</label>
+                <input 
+                  type="text" 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue/20 focus:border-blue focus:outline-none transition-all" 
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Password</label>
+                  <button 
+                    type="button" 
+                    onClick={() => { setShowForgotPassword(true); setError(''); }}
+                    className="text-xs font-bold text-blue hover:underline"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+                <input 
+                  type="password" 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue/20 focus:border-blue focus:outline-none transition-all" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full bg-ink text-white py-4 rounded-xl font-bold hover:bg-blue transition-all shadow-lg active:scale-[0.98] disabled:opacity-50"
+              >
+                {loading ? 'Authenticating...' : 'Sign In'}
+              </button>
+            </form>
+          )}
         </div>
       </div>
     );
@@ -507,7 +586,7 @@ export default function AdminDashboard() {
         <div className="p-8 border-b border-white/10 flex items-center gap-4">
           <div className="w-10 h-10 bg-white text-ink rounded-xl flex items-center justify-center font-bold text-xl shadow-lg">S</div>
           <div>
-            <h1 className="text-lg font-bold tracking-tight">Sri Sai Admin</h1>
+            <h1 className="text-lg font-bold tracking-tight">Super Admin Panel</h1>
             <p className="text-[10px] text-white/50 uppercase font-black tracking-widest">Control Center</p>
           </div>
         </div>

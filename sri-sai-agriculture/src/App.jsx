@@ -24,12 +24,13 @@ import ResetPassword    from "./pages/portal/ResetPassword";
 import StaffLogin       from "./pages/staff/StaffLogin";
 import StaffDashboard   from "./pages/staff/StaffDashboard";
 import ReceptionistDashboard from "./pages/receptionist/ReceptionistDashboard";
+import SuperAdminResetPassword from "./pages/portal/SuperAdminResetPassword";
 
 export default function App() {
   const location = useLocation();
   useScrollReveal([location.pathname]);
 
-  const isAdminPanel = location.pathname.startsWith('/admin');
+  const isAdminPanel = location.pathname.startsWith('/super-admin') || location.pathname.startsWith('/admin');
   const isPortal = location.pathname.startsWith('/portal') || location.pathname.startsWith('/staff') || location.pathname.startsWith('/receptionist');
 
   return (
@@ -53,8 +54,15 @@ export default function App() {
           <Route path="/testimonials" element={<TestimonialsPage />} />
           <Route path="/activities" element={<ActivitiesPage />} />
           <Route path="/hostel" element={<Hostel />} />
-          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          
+          {/* Super Admin Panel Routes */}
+          <Route path="/super-admin" element={<Navigate to="/super-admin/dashboard" replace />} />
+          <Route path="/super-admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/super-admin/reset-password/:token" element={<SuperAdminResetPassword />} />
+
+          {/* Legacy Admin Routes Fallback */}
+          <Route path="/admin" element={<Navigate to="/super-admin/dashboard" replace />} />
+          <Route path="/admin/dashboard" element={<Navigate to="/super-admin/dashboard" replace />} />
           
           {/* Student Portal Routes */}
           <Route path="/portal/login" element={<StudentLogin />} />

@@ -3,6 +3,8 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const pool = require("../utils/db");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
+const { sendEmail } = require("../utils/mailer");
 
 // Login admin
 router.post("/login", async (req, res) => {
@@ -188,6 +190,127 @@ router.delete("/registration-fields/:id", authenticate, async (req, res) => {
     res.json({ message: "Field deleted" });
   } catch (err) {
     res.status(500).json({ message: "Failed to delete field" });
+  }
+});
+
+// Super Admin Forgot Password Request
+router.post("/forgot-password", async (req, res) => {
+  const { username, email } = req.body;
+  if (!username && !email) {
+    return res.status(400).json({ message: "Username or email is required" });
+  }
+
+  try {
+    const inputVal = (username || email).trim();
+    const [rows] = await pool.query(
+      "SELECT * FROM admins WHERE username = ? OR email = ? LIMIT 1",
+      [inputVal, inputVal]
+    );
+
+    let admin = rows[0];
+    
+    // Fallback: If no DB row matches but input equals process.env.ADMIN_USERNAME or ADMIN_EMAIL
+    const envUser = (process.env.ADMIN_USERNAME || "admin").trim();
+    if (!admin && (inputVal.toLowerCase() === envUser.toLowerCase() || inputVal.toLowerCase() === "admin")) {
+      const [allAdmins] = await pool.query("SELECT * FROM admins LIMIT 1");
+      admin = allAdmins[0];
+    }
+
+    if (!admin) {
+      return res.status(404).json({ message: "No Super Admin account found with provided credentials" });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiry = new Date(Date.now() + 3600000); // 1 hour
+
+    await pool.query(
+      "UPDATE admins SET reset_token = ?, reset_token_expiry = ? WHERE id = ?",
+      [token, expiry, admin.id]
+    );
+
+    if (email && !admin.email) {
+      await pool.query("UPDATE admins SET email = ? WHERE id = ?", [email.trim(), admin.id]);
+    }
+
+    const recipientEmail = email || admin.email;
+    const host = req.get('host');
+    const protocol = req.protocol;
+    const resetUrl = `${protocol}://${host}/super-admin/reset-password/${token}`;
+
+    if (recipientEmail) {
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; border: 1px solid #eef2f6; border-radius: 24px; background-color: #ffffff;">
+          <div style="text-align: center; margin-bottom: 32px;">
+            <h1 style="color: #1a6b3c; margin: 0; font-size: 24px;">Sri Sai Agricultural College</h1>
+            <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Super Admin Control Center</p>
+          </div>
+          
+          <p style="font-size: 16px; color: #1e293b; margin-bottom: 24px;">Hello <strong>Super Admin</strong>,</p>
+          
+          <p style="font-size: 16px; color: #475569; line-height: 1.6; margin-bottom: 32px;">
+            We received a password reset request for your Super Admin account. 
+            Click the button below to reset your password:
+          </p>
+          
+          <div style="text-align: center; margin-bottom: 32px;">
+            <a href="${resetUrl}" style="display: inline-block; padding: 16px 32px; background-color: #1a6b3c; color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em;">
+              Reset Super Admin Password
+            </a>
+          </div>
+          
+          <div style="padding: 24px; background-color: #f8fafc; border-radius: 16px; margin-bottom: 32px;">
+            <p style="font-size: 13px; color: #64748b; margin: 0; word-break: break-all;">
+              <strong>Reset URL:</strong><br/>
+              <span style="color: #1a6b3c;">${resetUrl}</span>
+            </p>
+          </div>
+        </div>
+      `;
+      await sendEmail(recipientEmail, "Super Admin Password Reset Request", html);
+    }
+
+    res.json({ 
+      message: "Password reset request created successfully. Please use the reset link sent or provided below.",
+      resetUrl,
+      token
+    });
+  } catch (err) {
+    console.error("Super Admin forgot password error:", err);
+    res.status(500).json({ message: "Server error during password reset request: " + err.message });
+  }
+});
+
+// Super Admin Reset Password Submit
+router.post("/reset-password/:token", async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  if (!password) {
+    return res.status(400).json({ message: "New password is required" });
+  }
+
+  try {
+    const [rows] = await pool.query(
+      "SELECT * FROM admins WHERE reset_token = ? AND reset_token_expiry > NOW() LIMIT 1",
+      [token]
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({ message: "Invalid or expired reset token" });
+    }
+
+    const admin = rows[0];
+    const hashedPassword = await bcrypt.hash(password.trim(), 10);
+
+    await pool.query(
+      "UPDATE admins SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?",
+      [hashedPassword, admin.id]
+    );
+
+    res.json({ message: "Super Admin password reset successfully! You can now log in." });
+  } catch (err) {
+    console.error("Super Admin reset password error:", err);
+    res.status(500).json({ message: "Server error resetting password: " + err.message });
   }
 });
 
